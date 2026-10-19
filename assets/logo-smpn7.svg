@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="gradShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+    <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+  <!-- Shield Background -->
+  <path d="M50 8 L85 22 V52 C85 72 50 92 50 92 C50 92 15 72 15 52 V22 Z" fill="url(#gradShield)" stroke="#FFFFFF" stroke-width="2.5" />
+  <!-- Inner Ring / Border -->
+  <path d="M50 14 L80 26 V51 C80 68 50 84 50 84 C50 84 20 68 20 51 V26 Z" fill="none" stroke="url(#gradGold)" stroke-width="1.8" />
+  <!-- Open Book Symbol -->
+  <path d="M50 56 C42 51 32 52 26 55 V39 C32 36 42 35 50 40 C58 35 68 36 74 39 V55 C68 52 58 51 50 56 Z" fill="#FFFFFF" opacity="0.95" />
+  <line x1="50" y1="40" x2="50" y2="56" stroke="#1E3A8A" stroke-width="1.5" />
+  <!-- Graduation / Digital Torch Flame -->
+  <path d="M50 25 C47 31 53 33 50 37 C49 33 52 30 50 25 Z" fill="url(#gradGold)" />
+  <!-- Number 7 Accent -->
+  <text x="50" y="73" font-family="'Outfit', sans-serif" font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="middle">7</text>
+</svg>

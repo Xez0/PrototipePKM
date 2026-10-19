@@ -1,0 +1,242 @@
+/* ==========================================================================
+   DESAIN SISTEM RESMI: UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN
+   Penerapan Panduan /taste-skill & /antislop (Art Direction: Scholastic Ledger)
+   Tipografi Humanis Indonesia, Kanvas Akademis Bernas, & Bebas Dari AI Slop
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* -------------------------------------------------------------
+     TEMA TERANG RESMI SEKOLAH (Scholastic Slate Canvas)
+     ------------------------------------------------------------- */
+  --color-canvas: #f8fafc;        /* Scholastic Slate Canvas (Bukan Cream/Kuning) */
+  --color-surface-1: #ffffff;     /* Kartu Kertas & Panel Utama */
+  --color-surface-2: #f1f5f9;     /* Langkah Nada / Tone Step */
+  --color-surface-3: #e2e8f0;     /* Batas Halus Struktural */
+  --color-surface-4: #cbd5e1;
+  --color-surface-dark: #0a1733;  /* Bidang Kontras Bab Edukasi (Full-Bleed Field) */
+
+  --color-hairline: #e2e8f0;      /* Garis Struktur Halus */
+  --color-hairline-strong: #cbd5e1;
+
+  --color-ink: #0a0f1d;           /* Deep Charcoal Ink (Kontras 13.5:1 - WCAG AAA) */
+  --color-ink-muted: #2d3748;     /* Slate 700 */
+  --color-ink-subtle: #5a6578;    /* Slate 500 */
+  --color-ink-tertiary: #8b95a5;  /* Slate 400 */
+
+  /* Warna Identitas Resmi SMPN 7 Tangsel */
+  --color-primary: #122b5c;       /* Deep Scholastic Navy */
+  --color-primary-hover: #0a1b3d;
+  --color-primary-focus: #1d3e80;
+  --color-primary-tint: #eef3fc;
+  --color-primary-border: #c8d8f5;
+
+  --color-accent: #b45309;        /* Emas Tut Wuri Handayani */
+  --color-accent-hover: #92400e;
+  --color-accent-tint: #fef3c7;
+
+  /* Status Semantik */
+  --color-success: #15803d;
+  --color-success-bg: #dcfce7;
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fee2e2;
+
+  /* Rumpun Mapel Kurikulum Merdeka */
+  --mapel-mipa: #1d4ed8;
+  --mapel-ipa: #047857;
+  --mapel-informatika: #0284c7;
+  --mapel-bahasa: #b45309;
+  --mapel-ips: #b91c1c;
+
+  /* Jenjang Kelas */
+  --badge-grade-7: #1d4ed8;
+  --badge-grade-8: #0369a1;
+  --badge-grade-9: #0e7490;
+
+  /* Tipografi Bricolage Grotesque & Plus Jakarta Sans */
+  --font-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Skala Spasi */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Kelengkungan Terukur (Anti-Slop: Tidak berlebihan serba pill) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 9999px;
+
+  --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
+  --shadow-modal: 0 20px 48px -10px rgba(15, 23, 42, 0.25);
+
+  --duration-fast: 150ms;
+  --duration-normal: 220ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* -------------------------------------------------------------
+   TEMA GELAP MALAM (Midnight Scholastic - Opsional untuk Belajar Malam)
+   ------------------------------------------------------------- */
+[data-theme="dark"] {
+  --color-canvas: #0b132b;        /* Midnight Navy (Bukan Hitam Mati Kosong) */
+  --color-surface-1: #111c38;
+  --color-surface-2: #17254a;
+  --color-surface-3: #1f315f;
+  --color-surface-4: #2b427e;
+
+  --color-hairline: #1e3156;
+  --color-hairline-strong: #2a4374;
+
+  --color-ink: #f8fafc;
+  --color-ink-muted: #cbd5e1;
+  --color-ink-subtle: #94a3b8;
+  --color-ink-tertiary: #64748b;
+
+  --color-primary: #3b82f6;       /* Royal Blue Kontras Tinggi di Latar Gelap */
+  --color-primary-hover: #60a5fa;
+  --color-primary-focus: #2563eb;
+  --color-primary-tint: rgba(59, 130, 246, 0.15);
+  --color-primary-border: rgba(59, 130, 246, 0.4);
+
+  --color-accent: #f59e0b;
+  --color-accent-hover: #fbbf24;
+  --color-accent-tint: rgba(245, 158, 11, 0.15);
+
+  --color-success: #22c55e;
+  --color-success-bg: rgba(34, 197, 94, 0.15);
+  --color-danger: #ef4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
+
+  --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 20px 48px -10px rgba(0, 0, 0, 0.85);
+}
+
+/* ==========================================================================
+   RESET DASAR & ATURAN AKSESIBILITAS (ANTISLOP-HUMAN)
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  line-height: 1.6;
+  font-size: 1rem; /* 16px bodi standar, nyaman dibaca */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ring Fokus Aksesibel */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+}
+
+h4 {
+  font-size: 1.05rem;
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-ink-muted);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* -------------------------------------------------------------
+   MOTION LAYER (taste-skill step 9: signature entrances)
+   ------------------------------------------------------------- */
+@keyframes tasteFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-title { animation: tasteFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+  .hero-desc { animation: tasteFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards; }
+  .hero-actions { animation: tasteFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s backwards; }
+  .hero-stats { animation: tasteFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.22s backwards; }
+  .hero-card-preview { animation: tasteFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.12s backwards; }
+  .search-bar-wrapper { animation: tasteFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards; }
+  .filter-groups { animation: tasteFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s backwards; }
+  .video-card { animation: tasteFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards; }
+  .faq-hero-band { animation: tasteFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s backwards; }
+  .faq-band-row { animation: tasteFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.14s backwards; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

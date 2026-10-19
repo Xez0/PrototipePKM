@@ -1,0 +1,264 @@
+/* ==========================================================================
+   RESPONSIVE LAYOUT & ACCESSIBILITY - SMP NEGERI 7 TANGSEL
+   Linear Design System & taste-skill anti-slop mobile rules
+   ========================================================================== */
+
+/* TABLET & MEDIUM SCREENS (< 1024px) */
+@media (max-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .hero-desc {
+    max-width: 60ch; /* Cap measure per taste-skill rule */
+  }
+
+  .theatre-content-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  [data-ui] .theatre-main-view,
+  .theatre-main-view {
+    border-right: none;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .theatre-sidebar {
+    height: 380px;
+  }
+
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .faq-intro p {
+    max-width: 60ch;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+  }
+}
+
+/* SMARTPHONES (< 768px) */
+@media (max-width: 768px) {
+  .header-nav-links {
+    display: none;
+  }
+
+  .brand-subtitle {
+    display: none;
+  }
+
+  .key-hint {
+    display: none;
+  }
+
+  .hero-section {
+    padding: var(--space-2xl) 0 var(--space-lg);
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 7vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    max-width: 55ch;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  .search-input-box {
+    padding-right: 90px;
+    font-size: 0.875rem;
+  }
+
+  .filter-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filter-label {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* COMPACT SMARTPHONES (< 480px) */
+@media (max-width: 480px) {
+  .site-header {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .nav-wrapper {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-link {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+
+  .brand-title {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-actions {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+
+  .btn-teacher-nav {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .btn-teacher-nav svg {
+    display: none;
+  }
+
+  .container {
+    padding: 0 var(--space-md);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hero-title {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+    line-height: 1.15;
+    max-width: 100%;
+  }
+
+  .hero-desc {
+    max-width: 100%;
+  }
+
+  .video-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .header-actions .btn-outline {
+    display: none;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-stats {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .faq-hero-inner {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .faq-band-grid {
+    width: 100%;
+  }
+
+  .footer-top-row {
+    width: 100%;
+  }
+
+  .footer-monument-left,
+  .footer-monument-right {
+    width: 100%;
+  }
+
+  .footer-address,
+  .footer-pkm-desc {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .footer-statement-banner {
+    width: 100%;
+  }
+
+  .footer-monument-typo {
+    display: block;
+    width: 100%;
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .footer-bottom-bar {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .footer-anchors {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: space-between;
+  }
+
+  .pdf-download-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pdf-download-card .btn {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    padding: var(--space-xs);
+  }
+
+  .theatre-modal {
+    max-height: 98vh;
+    border-radius: var(--radius-lg);
+  }
+}

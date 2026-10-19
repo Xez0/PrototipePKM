@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  
+  <title>Repositori Video Pembelajaran - SMP Negeri 7 Kota Tangerang Selatan</title>
+  <meta name="description" content="Platform repositori video bahan ajar digital resmi UPTD SMP Negeri 7 Kota Tangerang Selatan. Belajar mandiri terarah, bebas distraksi algoritma, sesuai Kurikulum Merdeka.">
+  <meta name="keywords" content="SMPN 7 Tangerang Selatan, Repositori Video Pembelajaran, PkM Universitas Pamulang, Bahan Ajar SMP, Kurikulum Merdeka">
+  <meta name="author" content="Tim Pengabdian kepada Masyarakat (PkM) Mahasiswa Teknik Informatika S-1 Universitas Pamulang">
+  
+  <link rel="icon" type="image/svg+xml" href="assets/logo-smpn7.svg">
+  
+  <!-- Tipografi Resmi: Bricolage Grotesque & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS Stylesheets (SMPN 7 Scholastic Design System & Responsive) -->
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
+  <header class="site-header">
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="#beranda" class="brand-link" id="brandHomeLink">
+          <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Kota Tangerang Selatan" class="brand-logo">
+          <div class="brand-info">
+            <span class="brand-title">SMP NEGERI 7 TANGERANG SELATAN</span>
+            <span class="brand-subtitle">Repositori Video Pembelajaran Mandiri • PkM UNPAM</span>
+          </div>
+        </a>
+
+        <nav class="header-nav-links" aria-label="Navigasi Utama">
+          <a href="#katalog" class="nav-text-link">Katalog Bahan Ajar</a>
+          <a href="#edukasi-pkm" class="nav-text-link">Prinsip Mandiri</a>
+        </nav>
+
+        <div class="header-actions">
+          <!-- Tombol Toggle Tema (Dark/Light) -->
+          <button class="btn btn-icon-only btn-sm" id="btnToggleTheme" onclick="App.toggleTheme()" title="Ganti Tema (Pintasan: T)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+
+          <!-- Tombol Panel Guru -->
+          <button class="btn btn-primary btn-sm btn-teacher-nav" id="btnOpenTeacherPortal" onclick="App.openTeacherModal()" title="Panel Guru (Pintasan: G)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Panel Guru</span>
+            <kbd class="key-hint">G</kbd>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== STRIP PROGRES BELAJAR SISWA ==================== -->
+  <aside class="progress-strip" data-ui="true" aria-label="Progres Belajar Siswa">
+    <div class="container">
+      <div class="progress-strip-inner">
+        <div class="progress-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span id="userProgressText">Memuat progres belajar mandiri...</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="userProgressFill"></div>
+        </div>
+        <span class="progress-percent" id="userProgressPercent">0%</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="beranda">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-content">
+            <h1 class="hero-title">
+              Belajar Mandiri <span class="hero-title-accent">Bebas Distraksi</span>
+            </h1>
+            
+            <p class="hero-desc">
+              Pusat video pembelajaran terstruktur untuk peserta didik Kelas 7, 8, dan 9 UPTD SMP Negeri 7 Kota Tangerang Selatan. Mengulang materi sulit, persiapan asesmen ulangan, dan bimbingan langsung dari dewan guru pengampu.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#katalog" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Jelajahi Materi Belajar
+              </a>
+              <button class="btn btn-secondary" onclick="App.openFeaturedHero()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                Tonton Materi Terpopuler
+              </button>
+            </div>
+
+            <!-- STATISTIK REPOSITORI (FLAT METRICS) -->
+            <div class="hero-stats" data-ui="metrics">
+              <div class="stat-item">
+                <span class="stat-number" id="statTotalVideos">0</span>
+                <span class="stat-label">Video Materi Ajar</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="statTotalSubjects">0</span>
+                <span class="stat-label">Mata Pelajaran</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="statTotalTeachers">0</span>
+                <span class="stat-label">Guru Kontributor</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Bebas Iklan & Terarah</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KARTU PRATINJAU INTERAKTIF (LINEAR FRAMED PANEL) -->
+          <div class="hero-card-preview">
+            <div class="preview-screen" onclick="App.openFeaturedHero()" style="cursor: pointer;">
+              <video autoplay muted loop playsinline preload="metadata" poster="assets/join-nasa-s-mission-to-mars-student-poster.jpg" style="width: 100%; height: 100%; object-fit: cover;" aria-hidden="true">
+                <source src="assets/join-nasa-s-mission-to-mars-student.mp4" type="video/mp4">
+              </video>
+              <div class="preview-play-btn" title="Putar Video">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4 20 12 6 20 6 4"/>
+                </svg>
+              </div>
+            </div>
+            <div class="preview-caption">
+              <div>
+                <h3>Bentuk Aljabar & Suku Sejenis</h3>
+                <p>Matematika Kelas 7 • Dra. Hj. Nurjanah, M.Pd.</p>
+              </div>
+              <span class="chip-count">Materi Rekomendasi</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH & FILTER SECTION -->
+    <section class="search-filter-section" id="katalog">
+      <div class="container">
+        <!-- PENCARIAN CERDAS -->
+        <div class="search-bar-wrapper">
+          <svg class="search-icon-pos" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="searchInput" 
+            class="search-input-box" 
+            placeholder="Cari materi pembelajaran, bab, mapel, atau nama guru pengampu..."
+            aria-label="Cari materi pembelajaran"
+          >
+          <div class="search-actions-right">
+            <kbd class="key-hint">/</kbd>
+            <button class="btn btn-outline btn-sm" id="clearSearchBtn">Hapus</button>
+          </div>
+        </div>
+
+        <!-- GRUP FILTER KELAS & MAPEL -->
+        <div class="filter-groups">
+          <!-- Filter 1: Jenjang Kelas -->
+          <div class="filter-row">
+            <span class="filter-label">Jenjang:</span>
+            <button class="chip-btn active" data-filter-grade="all">Semua Kelas</button>
+            <button class="chip-btn" data-filter-grade="7">Kelas 7</button>
+            <button class="chip-btn" data-filter-grade="8">Kelas 8</button>
+            <button class="chip-btn" data-filter-grade="9">Kelas 9</button>
+          </div>
+
+          <!-- Filter 2: Rumpun Mata Pelajaran -->
+          <div class="filter-row">
+            <span class="filter-label">Kategori:</span>
+            <button class="chip-btn active" data-filter-category="all">
+              Semua Mapel
+              <span class="chip-count" data-chip-count="all">0</span>
+            </button>
+            <button class="chip-btn" data-filter-category="MIPA">
+              MIPA (Matematika & IPA)
+              <span class="chip-count" data-chip-count="MIPA">0</span>
+            </button>
+            <button class="chip-btn" data-filter-category="Informatika">
+              Informatika / TIK
+              <span class="chip-count" data-chip-count="Informatika">0</span>
+            </button>
+            <button class="chip-btn" data-filter-category="Bahasa">
+              Bahasa (Indo & Inggris)
+              <span class="chip-count" data-chip-count="Bahasa">0</span>
+            </button>
+            <button class="chip-btn" data-filter-category="IPS">
+              IPS & Humaniora
+              <span class="chip-count" data-chip-count="IPS">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- JUDUL KATALOG & JUMLAH -->
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Katalog Video Bahan Ajar</h2>
+            <p class="section-desc">Pilih materi yang ingin dipelajari secara mandiri</p>
+          </div>
+          <span id="searchResultCount" style="font-size: 0.875rem; font-family: var(--font-sans); font-weight: 500; color: var(--color-primary-hover);">
+            Memuat data...
+          </span>
+        </div>
+
+        <!-- GRID KARTU VIDEO -->
+        <div class="video-grid" id="videoGridContainer">
+          <!-- Diisi secara dinamis oleh app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION FAQ & EDUKASI PKM -->
+    <!-- SECTION EDUKASI & PRINSIP BELAJAR MANDIRI (BAND-PER-QUESTION TASTE-SKILL) -->
+    <section class="faq-section" id="edukasi-pkm">
+      <div class="faq-hero-band">
+        <div class="container">
+          <div class="faq-hero-inner">
+            <h2 class="faq-hero-title">Prinsip Pembelajaran Mandiri SMPN 7</h2>
+            <p class="faq-hero-lead">
+              Landasan edukatif repositori video bahan ajar digital terarah, bebas distraksi algoritma komersial, dan mendukung kemandirian belajar siswa Fase D Kurikulum Merdeka.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-bands-stack">
+        <!-- Band 1 -->
+        <article class="faq-band-row faq-band-alt-1">
+          <div class="container">
+            <div class="faq-band-grid">
+              <div class="faq-band-question-col">
+                <span class="faq-band-tag">Fokus Belajar</span>
+                <h3 class="faq-band-question">Kenapa tidak langsung belajar di YouTube terbuka?</h3>
+              </div>
+              <div class="faq-band-answer-col">
+                <p>
+                  Di YouTube terbuka, fokus belajar siswa rentan terdistraksi oleh algoritma rekomendasi hiburan, tayangan gim, dan iklan komersial. Repositori resmi SMPN 7 menyediakan ruang belajar mandiri yang terarah, terstruktur per mata pelajaran dan bab ulangan, serta dilengkapi modul lembar ringkasan belajar resmi yang siap dicetak fisik.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Band 2 -->
+        <article class="faq-band-row faq-band-alt-2">
+          <div class="container">
+            <div class="faq-band-grid">
+              <div class="faq-band-question-col">
+                <span class="faq-band-tag">Akses Fleksibel</span>
+                <h3 class="faq-band-question">Kenapa platform dapat diakses dari rumah siswa?</h3>
+              </div>
+              <div class="faq-band-answer-col">
+                <p>
+                  Fasilitas laboratorium komputer sekolah memiliki keterbatasan jam operasional tatap muka. Melalui repositori web mandiri ini, peserta didik dapat mengulang penjelasan guru saat belajar malam hari atau akhir pekan menjelang asesmen sumatif, baik melalui ponsel cerdas siswa maupun komputer keluarga.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Band 3 -->
+        <article class="faq-band-row faq-band-alt-1">
+          <div class="container">
+            <div class="faq-band-grid">
+              <div class="faq-band-question-col">
+                <span class="faq-band-tag">Diferensiasi Belajar</span>
+                <h3 class="faq-band-question">Bagaimana platform mengakomodasi keberagaman gaya belajar siswa?</h3>
+              </div>
+              <div class="faq-band-answer-col">
+                <p>
+                  Setiap peserta didik memiliki modalitas belajar berbeda. Siswa visual terbantu oleh slide diagram guru, siswa auditori mendengarkan intonasi penjelasan audio, dan siswa yang memerlukan repetisi konsep rumit dapat memanfaatkan penanda bab (chapters) untuk melompat ke detik pembahasan tanpa memuat ulang video.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Band 4 -->
+        <article class="faq-band-row faq-band-alt-2">
+          <div class="container">
+            <div class="faq-band-grid">
+              <div class="faq-band-question-col">
+                <span class="faq-band-tag">Kemudahan Guru</span>
+                <h3 class="faq-band-question">Bagaimana peran dewan guru yang belum terbiasa dengan coding?</h3>
+              </div>
+              <div class="faq-band-answer-col">
+                <p>
+                  Dewan guru tidak memerlukan keterampilan teknis pemrograman sama sekali. Melalui Panel Guru yang dirancang visual dan sederhana, bapak/ibu guru dapat mengunggah video, menentukan jenjang kelas, mengatur Capaian Pembelajaran, serta mengunduh cadangan kurikulum dalam format terbuka.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== THEATRE MODAL (PEMUTAR VIDEO FOKUS) ==================== -->
+  <div class="modal-backdrop" id="theatreModalBackdrop" data-ui="dialog" onclick="if (event.target === this) VideoPlayer.closePlayer()">
+    <div class="theatre-modal" id="theatreModal" data-ui="dialog" role="dialog" aria-modal="true" aria-labelledby="modalVideoTitle">
+      <!-- HEADER THEATRE -->
+      <div class="theatre-header">
+        <div class="theatre-header-title">
+          <span class="brand-badge-tag" id="modalSubjectGrade">Matematika</span>
+          <h2 id="modalVideoTitle">Judul Video Pembelajaran</h2>
+        </div>
+        <button class="btn-close-modal" onclick="VideoPlayer.closePlayer()" aria-label="Tutup pemutar video (ESC)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- KONTEN THEATRE (GRID 2 KOLOM) -->
+      <div class="theatre-content-grid">
+        <!-- KOLOM KIRI: VIDEO DAN DETAIL -->
+        <div class="theatre-main-view">
+          <!-- Player Switcher Bar -->
+          <div class="player-mode-bar">
+            <div class="player-mode-tag">
+              <span id="playerModeLabel">Mode YouTube (Online)</span>
+            </div>
+            <div class="player-controls-right">
+              <button class="btn btn-secondary btn-sm" onclick="VideoPlayer.togglePlayerMode()" style="padding: 2px 8px; font-size: 0.75rem;">
+                Ganti Sumber Pemutar
+              </button>
+              <label for="playbackSpeedSelect" style="font-size: 0.75rem; color: var(--color-ink-subtle);">Kecepatan:</label>
+              <select id="playbackSpeedSelect" class="speed-select" onchange="VideoPlayer.setPlaybackSpeed(this.value)">
+                <option value="0.75">0.75x</option>
+                <option value="1.0" selected>1.0x (Normal)</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="video-player-container" id="modalPlayerContainer">
+            <!-- Iframe embed atau Video HTML5 disuntikkan secara dinamis -->
+          </div>
+
+          <div class="video-details-box">
+            <div class="theatre-meta-bar">
+              <div class="theatre-teacher-info">
+                <span class="theatre-teacher-name" id="modalTeacherName">Nama Guru</span>
+                <span class="theatre-teacher-nip" id="modalTeacherNip">NIP Guru</span>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btnToggleComplete" onclick="VideoPlayer.toggleCompletion()">
+                Tandai Selesai
+              </button>
+            </div>
+
+            <!-- KOTAK CAPAIAN PEMBELAJARAN (CP) -->
+            <div class="cp-box">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Capaian Pembelajaran (Kurikulum Merdeka)
+              </h4>
+              <p id="modalLearningOutcome">Capaian pembelajaran materi.</p>
+            </div>
+
+            <p id="modalDescription" style="font-size: 0.9rem; line-height: 1.6; color: var(--color-ink-muted);">
+              Deskripsi penjelasan materi ajar.
+            </p>
+
+            <!-- KARTU CETAK / UNDUH MODUL LEMBAR BELAJAR RESMI -->
+            <div class="pdf-download-card" id="pdfDownloadCard">
+              <div class="pdf-info">
+                <div class="pdf-icon-badge">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+                <div class="pdf-text">
+                  <h5>Lembar Rangkuman & Catatan Belajar Resmi</h5>
+                  <p>Format resmi SMPN 7 lengkap dengan CP materi dan paraf guru</p>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="VideoPlayer.openPrintSummary()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Cetak / Simpan PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KOLOM KANAN: BAB REPETISI & CATATAN SISWA -->
+        <div class="theatre-sidebar">
+          <div class="theatre-tab-nav">
+            <button class="theatre-tab-btn active" data-tab="tabChapters">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Daftar Bab (Repetisi)
+            </button>
+            <button class="theatre-tab-btn" data-tab="tabNotes">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Catatan Siswa
+            </button>
+          </div>
+
+          <!-- TAB 1: DAFTAR BAB -->
+          <div class="theatre-tab-pane active" id="tabChapters">
+            <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-bottom: 8px;">
+              Pilih bagian materi yang ingin kamu ulang penjelasannya:
+            </p>
+            <div class="chapter-list" id="chapterListContainer">
+              <!-- Diisi dinamis -->
+            </div>
+          </div>
+
+          <!-- TAB 2: CATATAN MANDIRI SISWA -->
+          <div class="theatre-tab-pane" id="tabNotes">
+            <div class="student-notes-area">
+              <label for="studentNotesInput" style="font-size: 0.8125rem; font-weight: 600; color: var(--color-ink);">
+                Tulis Poin Kunci & Rumus yang Dipelajari:
+              </label>
+              <textarea 
+                id="studentNotesInput" 
+                class="notes-textarea" 
+                placeholder="Tulis rumus cepat, istilah asing, atau poin yang belum kamu pahami di sini..."
+              ></textarea>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
+                <span class="notes-status-text" id="notesSavedStatus">Tersimpan di perangkat ini</span>
+                <button class="btn btn-secondary btn-sm" onclick="VideoPlayer.copyStudentNotes()" style="padding: 2px 8px; font-size: 0.75rem;">
+                  Salin Catatan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TEACHER PORTAL MODAL (PANEL GURU) ==================== -->
+  <div class="modal-backdrop" id="teacherModalBackdrop" data-ui="dialog" onclick="if (event.target === this) App.closeTeacherModal()">
+    <div class="theatre-modal" id="teacherModal" data-ui="dialog" style="max-width: 960px;" role="dialog" aria-modal="true" aria-labelledby="teacherPortalTitle">
+      <div class="theatre-header">
+        <div class="theatre-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <h2 id="teacherPortalTitle">Panel Kontribusi Dewan Guru SMPN 7</h2>
+        </div>
+        <button class="btn-close-modal" onclick="App.closeTeacherModal()" aria-label="Tutup panel guru (ESC)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div style="padding: var(--space-lg); overflow-y: auto;" id="teacherPortalScrollBody">
+        <!-- FORMULIR INPUT / EDIT VIDEO GURU -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md);">
+          <h3 id="teacherFormTitle" style="font-size: 1.1rem; color: var(--color-ink);">
+            + Unggah Materi Pembelajaran Baru
+          </h3>
+          <button id="btnCancelEditVideo" class="btn btn-outline btn-sm" onclick="App.cancelEdit()" style="display: none;">
+            Batal Edit (Mode Tambah Baru)
+          </button>
+        </div>
+
+        <form id="addVideoForm" class="teacher-form">
+          <div class="form-group">
+            <label for="inputVideoTitle">Judul Materi Pembelajaran *</label>
+            <input type="text" id="inputVideoTitle" placeholder="Contoh: Operasi Hitung Pecahan Aljabar" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="selectGrade">Jenjang Kelas *</label>
+              <select id="selectGrade" required>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="selectCategory">Rumpun Kategori *</label>
+              <select id="selectCategory" required>
+                <option value="MIPA">MIPA (Matematika & IPA)</option>
+                <option value="Informatika">Informatika / TIK</option>
+                <option value="Bahasa">Bahasa (Indonesia & Inggris)</option>
+                <option value="IPS">IPS & Humaniora</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="inputSubject">Mata Pelajaran *</label>
+              <input type="text" id="inputSubject" placeholder="Contoh: Matematika" required>
+            </div>
+
+            <div class="form-group">
+              <label for="inputTeacher">Nama Guru Pengampu & Gelar *</label>
+              <input type="text" id="inputTeacher" placeholder="Contoh: Dra. Hj. Siti Fatimah, M.Pd." required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="inputTeacherNip">NIP Guru (Opsional)</label>
+              <input type="text" id="inputTeacherNip" placeholder="Contoh: 19750812 200212 2 003">
+            </div>
+
+            <div class="form-group">
+              <label for="inputVideoUrl">Tautan Video (YouTube / Link Video) *</label>
+              <input type="url" id="inputVideoUrl" placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/..." required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputOutcome">Capaian Pembelajaran (CP) / Indikator Materi</label>
+            <input type="text" id="inputOutcome" placeholder="Kompetensi yang diharapkan dicapai oleh siswa setelah menyimak materi">
+          </div>
+
+          <div class="form-group">
+            <label for="inputDescription">Ringkasan Materi / Petunjuk Belajar Siswa</label>
+            <textarea id="inputDescription" style="height: 70px;" placeholder="Uraian singkat bab dan hal-hal yang perlu diperhatikan siswa"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="inputChapters">Daftar Bab & Menit Repetisi (Format per baris: mm:ss - Nama Bab)</label>
+            <textarea id="inputChapters" style="height: 80px; font-size: 0.8125rem;" placeholder="00:00 - Pengantar Materi&#10;03:15 - Penjelasan Konsep Inti&#10;08:40 - Contoh Soal Ulangan"></textarea>
+            <span class="form-hint">Siswa dapat langsung mengklik menit bab untuk mengulang bagian tertentu secara instan.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="inputPdfContent">Konten Lembar Rangkuman & Cetak Belajar Siswa</label>
+            <textarea id="inputPdfContent" style="height: 85px;" placeholder="Ketik ringkasan materi, rumus kunci, atau poin penting untuk modul cetak siswa"></textarea>
+          </div>
+
+          <button type="submit" id="btnSubmitTeacherForm" class="btn btn-primary" style="margin-top: var(--space-xs);">
+            Simpan Materi Baru ke Repositori SMPN 7
+          </button>
+        </form>
+
+        <div style="height: var(--space-xl);"></div>
+
+        <!-- TABEL KELOLA VIDEO TERSEDIA -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); flex-wrap: wrap; gap: var(--space-sm);">
+          <div>
+            <h3 style="font-size: 1.1rem; color: var(--color-ink); margin: 0;">
+              Daftar Materi Video di Repositori
+            </h3>
+            <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
+              Bapak/Ibu guru dapat mengedit isi materi, menguji pratinjau, atau menghapus materi lama.
+            </p>
+          </div>
+
+          <!-- Cadangan & Impor -->
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="StorageManager.exportData()">Ekspor Cadangan JSON</button>
+            <button class="btn btn-secondary btn-sm" onclick="App.triggerImport()">Pulihkan Cadangan</button>
+            <button class="btn btn-outline btn-sm" onclick="App.handleResetDefault()" style="color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
+              Reset Data Standar
+            </button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+          </div>
+        </div>
+
+        <!-- Pencarian Cepat di Tabel Guru -->
+        <div style="margin-bottom: var(--space-sm);">
+          <input 
+            type="text" 
+            id="teacherSearchInput" 
+            placeholder="Cari materi di tabel guru..." 
+            style="width: 100%; padding: 8px 12px; background: var(--color-surface-2); border: 1px solid var(--color-hairline); border-radius: var(--radius-sm); color: var(--color-ink); font-size: 0.8125rem;"
+          >
+        </div>
+
+        <div class="teacher-table-wrap">
+          <table class="teacher-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">No</th>
+                <th>Judul & Mapel</th>
+                <th>Guru Pengampu</th>
+                <th style="text-align: right; width: 220px;">Tindakan</th>
+              </tr>
+            </thead>
+            <tbody id="teacherVideoTableBody">
+              <!-- Diisi dinamis -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- ==================== FOOTER (FULL-WIDTH MONUMENT STATEMENT PER TASTE-SKILL) ==================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-row">
+        <div class="footer-monument-left">
+          <div class="footer-crest-wrap">
+            <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" class="footer-crest-img">
+            <div>
+              <h2 class="footer-school-name">UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN</h2>
+              <p class="footer-dept-name">Dinas Pendidikan dan Kebudayaan Pemerintah Kota Tangerang Selatan</p>
+            </div>
+          </div>
+          <p class="footer-address">
+            Jl. Cicentang Pulo, RT.006/RW.001, Kelurahan Rawa Buntu, Kecamatan Serpong, Kota Tangerang Selatan, Banten 15318.
+          </p>
+        </div>
+
+        <div class="footer-monument-right">
+          <span class="footer-heading-label">Kemitraan Program Pendidikan</span>
+          <p class="footer-pkm-desc">
+            Pengabdian kepada Masyarakat (PkM) Mahasiswa Program Studi S-1 Teknik Informatika, Fakultas Ilmu Komputer, Universitas Pamulang. Tahun Akademik 2026/2027.
+          </p>
+          <div class="footer-team-meta">
+            <span><strong>Dosen Pembimbing:</strong> Kecitaan Harefa, S.Kom., M.Kom. (NIDN: 0421049102)</span>
+            <span><strong>Ketua Pelaksana:</strong> Luckemeraldo Jardel Frits Putra Wagania (NIM: 241011400431)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TALL CLOSING MONUMENT TYPOGRAPHY -->
+      <div class="footer-statement-banner">
+        <span class="footer-monument-typo">SMPN 7 TANGSEL × INFORMATIKA UNPAM</span>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© 2026 UPTD SMP Negeri 7 Kota Tangerang Selatan & Tim PkM UNPAM. Hak Cipta Dilindungi.</span>
+        <div class="footer-anchors">
+          <a href="#beranda" class="footer-nav-link">Ke Atas ↑</a>
+          <a href="#katalog" class="footer-nav-link">Katalog Bahan Ajar</a>
+          <a href="#edukasi-pkm" class="footer-nav-link">Prinsip Mandiri</a>
+          <button type="button" class="footer-teacher-link" onclick="App.openTeacherModal()">Panel Guru</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
