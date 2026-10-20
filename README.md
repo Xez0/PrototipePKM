@@ -1,92 +1,105 @@
-# Repositori Video Pembelajaran - SMP Negeri 7 Kota Tangerang Selatan
+# Repositori Video Pembelajaran Mandiri - UPTD SMP Negeri 7 Kota Tangerang Selatan
 
-Prototipe aplikasi web untuk kegiatan **Pengabdian kepada Masyarakat (PkM) Mahasiswa**  
+Prototipe aplikasi web pembelajaran mandiri untuk kegiatan **Pengabdian kepada Masyarakat (PkM) Mahasiswa**  
 Program Studi S-1 Teknik Informatika, Fakultas Ilmu Komputer, Universitas Pamulang (UNPAM)  
-Tahun Akademik 2026/2027 Ganjil
+Tahun Akademik 2026/2027
 
 ---
 
-## 📌 Identitas Program & Dokumen Resmi
+## 📌 Identitas Program & Kemitraan Sekolah
 
 * **Judul Kegiatan:**  
-  *Pendampingan Pembuatan dan Pemanfaatan Website Repositori Video Pembelajaran untuk Meningkatkan Efisiensi Akses Bahan Ajar di SMPN 7*
+  *Pendampingan Pembuatan dan Pemanfaatan Website Repositori Video Pembelajaran untuk Meningkatkan Efisiensi Akses Bahan Ajar di UPTD SMPN 7 Kota Tangerang Selatan*
 * **Mitra Kerjasama:**  
   UPTD SMP Negeri 7 Kota Tangerang Selatan  
   *(Jl. Cicentang Pulo, RT.006/RW.001, Kelurahan Rawa Buntu, Kecamatan Serpong, Kota Tangerang Selatan, Banten 15318)*
 * **Dosen Pembimbing PkM:**  
   Kecitaan Harefa, S.Kom., M.Kom. (NIDN: 0421049102)
-* **Ketua Pelaksana Mahasiswa:**  
+* **Ketua Pelaksana:**  
   Luckemeraldo Jardel Frits Putra Wagania (NIM: 241011400431 / Kelas: 05TPLM003)
 * **Sasaran Pemanfaat:**  
-  Perwakilan Dewan Guru Mata Pelajaran Kelas 7, 8, dan 9 (15–20 guru) serta ±800 peserta didik SMPN 7.
+  Dewan Guru Mata Pelajaran Kelas 7, 8, dan 9 serta seluruh peserta didik SMPN 7 Kota Tangerang Selatan.
 
 ---
 
-## 🎨 Redesain dengan Linear Design System (`awesome-design-md`) & `taste-skill v2`
+## 🏛️ Arsitektur Aplikasi & Keputusan Teknologi
 
-Aplikasi telah direkayasa ulang secara menyeluruh menggunakan bahasa desain **Linear** (`linear.app`) dari koleksi `awesome-design-md` dan lulus standar anti-slop `taste-skill v2`:
+Aplikasi ini dibangun menggunakan arsitektur **Single Page Application (SPA)** berbasis standar web terbuka (*Web Standards: HTML5, CSS3, dan Vanilla JavaScript ES6+*) dengan alasan teknis dan operasional lingkungan sekolah:
 
-1. **Palet Warna Linear (Obsidian Dark & Clean Light):**
-   * *Dark Mode (Bawaan):* Canvas obsidian `#08090a`, permukaan panel `#0f1011` / `#141516`, garis hairline halus `#23252a`.
-   * *Light Mode:* Canvas bersih `#ffffff`, permukaan panel `#f8f9fa`, garis hairline `#e5e7eb`.
-   * *Aksen Khas Linear:* Lavender-indigo `#5e6ad2`, hover `#828fff`, dan hijau semantik sukses `#27a644`.
-   * *Pintasan Tema:* Tekan tombol `T` pada keyboard untuk beralih mode seketika.
-2. **Kaidah Anti-Slop `taste-skill`:**
-   * Menghilangkan gradasi latar murahan (*generic gradient*) dan teks kliping warna-warni (*gradient text*).
-   * Menghilangkan bayangan mengambang (*blurry rest drop shadows*), digantikan oleh permukaan datar (*flat tone steps*) berbatas hairline rapi.
-   * Skala tipografi terstandarisasi (Inter Display 56px, Heading 24px, Subhead 18px, Body 16px, Caption 13px) dengan pelacakan negatif (*negative letter-spacing*).
-   * Tidak ada teks di bawah 13px dan kontras rasio memenuhi standar aksesibilitas WCAG AA (4.5:1+).
-   * Animasi transisi masuk halus (*micro-interactions motion layer*) dengan dukungan penuh `prefers-reduced-motion`.
+1. **Zero Runtime Dependency (Tanpa Instalasi Server Berat):**
+   * Dapat dijalankan langsung di laboratorium komputer sekolah, Chromebook dinas, maupun smartphone siswa tanpa memerlukan proses kompilasi `node_modules` atau server backend berbayar.
+2. **Penyimpanan Berkas Video Lokal (IndexedDB Binary Storage):**
+   * Berbeda dengan LocalStorage yang terbatas 5 MB, aplikasi memanfaatkan **IndexedDB API** peramban untuk menyimpan berkas video asli (`.mp4`, `.webm`) berukuran ratusan megabita hingga gigabita langsung di penyimpanan lokal komputer guru/sekolah.
+   * Siswa dapat memutar materi ajar secara offline di jaringan lokal lab sekolah tanpa bergantung pada akses internet YouTube.
+3. **Penyimpanan Metadata & Sinkronisasi Cepat:**
+   * Metadata materi, capaian pembelajaran (CP), catatan siswa, dan status penyelesaian tersimpan terstruktur serta dapat diekspor menjadi berkas cadangan JSON resmi sekolah.
+4. **Desain Bersih & Ramah Pengguna (Human-Centered Design):**
+   * Menghilangkan kerumitan formulir yang membingungkan bagi dewan guru senior. Antarmuka dibuat bersih, berjarak nyaman, dengan tipografi yang jelas dan kontras rasio tinggi (WCAG AA).
 
 ---
 
-## 🛠️ Perbaikan & Penyempurnaan Fungsi (Functional Audit & Fixes)
+## ✨ Fitur-Fitur Utama Sistem
 
-1. **Pemutar Video & Navigasi Bab Bebas Distraksi:**
-   * **Instant Chapter Seeking:** Navigasi bab kini menggunakan **YouTube postMessage API** (`seekTo` & `playVideo`), sehingga melompat ke menit/bab tertentu terjadi seketika **tanpa memuat ulang (*reload*) iframe** dan tanpa layar hitam/flicker.
-   * **Pemutar Ganda (Dual-Source Player):** Mendukung mode YouTube dan **Mode Lab Offline (HTML5 Video)** dengan satu klik tombol. Jika YouTube dibatasi oleh firewall/jaringan lab sekolah, materi langsung diputar via video player HTML5 lokal.
-   * **Pencegahan Kebocoran Audio:** Saat modal ditutup via tombol silang, klik latar belakang, atau tombol `ESC`, sinyal `pauseVideo` seketika dikirim dan container dibersihkan sehingga suara video tidak tertinggal di latar belakang.
-   * **Pengatur Kecepatan:** Dilengkapi opsi kecepatan putar `0.75x`, `1.0x (Normal)`, `1.25x`, dan `1.5x` untuk repetisi kilat.
-2. **Lembar Belajar Cetak / PDF Resmi SMPN 7:**
-   * Menggantikan unduhan file `.txt` sederhana dengan **Lembar Kerja & Rangkuman Resmi Sekolah** format cetak (`@media print` dan `window.print()`).
-   * Dokumen cetak dilengkapi Kop Surat resmi SMPN 7 Tangsel, Capaian Pembelajaran (CP) Kurikulum Merdeka, rangkuman rumus guru, catatan pribadi siswa, serta kolom tanda tangan orang tua dan guru pengampu.
-3. **Panel Guru (CRUD Penuh: Tambah, Edit, Hapus, & Cadangan):**
-   * **Fitur Edit Materi:** Guru kini dapat memperbarui judul materi, kelas, nama guru, NIP, tautan video, capaian pembelajaran, bab, dan rangkuman tanpa perlu menghapus dari awal.
-   * **Pencarian di Tabel Guru:** Memudahkan bapak/ibu guru menyaring materi ajar di tabel manajemen.
-   * **Ekstraksi YouTube & Thumbnail Otomatis:** Sistem mendeteksi ID video dari berbagai format tautan (`youtu.be`, `watch?v=`, `shorts`) dan menghasilkan thumbnail presisi tinggi secara otomatis.
-   * **Parser Bab Tahan Banting:** Mendukung penulisan format `mm:ss - Judul Bab` secara fleksibel dengan regex.
-   * **Ekspor & Impor Cadangan:** Mendukung ekspor file JSON sebagai cadangan data sekolah dan pemulihan kapan saja.
-4. **Pelacak Progres Belajar Siswa:**
-   * Menampilkan bilah progres belajar interaktif (*"X dari Y materi selesai dipelajari"*).
-   * Tombol "Tandai Selesai" langsung memperbarui lencana centang pada kartu dan persentase capaian di bagian atas.
-   * Fitur "Salin Catatan" untuk menyalin catatan rumus langsung ke clipboard ponsel/laptop siswa.
+### 1. Halaman Siswa & Katalog Publik Bebas Distraksi
+* **Katalog Berjenjang:** Pembagian materi jelas berdasarkan Kelas 7, Kelas 8, dan Kelas 9 serta rumpun mata pelajaran (MIPA, Informatika, Bahasa, dan IPS).
+* **Pencarian Cerdas Instan:** Pencarian materi berdasarkan judul bab, nama guru pengampu, atau topik pelajaran.
+* **Pelacak Progres Mandiri:** Bilah progres yang mencatat berapa materi yang telah dipelajari siswa secara mandiri di perangkat masing-masing.
+
+### 2. Portal & Ruang Pengelolaan Dewan Guru
+* **Akses Terpisah (Role Separation):** Alur masuk terdedikasi untuk dewan guru pengampu dengan opsi Masuk Cepat (Akun Demo) untuk kemudahan peninjauan prototipe.
+* **Formulir Unggah Sangat Sederhana (3 Langkah Inti):**
+  1. Pilih sumber video: **Berkas dari Laptop/HP** atau **Tautan YouTube**.
+  2. Masukkan Judul Materi Pembelajaran.
+  3. Pilih Jenjang Kelas dan Mata Pelajaran, lalu klik Simpan.
+* **Manajemen Repositori:** Tabel kelola materi yang rapi untuk mempratinjau hasil tayang atau menghapus materi lama.
+* **Cadangan & Pemulihan Data:** Fitur ekspor/impor JSON untuk mengamankan data materi antarperangkat komputer sekolah.
+
+### 3. Pemutar Video Pembelajaran Fokus (Theatre Mode)
+* **Dukungan Ganda (Dual-Source Playback):** Memutar file video lokal dari IndexedDB via Object URL Blob secara mulus, atau memutar tautan YouTube dengan API bebas iklan pengganggu.
+* **Navigasi Bab Instan:** Siswa dapat mengulang bagian materi tertentu yang sulit langsung dengan mengeklik daftar bab tanpa harus memuat ulang video.
+* **Pengatur Kecepatan:** Kecepatan putar fleksibel (0.75x hingga 1.5x) untuk memfasilitasi repetisi konsep.
+* **Buku Catatan Digital Siswa:** Ruang catatan mandiri yang otomatis tersimpan saat video disimak.
+
+### 4. Modul Lembar Belajar Cetak / PDF Resmi Sekolah
+* Menghasilkan dokumen cetak resmi lengkap dengan Kop UPTD SMP Negeri 7 Kota Tangerang Selatan, Capaian Pembelajaran Kurikulum Merdeka, rangkuman materi dari guru, serta lembar tanda tangan guru dan orang tua.
 
 ---
 
-## ⌨️ Pintasan Keyboard (Linear Power User)
+## ⌨️ Pintasan Keyboard Pintar
 
-| Tombol | Fungsi |
+| Tombol | Fungsi Cepat |
 | :---: | :--- |
-| `/` atau `K` | Langsung memusatkan kursor ke kotak Pencarian Cerdas |
-| `G` | Membuka Panel Guru (Teacher Management Portal) |
-| `T` | Mengganti tema (Linear Dark Obsidian <-> Linear Clean Light) |
-| `P` | Membuka dialog Cetak / Simpan PDF Lembar Belajar (saat video aktif) |
-| `Esc` | Menutup jendela modal pemutar video atau Panel Guru |
+| `/` atau `K` | Langsung memusatkan kursor ke kotak pencarian katalog materi |
+| `G` | Buka Portal Masuk Dewan Guru / Ruang Pengelolaan Guru |
+| `T` | Beralih tema tampilan (Mode Terang Sekolah / Mode Gelap Malam) |
+| `P` | Buka dialog cetak lembar modul PDF resmi saat materi sedang diputar |
+| `Esc` | Menutup pemutar video fokus |
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+## 🚀 Panduan Menjalankan Prototipe
 
-Aplikasi ini bersifat *zero-dependency* dan dapat dijalankan langsung di browser apa pun:
+Aplikasi ini dapat dibuka secara langsung tanpa proses instalasi dependensi tambahan:
 
-1. **Akses Langsung:**
-   * Buka file `index.html` langsung di browser (Google Chrome, Microsoft Edge, Mozilla Firefox, atau Safari).
-2. **Menjalankan Dev Server Lokal:**
-   ```bash
-   python -m http.server 8877
-   ```
-   Lalu buka peramban di `http://localhost:8877`.
+### Cara 1: Buka Langsung di Peramban
+* Buka berkas `index.html` menggunakan peramban modern (Google Chrome, Microsoft Edge, Mozilla Firefox, atau Safari).
+
+### Cara 2: Menjalankan Server Lokal (Opsional)
+Jika ingin menguji fitur Service Worker atau protokol HTTP lokal:
+```bash
+python -m http.server 8877
+```
+Buka peramban pada alamat `http://localhost:8877`.
 
 ---
 
-© 2026 UPTD SMP Negeri 7 Kota Tangerang Selatan & Tim PkM S-1 Teknik Informatika Universitas Pamulang.
+## 👥 Tim Pelaksana PkM (Universitas Pamulang)
+
+* **Dosen Pembimbing:** Kecitaan Harefa, S.Kom., M.Kom. (NIDN: 0421049102)
+* **Ketua Pelaksana:** Luckemeraldo Jardel Frits Putra Wagania (NIM: 241011400431)
+* **Program Studi:** S-1 Teknik Informatika
+* **Fakultas:** Ilmu Komputer, Universitas Pamulang
+
+---
+
+© 2026 UPTD SMP Negeri 7 Kota Tangerang Selatan & Tim PkM S-1 Teknik Informatika Universitas Pamulang. Seluruh hak cipta dilindungi.

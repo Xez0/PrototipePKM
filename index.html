@@ -28,7 +28,7 @@
   <header class="site-header">
     <div class="container">
       <div class="nav-wrapper">
-        <a href="#beranda" class="brand-link" id="brandHomeLink">
+        <a href="#beranda" class="brand-link" id="brandHomeLink" onclick="App.navigateTo('student')">
           <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Kota Tangerang Selatan" class="brand-logo">
           <div class="brand-info">
             <span class="brand-title">SMP NEGERI 7 TANGERANG SELATAN</span>
@@ -36,9 +36,9 @@
           </div>
         </a>
 
-        <nav class="header-nav-links" aria-label="Navigasi Utama">
-          <a href="#katalog" class="nav-text-link">Katalog Bahan Ajar</a>
-          <a href="#edukasi-pkm" class="nav-text-link">Prinsip Mandiri</a>
+        <nav class="header-nav-links" id="mainHeaderNav" aria-label="Navigasi Utama">
+          <a href="#katalog" class="nav-text-link" onclick="App.navigateTo('student', 'katalog')">Katalog Bahan Ajar</a>
+          <a href="#edukasi-pkm" class="nav-text-link" onclick="App.navigateTo('student', 'edukasi-pkm')">Prinsip Mandiri</a>
         </nav>
 
         <div class="header-actions">
@@ -57,13 +57,13 @@
             </svg>
           </button>
 
-          <!-- Tombol Panel Guru -->
-          <button class="btn btn-primary btn-sm btn-teacher-nav" id="btnOpenTeacherPortal" onclick="App.openTeacherModal()" title="Panel Guru (Pintasan: G)">
+          <!-- Tombol Portal Guru / Masuk Guru -->
+          <button class="btn btn-primary btn-sm btn-teacher-nav" id="btnOpenTeacherPortal" onclick="App.handleTeacherNavClick()" title="Portal Guru (Pintasan: G)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9"></path>
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
-            <span>Panel Guru</span>
+            <span id="txtTeacherNav">Masuk Guru</span>
             <kbd class="key-hint">G</kbd>
           </button>
         </div>
@@ -92,8 +92,10 @@
 
   <!-- ==================== MAIN CONTENT ==================== -->
   <main>
-    <!-- HERO SECTION -->
-    <section class="hero-section" id="beranda">
+    <!-- ==================== VIEW 1: HALAMAN UTAMA SISWA & PUBLIK ==================== -->
+    <div id="viewStudent" class="app-view">
+      <!-- HERO SECTION -->
+      <section class="hero-section" id="beranda">
       <div class="container">
         <div class="hero-grid">
           <div class="hero-content">
@@ -327,7 +329,260 @@
         </article>
       </div>
     </section>
-  </main>
+  </div>
+
+  <!-- ==================== VIEW 2: HALAMAN LOGIN GURU ==================== -->
+  <div id="viewLogin" class="app-view hidden">
+    <div class="container">
+      <div class="login-view-wrap">
+        <div class="login-card" data-ui="true">
+          <div class="login-header">
+            <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" class="login-crest">
+            <h2 class="login-title">Portal Masuk Dewan Guru</h2>
+            <p class="login-desc">
+              Ruang khusus dewan guru UPTD SMP Negeri 7 Kota Tangerang Selatan untuk mengunggah bahan ajar video mandiri.
+            </p>
+          </div>
+
+          <form id="teacherLoginForm" class="login-form" onsubmit="event.preventDefault(); App.handleLoginSubmit();">
+            <div class="form-group">
+              <label for="loginNip">NIP atau Email Guru</label>
+              <input 
+                type="text" 
+                id="loginNip" 
+                placeholder="Contoh: 19750812 ... atau guru@smpn7.sch.id"
+                autocomplete="username"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="loginPassword">Kata Sandi / PIN</label>
+              <input 
+                type="password" 
+                id="loginPassword" 
+                placeholder="Ketik kata sandi Anda..."
+                autocomplete="current-password"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: var(--space-xs);">
+              Masuk ke Ruang Guru
+            </button>
+          </form>
+
+          <div class="login-demo-box">
+            <div class="login-demo-title">Kemudahan Uji Coba Prototipe PkM</div>
+            <p class="login-demo-text">
+              Bapak/Ibu dewan guru atau penguji dapat langsung mencoba portal tanpa perlu mengetik kata sandi:
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.handleFastLogin()" style="width: 100%; justify-content: center;">
+              Masuk Langsung (Akun Demo Guru)
+            </button>
+          </div>
+
+          <div style="text-align: center; margin-top: var(--space-lg);">
+            <a href="#katalog" class="nav-text-link" onclick="App.navigateTo('student')">
+              Kembali ke Halaman Siswa
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 3: RUANG PENGELOLAAN GURU ==================== -->
+  <div id="viewTeacherPortal" class="app-view hidden">
+    <div class="container">
+      <div class="teacher-dashboard-wrap">
+        <!-- TOP BANNER RUANG GURU -->
+        <div class="teacher-top-banner">
+          <div class="teacher-profile-badge">
+            <div class="teacher-profile-avatar" id="teacherAvatarText">G</div>
+            <div>
+              <div class="teacher-profile-name" id="teacherDisplayGreeting">Dra. Hj. Nurjanah, M.Pd.</div>
+              <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19750812 200212 2 003 • Dewan Guru SMPN 7</div>
+            </div>
+          </div>
+
+          <div class="teacher-actions-bar">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.navigateTo('student')">
+              Lihat Halaman Siswa
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="App.handleLogout()" style="color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
+              Keluar (Logout)
+            </button>
+          </div>
+        </div>
+
+        <!-- KARTU UNGGAH MATERI BARU (SEDERHANA, TIDAK RAMAI) -->
+        <div class="upload-card-wrapper" data-ui="true">
+          <div style="margin-bottom: var(--space-lg);">
+            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-ink); margin-bottom: 4px;">
+              Unggah Materi Video Pembelajaran
+            </h2>
+            <p style="font-size: 0.875rem; color: var(--color-ink-subtle);">
+              Pilih apakah video berasal dari file di laptop Anda atau tautan YouTube.
+            </p>
+          </div>
+
+          <!-- TAB SUMBER: FILE SENDIRI vs YOUTUBE -->
+          <div class="source-picker-tabs">
+            <button type="button" class="source-tab-btn active" id="tabSourceFile" onclick="App.switchUploadSource('file')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Unggah File Video (Komputer)
+            </button>
+
+            <button type="button" class="source-tab-btn" id="tabSourceYoutube" onclick="App.switchUploadSource('youtube')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Tautan Video YouTube
+            </button>
+          </div>
+
+          <!-- FORMULIR INPUT SEDERHANA (HANYA 3 BAGIAN INTI) -->
+          <form id="simplifiedTeacherForm" class="teacher-form" onsubmit="event.preventDefault(); App.handleTeacherFormSubmit();">
+            
+            <!-- BLOK 1A: PILIH FILE VIDEO LOKAL -->
+            <div id="sourceFileBlock">
+              <div class="video-file-dropzone" onclick="document.getElementById('inputVideoLocalFile').click()">
+                <div class="dropzone-icon">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                    <line x1="7" y1="2" x2="7" y2="22"></line>
+                    <line x1="17" y1="2" x2="17" y2="22"></line>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <line x1="2" y1="7" x2="7" y2="7"></line>
+                    <line x1="2" y1="17" x2="7" y2="17"></line>
+                    <line x1="17" y1="17" x2="22" y2="17"></line>
+                    <line x1="17" y1="7" x2="22" y2="7"></line>
+                  </svg>
+                </div>
+                <div class="dropzone-title" id="dropzoneTitleText">Klik untuk Memilih File Video dari Laptop / HP</div>
+                <div class="dropzone-hint">Format MP4 atau WebM. Tersimpan aman di memori lokal peramban.</div>
+                <input type="file" id="inputVideoLocalFile" accept="video/mp4,video/webm,video/*" style="display: none;" onchange="App.handleFileSelected(this)">
+              </div>
+
+              <div id="fileSelectedDisplay" class="file-selected-info" style="display: none;">
+                <span class="file-selected-name" id="selectedFileName">video-materi.mp4</span>
+                <span class="file-selected-size" id="selectedFileSize">0 MB</span>
+              </div>
+            </div>
+
+            <!-- BLOK 1B: TAUTAN YOUTUBE -->
+            <div id="sourceYoutubeBlock" style="display: none;">
+              <div class="form-group">
+                <label for="inputTeacherYoutubeUrl">Tautan Video YouTube</label>
+                <input 
+                  type="url" 
+                  id="inputTeacherYoutubeUrl" 
+                  placeholder="Contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+                >
+                <span class="form-hint">Sistem akan otomatis mengambil thumbnail dan memutar video tanpa iklan komersial.</span>
+              </div>
+            </div>
+
+            <!-- BLOK 2: IDENTITAS MATERI (SANGAT MUDAH) -->
+            <div class="form-group" style="margin-top: var(--space-sm);">
+              <label for="simpleVideoTitle">Judul Materi Pembelajaran *</label>
+              <input 
+                type="text" 
+                id="simpleVideoTitle" 
+                placeholder="Contoh: Operasi Hitung Pecahan Aljabar" 
+                required
+              >
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Jenjang Kelas *</label>
+                <div class="grade-radios">
+                  <button type="button" class="grade-radio-btn active" data-grade-val="7" onclick="App.selectGradeBtn('7')">Kelas 7</button>
+                  <button type="button" class="grade-radio-btn" data-grade-val="8" onclick="App.selectGradeBtn('8')">Kelas 8</button>
+                  <button type="button" class="grade-radio-btn" data-grade-val="9" onclick="App.selectGradeBtn('9')">Kelas 9</button>
+                </div>
+                <input type="hidden" id="simpleVideoGrade" value="7">
+              </div>
+
+              <div class="form-group">
+                <label for="simpleVideoSubject">Mata Pelajaran *</label>
+                <select id="simpleVideoSubject" required>
+                  <option value="Matematika" selected>Matematika</option>
+                  <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
+                  <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                  <option value="Bahasa Inggris">Bahasa Inggris</option>
+                  <option value="Informatika / TIK">Informatika / TIK</option>
+                  <option value="Ilmu Pengetahuan Sosial (IPS)">Ilmu Pengetahuan Sosial (IPS)</option>
+                  <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+                  <option value="Seni Budaya">Seni Budaya</option>
+                  <option value="Pendidikan Jasmani (PJOK)">Pendidikan Jasmani (PJOK)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- BLOK 3: CATATAN GURU UNTUK SISWA (OPSIONAL) -->
+            <div class="form-group">
+              <label for="simpleVideoNotes">Ringkasan / Pesan Guru untuk Siswa (Opsional)</label>
+              <textarea 
+                id="simpleVideoNotes" 
+                style="height: 75px;" 
+                placeholder="Tuliskan poin kunci atau instruksi tugas yang perlu diperhatikan siswa saat menonton materi ini..."
+              ></textarea>
+            </div>
+
+            <button type="submit" id="btnSubmitSimpleVideo" class="btn btn-primary" style="margin-top: var(--space-sm); width: 100%; justify-content: center; padding: 14px;">
+              Simpan & Tayangkan Materi ke Siswa
+            </button>
+          </form>
+        </div>
+
+        <!-- KARTU DAFTAR MATERI SAYA (BERSIH & TERORGANISIR) -->
+        <div class="upload-card-wrapper" data-ui="true">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); flex-wrap: wrap; gap: var(--space-sm);">
+            <div>
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--color-ink); margin: 0;">
+                Daftar Materi Pembelajaran di Repositori
+              </h3>
+              <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
+                Bapak/Ibu guru dapat melihat materi di sisi siswa atau menghapus materi lama.
+              </p>
+            </div>
+
+            <!-- Cadangan Data -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="StorageManager.exportData()">Cadangkan Data (JSON)</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="App.triggerImport()">Pulihkan Cadangan</button>
+              <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            </div>
+          </div>
+
+          <div class="teacher-table-wrap">
+            <table class="teacher-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;">No</th>
+                  <th>Judul & Pelajaran</th>
+                  <th>Sumber Video</th>
+                  <th>Guru Pengampu</th>
+                  <th style="text-align: right; width: 180px;">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="teacherVideoTableBody">
+                <!-- Diisi dinamis oleh App.renderTeacherTable() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 
   <!-- ==================== THEATRE MODAL (PEMUTAR VIDEO FOKUS) ==================== -->
   <div class="modal-backdrop" id="theatreModalBackdrop" data-ui="dialog" onclick="if (event.target === this) VideoPlayer.closePlayer()">
@@ -485,168 +740,6 @@
     </div>
   </div>
 
-  <!-- ==================== TEACHER PORTAL MODAL (PANEL GURU) ==================== -->
-  <div class="modal-backdrop" id="teacherModalBackdrop" data-ui="dialog" onclick="if (event.target === this) App.closeTeacherModal()">
-    <div class="theatre-modal" id="teacherModal" data-ui="dialog" style="max-width: 960px;" role="dialog" aria-modal="true" aria-labelledby="teacherPortalTitle">
-      <div class="theatre-header">
-        <div class="theatre-header-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          <h2 id="teacherPortalTitle">Panel Kontribusi Dewan Guru SMPN 7</h2>
-        </div>
-        <button class="btn-close-modal" onclick="App.closeTeacherModal()" aria-label="Tutup panel guru (ESC)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      <div style="padding: var(--space-lg); overflow-y: auto;" id="teacherPortalScrollBody">
-        <!-- FORMULIR INPUT / EDIT VIDEO GURU -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md);">
-          <h3 id="teacherFormTitle" style="font-size: 1.1rem; color: var(--color-ink);">
-            + Unggah Materi Pembelajaran Baru
-          </h3>
-          <button id="btnCancelEditVideo" class="btn btn-outline btn-sm" onclick="App.cancelEdit()" style="display: none;">
-            Batal Edit (Mode Tambah Baru)
-          </button>
-        </div>
-
-        <form id="addVideoForm" class="teacher-form">
-          <div class="form-group">
-            <label for="inputVideoTitle">Judul Materi Pembelajaran *</label>
-            <input type="text" id="inputVideoTitle" placeholder="Contoh: Operasi Hitung Pecahan Aljabar" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="selectGrade">Jenjang Kelas *</label>
-              <select id="selectGrade" required>
-                <option value="7">Kelas 7</option>
-                <option value="8">Kelas 8</option>
-                <option value="9">Kelas 9</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="selectCategory">Rumpun Kategori *</label>
-              <select id="selectCategory" required>
-                <option value="MIPA">MIPA (Matematika & IPA)</option>
-                <option value="Informatika">Informatika / TIK</option>
-                <option value="Bahasa">Bahasa (Indonesia & Inggris)</option>
-                <option value="IPS">IPS & Humaniora</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="inputSubject">Mata Pelajaran *</label>
-              <input type="text" id="inputSubject" placeholder="Contoh: Matematika" required>
-            </div>
-
-            <div class="form-group">
-              <label for="inputTeacher">Nama Guru Pengampu & Gelar *</label>
-              <input type="text" id="inputTeacher" placeholder="Contoh: Dra. Hj. Siti Fatimah, M.Pd." required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="inputTeacherNip">NIP Guru (Opsional)</label>
-              <input type="text" id="inputTeacherNip" placeholder="Contoh: 19750812 200212 2 003">
-            </div>
-
-            <div class="form-group">
-              <label for="inputVideoUrl">Tautan Video (YouTube / Link Video) *</label>
-              <input type="url" id="inputVideoUrl" placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/..." required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="inputOutcome">Capaian Pembelajaran (CP) / Indikator Materi</label>
-            <input type="text" id="inputOutcome" placeholder="Kompetensi yang diharapkan dicapai oleh siswa setelah menyimak materi">
-          </div>
-
-          <div class="form-group">
-            <label for="inputDescription">Ringkasan Materi / Petunjuk Belajar Siswa</label>
-            <textarea id="inputDescription" style="height: 70px;" placeholder="Uraian singkat bab dan hal-hal yang perlu diperhatikan siswa"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="inputChapters">Daftar Bab & Menit Repetisi (Format per baris: mm:ss - Nama Bab)</label>
-            <textarea id="inputChapters" style="height: 80px; font-size: 0.8125rem;" placeholder="00:00 - Pengantar Materi&#10;03:15 - Penjelasan Konsep Inti&#10;08:40 - Contoh Soal Ulangan"></textarea>
-            <span class="form-hint">Siswa dapat langsung mengklik menit bab untuk mengulang bagian tertentu secara instan.</span>
-          </div>
-
-          <div class="form-group">
-            <label for="inputPdfContent">Konten Lembar Rangkuman & Cetak Belajar Siswa</label>
-            <textarea id="inputPdfContent" style="height: 85px;" placeholder="Ketik ringkasan materi, rumus kunci, atau poin penting untuk modul cetak siswa"></textarea>
-          </div>
-
-          <button type="submit" id="btnSubmitTeacherForm" class="btn btn-primary" style="margin-top: var(--space-xs);">
-            Simpan Materi Baru ke Repositori SMPN 7
-          </button>
-        </form>
-
-        <div style="height: var(--space-xl);"></div>
-
-        <!-- TABEL KELOLA VIDEO TERSEDIA -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); flex-wrap: wrap; gap: var(--space-sm);">
-          <div>
-            <h3 style="font-size: 1.1rem; color: var(--color-ink); margin: 0;">
-              Daftar Materi Video di Repositori
-            </h3>
-            <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
-              Bapak/Ibu guru dapat mengedit isi materi, menguji pratinjau, atau menghapus materi lama.
-            </p>
-          </div>
-
-          <!-- Cadangan & Impor -->
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="StorageManager.exportData()">Ekspor Cadangan JSON</button>
-            <button class="btn btn-secondary btn-sm" onclick="App.triggerImport()">Pulihkan Cadangan</button>
-            <button class="btn btn-outline btn-sm" onclick="App.handleResetDefault()" style="color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
-              Reset Data Standar
-            </button>
-            <input type="file" id="importFileInput" accept=".json" style="display: none;">
-          </div>
-        </div>
-
-        <!-- Pencarian Cepat di Tabel Guru -->
-        <div style="margin-bottom: var(--space-sm);">
-          <input 
-            type="text" 
-            id="teacherSearchInput" 
-            placeholder="Cari materi di tabel guru..." 
-            style="width: 100%; padding: 8px 12px; background: var(--color-surface-2); border: 1px solid var(--color-hairline); border-radius: var(--radius-sm); color: var(--color-ink); font-size: 0.8125rem;"
-          >
-        </div>
-
-        <div class="teacher-table-wrap">
-          <table class="teacher-table">
-            <thead>
-              <tr>
-                <th style="width: 40px;">No</th>
-                <th>Judul & Mapel</th>
-                <th>Guru Pengampu</th>
-                <th style="text-align: right; width: 220px;">Tindakan</th>
-              </tr>
-            </thead>
-            <tbody id="teacherVideoTableBody">
-              <!-- Diisi dinamis -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
@@ -687,10 +780,10 @@
       <div class="footer-bottom-bar">
         <span>© 2026 UPTD SMP Negeri 7 Kota Tangerang Selatan & Tim PkM UNPAM. Hak Cipta Dilindungi.</span>
         <div class="footer-anchors">
-          <a href="#beranda" class="footer-nav-link">Ke Atas ↑</a>
-          <a href="#katalog" class="footer-nav-link">Katalog Bahan Ajar</a>
-          <a href="#edukasi-pkm" class="footer-nav-link">Prinsip Mandiri</a>
-          <button type="button" class="footer-teacher-link" onclick="App.openTeacherModal()">Panel Guru</button>
+          <a href="#beranda" class="footer-nav-link" onclick="App.navigateTo('student', 'beranda')">Ke Atas ↑</a>
+          <a href="#katalog" class="footer-nav-link" onclick="App.navigateTo('student', 'katalog')">Katalog Bahan Ajar</a>
+          <a href="#edukasi-pkm" class="footer-nav-link" onclick="App.navigateTo('student', 'edukasi-pkm')">Prinsip Mandiri</a>
+          <button type="button" class="footer-teacher-link" onclick="App.handleTeacherNavClick()">Portal Guru</button>
         </div>
       </div>
     </div>

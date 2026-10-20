@@ -575,6 +575,27 @@ kbd.key-hint {
   color: #ffffff;
 }
 
+.card-badge-source {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.02em;
+}
+
+.card-badge-source.badge-local {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.card-badge-source.badge-yt {
+  background-color: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+}
+
 .card-duration {
   position: absolute;
   bottom: 10px;
@@ -1251,6 +1272,282 @@ kbd.key-hint {
 
 .teacher-table tr:hover td {
   background-color: var(--color-surface-2);
+}
+
+.table-badge-source {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-badge-source.local {
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+
+.table-badge-source.youtube {
+  background-color: var(--color-surface-2);
+  color: var(--color-ink-subtle);
+}
+
+/* =============================================================
+   APP VIEWS (SINGLE PAGE NAVIGATION: SISWA / LOGIN / RUANG GURU)
+   ============================================================= */
+.app-view {
+  width: 100%;
+}
+
+.app-view.hidden {
+  display: none !important;
+}
+
+/* =============================================================
+   HALAMAN LOGIN DEWAN GURU
+   ============================================================= */
+.login-view-wrap {
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-surface-1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.login-crest {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-md);
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 6px;
+}
+
+.login-desc {
+  font-size: 0.875rem;
+  color: var(--color-ink-subtle);
+  line-height: 1.5;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.login-demo-box {
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-lg);
+  text-align: center;
+}
+
+.login-demo-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.login-demo-text {
+  font-size: 0.775rem;
+  color: var(--color-ink-subtle);
+  margin-bottom: var(--space-sm);
+  line-height: 1.4;
+}
+
+/* =============================================================
+   RUANG PENGELOLAAN DEWAN GURU (SEDERHANA & INTUITIF)
+   ============================================================= */
+.teacher-dashboard-wrap {
+  padding: var(--space-2xl) 0 var(--space-3xl);
+}
+
+.teacher-top-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--color-hairline);
+}
+
+.teacher-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.teacher-profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.teacher-profile-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+.teacher-profile-nip {
+  font-size: 0.8125rem;
+  color: var(--color-ink-subtle);
+}
+
+.teacher-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* TAB PEMILIHAN SUMBER VIDEO (UNGGAH FILE vs YOUTUBE) */
+.source-picker-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.source-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px var(--space-md);
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+.source-tab-btn:hover {
+  background-color: var(--color-surface-3);
+  color: var(--color-ink);
+}
+
+.source-tab-btn.active {
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+
+/* DROPZONE FILE VIDEO BESAR */
+.video-file-dropzone {
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+
+.video-file-dropzone:hover {
+  background-color: var(--color-surface-3);
+}
+
+.dropzone-icon {
+  margin-bottom: var(--space-xs);
+  color: var(--color-primary);
+}
+
+.dropzone-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 4px;
+}
+
+.dropzone-hint {
+  font-size: 0.8125rem;
+  color: var(--color-ink-subtle);
+}
+
+.file-selected-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-surface-3);
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-sm);
+}
+
+.file-selected-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.file-selected-size {
+  font-size: 0.8125rem;
+  color: var(--color-ink-subtle);
+}
+
+/* CHIP SELECTOR KELAS */
+.grade-radios {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.grade-radio-btn {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  transition: background-color var(--duration-fast), color var(--duration-fast);
+}
+
+.grade-radio-btn:hover {
+  background-color: var(--color-surface-3);
+}
+
+.grade-radio-btn.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.upload-card-wrapper {
+  background-color: var(--color-surface-1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-2xl);
 }
 
 /* -------------------------------------------------------------

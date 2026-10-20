@@ -49,14 +49,52 @@ const VideoPlayer = {
     document.body.style.overflow = "hidden"; // Kunci scroll halaman
   },
 
-  // Render Player Sesuai Mode (YouTube Embed API vs HTML5 Video)
-  renderActivePlayer: function () {
+  activeBlobUrl: null,
+
+  // Render Player Sesuai Mode (File Video Lokal vs YouTube vs Fallback)
+  renderActivePlayer: async function () {
     const playerContainer = document.getElementById("modalPlayerContainer");
     if (!playerContainer || !this.currentVideo) return;
 
     const v = this.currentVideo;
 
-    if (this.currentMode === "youtube" && v.embedUrl) {
+    // Bersihkan URL blob lama jika ada
+    if (this.activeBlobUrl) {
+      URL.revokeObjectURL(this.activeBlobUrl);
+      this.activeBlobUrl = null;
+    }
+
+    if (v.sourceType === "local") {
+      // Ambil file asli dari IndexedDB
+      const blob = await VideoDB.getVideoFile(v.id);
+      let videoSrc = "";
+      if (blob) {
+        this.activeBlobUrl = URL.createObjectURL(blob);
+        videoSrc = this.activeBlobUrl;
+      } else if (v.fallbackVideoUrl) {
+        videoSrc = v.fallbackVideoUrl;
+      } else {
+        videoSrc = "assets/join-nasa-s-mission-to-mars-student.mp4";
+      }
+
+      playerContainer.innerHTML = `
+        <video 
+          id="activeHtml5Video" 
+          controls 
+          autoplay 
+          playsinline
+          style="width: 100%; height: 100%; max-height: 520px; background: #000; border-radius: var(--radius-md);"
+          poster="${v.thumbnail || ''}">
+          <source src="${videoSrc}">
+          Browser Anda tidak mendukung pemutar video HTML5.
+        </video>
+      `;
+
+      const modeLabel = document.getElementById("playerModeLabel");
+      if (modeLabel) {
+        modeLabel.textContent = `File Video Komputer (${v.fileName || 'MP4'})`;
+      }
+    } else if (this.currentMode === "youtube" && v.embedUrl) {
       // Pastikan URL embed memiliki parameter enablejsapi=1
       let embedSrc = v.embedUrl;
       if (!embedSrc.includes("enablejsapi=1")) {
@@ -73,32 +111,41 @@ const VideoPlayer = {
           allowfullscreen>
         </iframe>
       `;
+
+      const modeLabel = document.getElementById("playerModeLabel");
+      if (modeLabel) {
+        modeLabel.textContent = "Mode YouTube (Online)";
+      }
     } else {
-      // Mode Lab Offline HTML5 (Jaminan 100% jalan bila YouTube terblokir sekolah)
-      const src = v.fallbackVideoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+      // Mode Lab Offline HTML5
+      const src = v.fallbackVideoUrl || "assets/join-nasa-s-mission-to-mars-student.mp4";
       playerContainer.innerHTML = `
         <video 
           id="activeHtml5Video" 
           controls 
           autoplay 
-          preload="metadata"
-          poster="${v.thumbnail}">
-          <source src="${src}" type="video/mp4">
+          playsinline
+          style="width: 100%; height: 100%; max-height: 520px; background: #000; border-radius: var(--radius-md);"
+          poster="${v.thumbnail || ''}">
+          <source src="${src}">
           Browser Anda tidak mendukung pemutar video HTML5.
         </video>
       `;
-    }
 
-    // Perbarui label status mode player
-    const modeLabel = document.getElementById("playerModeLabel");
-    if (modeLabel) {
-      modeLabel.textContent = this.currentMode === "youtube" ? "Mode YouTube (Online)" : "Mode Lab Offline (HTML5)";
+      const modeLabel = document.getElementById("playerModeLabel");
+      if (modeLabel) {
+        modeLabel.textContent = "Mode Lab Offline (HTML5)";
+      }
     }
   },
 
   // Beralih Antara Mode YouTube dan HTML5
   togglePlayerMode: function () {
     if (!this.currentVideo) return;
+    if (this.currentVideo.sourceType === "local") {
+      App.showToast("Materi ini adalah file video lokal yang diunggah langsung oleh guru.");
+      return;
+    }
     this.currentMode = this.currentMode === "youtube" ? "html5" : "youtube";
     this.renderActivePlayer();
     App.showToast(`Beralih ke ${this.currentMode === "youtube" ? "Mode YouTube" : "Mode Lab Offline (HTML5)"}`);
@@ -106,6 +153,12 @@ const VideoPlayer = {
 
   // Tutup Modal & Hentikan Audio/Video Seketika
   closePlayer: function () {
+    // Bersihkan URL blob jika ada
+    if (this.activeBlobUrl) {
+      URL.revokeObjectURL(this.activeBlobUrl);
+      this.activeBlobUrl = null;
+    }
+
     // Kirim sinyal pause ke iframe YouTube
     const iframe = document.getElementById("activeVideoIframe");
     if (iframe && iframe.contentWindow) {
