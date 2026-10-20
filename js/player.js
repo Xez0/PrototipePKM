@@ -324,7 +324,7 @@ const VideoPlayer = {
   // Tandai Selesai / Belum Selesai
   toggleCompletion: function () {
     if (!this.currentVideo) return;
-    const isDone = StorageManager.toggleCompleted(this.currentVideo.id);
+    const isDone = RepoStorage.toggleCompleted(this.currentVideo.id);
     this.updateCompletionButton();
     App.renderVideoGrid();
     App.renderStats();
@@ -336,7 +336,7 @@ const VideoPlayer = {
     const btn = document.getElementById("btnToggleComplete");
     if (!btn) return;
 
-    const isDone = StorageManager.isCompleted(this.currentVideo.id);
+    const isDone = RepoStorage.isCompleted(this.currentVideo.id);
     if (isDone) {
       btn.innerHTML = `
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -356,3 +356,5 @@ const VideoPlayer = {
     }
   }
 };
+window.VideoPlayer = VideoPlayer;
+

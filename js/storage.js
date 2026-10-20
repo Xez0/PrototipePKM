@@ -105,6 +105,7 @@ const VideoDB = {
     }
   }
 };
+window.VideoDB = VideoDB;
 
 // ==========================================================================
 // 2. AUTHENTICATION MANAGER (KHUSUS DEWAN GURU SMPN 7)
@@ -165,11 +166,13 @@ const AuthManager = {
     return true;
   }
 };
+window.AuthManager = AuthManager;
+
 
 // ==========================================================================
-// 3. STORAGE MANAGER (METADATA VIDEO & FITUR BELAJAR SISWA)
+// 3. REPO STORAGE (METADATA VIDEO & FITUR BELAJAR SISWA)
 // ==========================================================================
-const StorageManager = {
+const RepoStorage = {
   // Inisialisasi Data Video
   getVideos: function () {
     const raw = localStorage.getItem(STORAGE_KEYS.VIDEOS);
@@ -403,3 +406,5 @@ const StorageManager = {
     return defaultImg || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=640&q=80";
   }
 };
+window.RepoStorage = RepoStorage;
+

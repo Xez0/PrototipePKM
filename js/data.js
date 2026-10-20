@@ -170,3 +170,5 @@ const INITIAL_VIDEO_DATA = [
     ]
   }
 ];
+
+window.INITIAL_VIDEO_DATA = INITIAL_VIDEO_DATA;

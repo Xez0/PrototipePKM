@@ -88,13 +88,13 @@ const App = {
   handleHashChange: function () {
     const hash = window.location.hash.replace("#", "").toLowerCase();
     if (hash === "portal-guru") {
-      this.navigateTo("teacher");
+      if (this.currentView !== "teacher") this.navigateTo("teacher");
     } else if (hash === "login-guru" || hash === "masuk-guru") {
-      this.navigateTo("login");
+      if (this.currentView !== "login") this.navigateTo("login");
     } else if (hash === "katalog" || hash === "edukasi-pkm" || hash === "beranda" || hash === "prinsip") {
       this.navigateTo("student", hash);
-    } else {
-      this.navigateTo("student");
+    } else if (hash === "" || hash === "student") {
+      if (this.currentView !== "student") this.navigateTo("student");
     }
   },
 
@@ -119,10 +119,16 @@ const App = {
     if (viewName === "login") {
       viewLogin.classList.remove("hidden");
       this.currentView = "login";
+      if (window.location.hash !== "#login-guru") {
+        window.history.replaceState(null, "", "#login-guru");
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (viewName === "teacher") {
       viewTeacherPortal.classList.remove("hidden");
       this.currentView = "teacher";
+      if (window.location.hash !== "#portal-guru") {
+        window.history.replaceState(null, "", "#portal-guru");
+      }
       this.renderTeacherProfile();
       this.renderTeacherTable();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -130,6 +136,9 @@ const App = {
       viewStudent.classList.remove("hidden");
       this.currentView = "student";
       if (targetSectionId) {
+        if (window.location.hash !== `#${targetSectionId}`) {
+          window.history.replaceState(null, "", `#${targetSectionId}`);
+        }
         const targetElem = document.getElementById(targetSectionId);
         if (targetElem) {
           setTimeout(() => {
@@ -137,6 +146,9 @@ const App = {
           }, 80);
         }
       } else {
+        if (window.location.hash && window.location.hash !== "#beranda") {
+          window.history.replaceState(null, "", "#beranda");
+        }
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }
@@ -391,8 +403,8 @@ const App = {
         return;
       }
       videoPayload.sourceType = "youtube";
-      videoPayload.embedUrl = StorageManager.formatVideoEmbedUrl(ytUrl);
-      videoPayload.thumbnail = StorageManager.getThumbnailUrl(ytUrl) || defaultCover;
+      videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
+      videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
     }
 
     if (submitBtn) {
@@ -401,7 +413,7 @@ const App = {
     }
 
     try {
-      await StorageManager.addVideo(videoPayload, this.currentUploadSource === "file" ? this.pendingVideoFile : null);
+      await RepoStorage.addVideo(videoPayload, this.currentUploadSource === "file" ? this.pendingVideoFile : null);
       this.showToast("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!", "success");
 
       // Reset Formulir
@@ -436,7 +448,7 @@ const App = {
 
   // Modal Edit Video Guru
   openEditModal: function (id) {
-    const videos = StorageManager.getVideos();
+    const videos = RepoStorage.getVideos();
     const v = videos.find(item => item.id === id);
     if (!v) return;
 
@@ -487,12 +499,12 @@ const App = {
     };
 
     if (embedUrl) {
-      updatedData.embedUrl = StorageManager.formatVideoEmbedUrl(embedUrl);
-      updatedData.thumbnail = StorageManager.getThumbnailUrl(embedUrl) || this.getCoverBySubject(subject);
+      updatedData.embedUrl = RepoStorage.formatVideoEmbedUrl(embedUrl);
+      updatedData.thumbnail = RepoStorage.getThumbnailUrl(embedUrl) || this.getCoverBySubject(subject);
       updatedData.sourceType = "youtube";
     }
 
-    await StorageManager.updateVideo(id, updatedData);
+    await RepoStorage.updateVideo(id, updatedData);
     this.closeEditModal();
     this.showToast("Perubahan materi berhasil diperbarui!", "success");
     this.renderStats();
@@ -505,7 +517,7 @@ const App = {
     const tableBody = document.getElementById("teacherVideoTableBody");
     if (!tableBody) return;
 
-    let videos = StorageManager.getVideos();
+    let videos = RepoStorage.getVideos();
     if (query) {
       videos = videos.filter(v =>
         v.title.toLowerCase().includes(query) ||
@@ -527,7 +539,7 @@ const App = {
 
     tableBody.innerHTML = videos.map((v, idx) => {
       const isLocal = v.sourceType === "local";
-      const formattedDate = StorageManager.formatDate(v.publishedAt);
+      const formattedDate = RepoStorage.formatDate(v.publishedAt);
       return `
         <tr>
           <td style="color: var(--color-ink-subtle);">${idx + 1}</td>
@@ -564,7 +576,7 @@ const App = {
   // Hapus Materi Video dari Repositori
   deleteVideoItem: async function (id) {
     if (confirm("Apakah Bapak/Ibu guru yakin ingin menghapus materi pembelajaran ini?")) {
-      await StorageManager.deleteVideo(id);
+      await RepoStorage.deleteVideo(id);
       this.showToast("Materi pembelajaran telah dihapus dari repositori.");
       this.renderStats();
       this.renderVideoGrid();
@@ -574,15 +586,15 @@ const App = {
 
   // Inisialisasi Tema
   initTheme: function () {
-    const savedTheme = StorageManager.getTheme();
+    const savedTheme = RepoStorage.getTheme();
     document.documentElement.setAttribute("data-theme", savedTheme);
     this.updateThemeButton(savedTheme);
   },
 
   toggleTheme: function () {
-    const current = StorageManager.getTheme();
+    const current = RepoStorage.getTheme();
     const nextTheme = current === "dark" ? "light" : "dark";
-    StorageManager.setTheme(nextTheme);
+    RepoStorage.setTheme(nextTheme);
     this.updateThemeButton(nextTheme);
     this.showToast(`Beralih ke tema ${nextTheme === 'dark' ? 'Midnight Gelap' : 'Terang Resmi'}`);
   },
@@ -683,7 +695,7 @@ const App = {
     if (importInput) {
       importInput.addEventListener("change", (e) => {
         if (e.target.files && e.target.files[0]) {
-          StorageManager.importData(e.target.files[0]);
+          RepoStorage.importData(e.target.files[0]);
         }
       });
     }
@@ -714,7 +726,7 @@ const App = {
 
   // Render Metrik Statistik
   renderStats: function () {
-    const videos = StorageManager.getVideos();
+    const videos = RepoStorage.getVideos();
     const totalVideos = videos.length;
     const subjects = new Set(videos.map(v => v.subject)).size;
     const teachers = new Set(videos.map(v => v.teacher)).size;
@@ -736,7 +748,7 @@ const App = {
 
     if (!gridContainer) return;
 
-    const allVideos = StorageManager.getVideos();
+    const allVideos = RepoStorage.getVideos();
 
     const filtered = allVideos.filter(v => {
       const matchGrade = this.activeGradeFilter === "all" || v.grade === this.activeGradeFilter;
@@ -763,9 +775,9 @@ const App = {
     if (emptyState) emptyState.style.display = "none";
 
     gridContainer.innerHTML = filtered.map(v => {
-      const isDone = StorageManager.isCompleted(v.id);
+      const isDone = RepoStorage.isCompleted(v.id);
       const isLocal = v.sourceType === "local";
-      const formattedDate = StorageManager.formatDate(v.publishedAt);
+      const formattedDate = RepoStorage.formatDate(v.publishedAt);
       const coverSrc = v.thumbnail || this.getCoverBySubject(v.subject);
 
       return `
@@ -861,7 +873,7 @@ const App = {
   },
 
   openVideoById: function (id) {
-    const videos = StorageManager.getVideos();
+    const videos = RepoStorage.getVideos();
     const target = videos.find(v => v.id === id);
     if (target) {
       VideoPlayer.openPlayer(target);
@@ -875,6 +887,8 @@ const App = {
 };
 
 // Jalankan saat halaman siap
+window.App = App;
 document.addEventListener("DOMContentLoaded", () => {
   App.init();
 });
+
