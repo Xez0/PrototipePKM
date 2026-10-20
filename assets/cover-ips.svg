@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgIps" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="50%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <pattern id="gridIps" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgIps)"/>
+  <rect width="640" height="360" fill="url(#gridIps)"/>
+
+  <!-- Globe & Network Connections Graphic -->
+  <g transform="translate(470, 70)" opacity="0.35">
+    <circle cx="70" cy="70" r="65" fill="none" stroke="#fde68a" stroke-width="2.5"/>
+    <ellipse cx="70" cy="70" rx="30" ry="65" fill="none" stroke="#fde68a" stroke-width="1.8"/>
+    <line x1="5" y1="70" x2="135" y2="70" stroke="#fde68a" stroke-width="2"/>
+    <line x1="18" y1="40" x2="122" y2="40" stroke="#fde68a" stroke-width="1.5"/>
+    <line x1="18" y1="100" x2="122" y2="100" stroke="#fde68a" stroke-width="1.5"/>
+    <text x="70" y="165" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700" fill="#fde68a" text-anchor="middle">ERA GLOBALISASI</text>
+  </g>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="76" height="26" rx="6" fill="#b45309"/>
+  <text x="74" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">IPS</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Perubahan Sosial</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#fde68a">Globalisasi &amp; Budaya di Era Digital</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#451a03"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 9</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#78350f"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#fde68a" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#291202" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#fde68a">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#f59e0b" text-anchor="end">Dadang Sobari, S.E., Gr.</text>
+</svg>

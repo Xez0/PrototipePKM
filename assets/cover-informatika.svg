@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgInf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <pattern id="gridInf" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgInf)"/>
+  <rect width="640" height="360" fill="url(#gridInf)"/>
+
+  <!-- Flowchart Diagram Graphic -->
+  <g transform="translate(430, 45)" opacity="0.4">
+    <!-- Terminator: Start -->
+    <rect x="50" y="20" width="100" height="36" rx="18" fill="none" stroke="#38bdf8" stroke-width="2"/>
+    <text x="100" y="43" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="700" fill="#38bdf8" text-anchor="middle">MULAI</text>
+    <line x1="100" y1="56" x2="100" y2="90" stroke="#38bdf8" stroke-width="2"/>
+    <polygon points="96,86 100,94 104,86" fill="#38bdf8"/>
+
+    <!-- Process: Input -->
+    <polygon points="40,94 160,94 140,134 20,134" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+    <text x="90" y="118" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#7dd3fc" text-anchor="middle">INPUT NILAI</text>
+    <line x1="90" y1="134" x2="90" y2="168" stroke="#38bdf8" stroke-width="2"/>
+    <polygon points="86,164 90,172 94,164" fill="#38bdf8"/>
+
+    <!-- Decision: Diamond -->
+    <polygon points="90,172 150,210 90,248 30,210" fill="none" stroke="#bae6fd" stroke-width="2"/>
+    <text x="90" y="214" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#bae6fd" text-anchor="middle">NILAI &gt;= 75?</text>
+  </g>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="124" height="26" rx="6" fill="#0284c7"/>
+  <text x="98" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">INFORMATIKA</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Logika &amp; Algoritma</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#bae6fd">Flowchart &amp; Percabangan If-Else</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#0c4a6e"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 8</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#0369a1"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#bae6fd" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#0f172a" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#94a3b8">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#38bdf8" text-anchor="end">Riana Nurmayanti, S.Kom.</text>
+</svg>

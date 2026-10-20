@@ -71,25 +71,6 @@
     </div>
   </header>
 
-  <!-- ==================== STRIP PROGRES BELAJAR SISWA ==================== -->
-  <aside class="progress-strip" data-ui="true" aria-label="Progres Belajar Siswa">
-    <div class="container">
-      <div class="progress-strip-inner">
-        <div class="progress-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          <span id="userProgressText">Memuat progres belajar mandiri...</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="userProgressFill"></div>
-        </div>
-        <span class="progress-percent" id="userProgressPercent">0%</span>
-      </div>
-    </div>
-  </aside>
-
   <!-- ==================== MAIN CONTENT ==================== -->
   <main>
     <!-- ==================== VIEW 1: HALAMAN UTAMA SISWA & PUBLIK ==================== -->
@@ -147,10 +128,8 @@
           <!-- KARTU PRATINJAU INTERAKTIF (LINEAR FRAMED PANEL) -->
           <div class="hero-card-preview">
             <div class="preview-screen" onclick="App.openFeaturedHero()" style="cursor: pointer;">
-              <video autoplay muted loop playsinline preload="metadata" poster="assets/join-nasa-s-mission-to-mars-student-poster.jpg" style="width: 100%; height: 100%; object-fit: cover;" aria-hidden="true">
-                <source src="assets/join-nasa-s-mission-to-mars-student.mp4" type="video/mp4">
-              </video>
-              <div class="preview-play-btn" title="Putar Video">
+              <img src="assets/cover-matematika.svg" alt="Sampul Materi Bentuk Aljabar" style="width: 100%; height: 100%; object-fit: cover;">
+              <div class="preview-play-btn" title="Putar Video Materi">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="6 4 20 12 6 20 6 4"/>
                 </svg>
@@ -158,10 +137,10 @@
             </div>
             <div class="preview-caption">
               <div>
-                <h3>Bentuk Aljabar & Suku Sejenis</h3>
-                <p>Matematika Kelas 7 • Dra. Hj. Nurjanah, M.Pd.</p>
+                <h3>Konsep Dasar Aljabar</h3>
+                <p>Matematika Kelas 7 • Tri Elmania, S.Pd.</p>
               </div>
-              <span class="chip-count">Materi Rekomendasi</span>
+              <span class="chip-count">Materi Pilihan Guru</span>
             </div>
           </div>
         </div>
@@ -203,27 +182,12 @@
 
           <!-- Filter 2: Rumpun Mata Pelajaran -->
           <div class="filter-row">
-            <span class="filter-label">Kategori:</span>
-            <button class="chip-btn active" data-filter-category="all">
-              Semua Mapel
-              <span class="chip-count" data-chip-count="all">0</span>
-            </button>
-            <button class="chip-btn" data-filter-category="MIPA">
-              MIPA (Matematika & IPA)
-              <span class="chip-count" data-chip-count="MIPA">0</span>
-            </button>
-            <button class="chip-btn" data-filter-category="Informatika">
-              Informatika / TIK
-              <span class="chip-count" data-chip-count="Informatika">0</span>
-            </button>
-            <button class="chip-btn" data-filter-category="Bahasa">
-              Bahasa (Indo & Inggris)
-              <span class="chip-count" data-chip-count="Bahasa">0</span>
-            </button>
-            <button class="chip-btn" data-filter-category="IPS">
-              IPS & Humaniora
-              <span class="chip-count" data-chip-count="IPS">0</span>
-            </button>
+            <span class="filter-label">Mata Pelajaran:</span>
+            <button class="chip-btn active" data-filter-category="all">Semua Mapel</button>
+            <button class="chip-btn" data-filter-category="MIPA">MIPA (Matematika &amp; IPA)</button>
+            <button class="chip-btn" data-filter-category="Informatika">Informatika / TIK</button>
+            <button class="chip-btn" data-filter-category="Bahasa">Bahasa (Indonesia &amp; Inggris)</button>
+            <button class="chip-btn" data-filter-category="IPS">IPS &amp; Pendidikan Pancasila</button>
           </div>
         </div>
 
@@ -399,10 +363,10 @@
         <!-- TOP BANNER RUANG GURU -->
         <div class="teacher-top-banner">
           <div class="teacher-profile-badge">
-            <div class="teacher-profile-avatar" id="teacherAvatarText">G</div>
+            <div class="teacher-profile-avatar" id="teacherAvatarText">TE</div>
             <div>
-              <div class="teacher-profile-name" id="teacherDisplayGreeting">Dra. Hj. Nurjanah, M.Pd.</div>
-              <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19750812 200212 2 003 • Dewan Guru SMPN 7</div>
+              <div class="teacher-profile-name" id="teacherDisplayGreeting">Tri Elmania, S.Pd.</div>
+              <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19800512 200604 2 018 • Dewan Guru SMPN 7 Tangsel</div>
             </div>
           </div>
 
@@ -639,23 +603,11 @@
               </button>
             </div>
 
-            <!-- KOTAK CAPAIAN PEMBELAJARAN (CP) -->
-            <div class="cp-box">
-              <h4>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                Capaian Pembelajaran (Kurikulum Merdeka)
-              </h4>
-              <p id="modalLearningOutcome">Capaian pembelajaran materi.</p>
-            </div>
-
-            <p id="modalDescription" style="font-size: 0.9rem; line-height: 1.6; color: var(--color-ink-muted);">
-              Deskripsi penjelasan materi ajar.
+            <p id="modalDescription" style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-ink-muted); margin-bottom: var(--space-md);">
+              Deskripsi materi pembelajaran ajar.
             </p>
 
-            <!-- KARTU CETAK / UNDUH MODUL LEMBAR BELAJAR RESMI -->
+            <!-- KARTU CETAK LEMBAR MODUL BELAJAR RESMI -->
             <div class="pdf-download-card" id="pdfDownloadCard">
               <div class="pdf-info">
                 <div class="pdf-icon-badge">
@@ -667,12 +619,12 @@
                   </svg>
                 </div>
                 <div class="pdf-text">
-                  <h5>Lembar Rangkuman & Catatan Belajar Resmi</h5>
-                  <p>Format resmi SMPN 7 lengkap dengan CP materi dan paraf guru</p>
+                  <h5>Lembar Modul &amp; Rangkuman Belajar Resmi</h5>
+                  <p>Format resmi SMPN 7 lengkap dengan Capaian Pembelajaran &amp; paraf guru</p>
                 </div>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="VideoPlayer.openPrintSummary()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button type="button" class="btn btn-primary btn-sm" onclick="VideoPlayer.openPrintSummary()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 6 2 18 2 18 9"></polyline>
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                   <rect x="6" y="14" width="12" height="8"></rect>
@@ -683,7 +635,7 @@
           </div>
         </div>
 
-        <!-- KOLOM KANAN: BAB REPETISI & CATATAN SISWA -->
+        <!-- KOLOM KANAN: BAB REPETISI & RANGKUMAN RESMI GURU -->
         <div class="theatre-sidebar">
           <div class="theatre-tab-nav">
             <button class="theatre-tab-btn active" data-tab="tabChapters">
@@ -697,41 +649,40 @@
               </svg>
               Daftar Bab (Repetisi)
             </button>
-            <button class="theatre-tab-btn" data-tab="tabNotes">
+            <button class="theatre-tab-btn" data-tab="tabTeacherNotes">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
               </svg>
-              Catatan Siswa
+              Rangkuman Materi
             </button>
           </div>
 
-          <!-- TAB 1: DAFTAR BAB -->
+          <!-- TAB 1: DAFTAR BAB REPETISI -->
           <div class="theatre-tab-pane active" id="tabChapters">
             <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-bottom: 8px;">
-              Pilih bagian materi yang ingin kamu ulang penjelasannya:
+              Klik menit bab di bawah untuk mengulang bagian materi tertentu:
             </p>
             <div class="chapter-list" id="chapterListContainer">
               <!-- Diisi dinamis -->
             </div>
           </div>
 
-          <!-- TAB 2: CATATAN MANDIRI SISWA -->
-          <div class="theatre-tab-pane" id="tabNotes">
-            <div class="student-notes-area">
-              <label for="studentNotesInput" style="font-size: 0.8125rem; font-weight: 600; color: var(--color-ink);">
-                Tulis Poin Kunci & Rumus yang Dipelajari:
-              </label>
-              <textarea 
-                id="studentNotesInput" 
-                class="notes-textarea" 
-                placeholder="Tulis rumus cepat, istilah asing, atau poin yang belum kamu pahami di sini..."
-              ></textarea>
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-                <span class="notes-status-text" id="notesSavedStatus">Tersimpan di perangkat ini</span>
-                <button class="btn btn-secondary btn-sm" onclick="VideoPlayer.copyStudentNotes()" style="padding: 2px 8px; font-size: 0.75rem;">
-                  Salin Catatan
-                </button>
+          <!-- TAB 2: RANGKUMAN GURU & CP -->
+          <div class="theatre-tab-pane" id="tabTeacherNotes">
+            <div class="teacher-notes-display">
+              <div class="cp-compact-box">
+                <span class="cp-badge-label">Capaian Pembelajaran (CP)</span>
+                <p id="modalLearningOutcome" class="cp-text-content">Capaian pembelajaran materi.</p>
+              </div>
+
+              <div style="margin-top: var(--space-sm);">
+                <span class="cp-badge-label">Ringkasan Konsep dari Dewan Guru</span>
+                <div id="modalTeacherSummary" class="teacher-summary-text">
+                  Rangkuman materi pembelajaran dari guru pengampu.
+                </div>
               </div>
             </div>
           </div>

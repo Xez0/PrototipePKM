@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgMat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <pattern id="gridPattern" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgMat)"/>
+  <rect width="640" height="360" fill="url(#gridPattern)"/>
+
+  <!-- Decorative Geometry Elements -->
+  <circle cx="530" cy="180" r="130" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.3"/>
+  <polygon points="530,70 610,230 450,230" fill="none" stroke="#818cf8" stroke-width="1.5" opacity="0.25"/>
+  <line x1="380" y1="280" x2="620" y2="280" stroke="#a5b4fc" stroke-width="1" opacity="0.2"/>
+  <line x1="530" y1="50" x2="530" y2="310" stroke="#a5b4fc" stroke-width="1" opacity="0.2"/>
+
+  <!-- Formula Callouts (Junior High Algebra) -->
+  <text x="440" y="110" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="600" fill="#a5b4fc" opacity="0.4">f(x) = ax + b</text>
+  <text x="520" y="260" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="600" fill="#a5b4fc" opacity="0.4">(a + b)² = a² + 2ab + b²</text>
+  <text x="400" y="200" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="700" fill="#c7d2fe" opacity="0.45">3x + 5 = 20</text>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="120" height="26" rx="6" fill="#4338ca"/>
+  <text x="96" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">MATEMATIKA</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Konsep Dasar Aljabar</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#c7d2fe">Variabel, Koefisien, &amp; Suku Sejenis</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#1e293b"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 7</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#312e81"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#c7d2fe" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#0f172a" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#94a3b8">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#818cf8" text-anchor="end">Tri Elmania, S.Pd.</text>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgIndo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#450a0a"/>
+      <stop offset="50%" stop-color="#7f1d1d"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <pattern id="gridIndo" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgIndo)"/>
+  <rect width="640" height="360" fill="url(#gridIndo)"/>
+
+  <!-- Book & Quill / Literacy Vector Art -->
+  <g transform="translate(450, 65)" opacity="0.35">
+    <!-- Open Book -->
+    <path d="M10 120 C45 105 85 107 120 115 C155 107 195 105 230 120 V195 C195 180 155 182 120 190 C85 182 45 180 10 195 Z" 
+          fill="none" stroke="#fecaca" stroke-width="2.5"/>
+    <line x1="120" y1="115" x2="120" y2="190" stroke="#fecaca" stroke-width="2"/>
+    <!-- Feather Quill -->
+    <path d="M180 40 C170 80 140 120 110 150 C125 130 145 110 155 70 Z" fill="#fca5a5"/>
+    <line x1="180" y1="40" x2="100" y2="170" stroke="#fecaca" stroke-width="2"/>
+    <text x="120" y="225" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700" fill="#fca5a5" text-anchor="middle">CERAPAN PANCA INDRA</text>
+  </g>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="150" height="26" rx="6" fill="#991b1b"/>
+  <text x="111" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">BAHASA INDONESIA</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Teks Deskripsi</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#fca5a5">Menangkap Objek Lewat Panca Indra</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#450a0a"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 7</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#7f1d1d"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#fca5a5" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#2d0a0a" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#fca5a5">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#f87171" text-anchor="end">Sudarman, M.Pd.</text>
+</svg>

@@ -1,16 +1,17 @@
 /* ==========================================================================
    KONTROL PEMUTAR VIDEO BEBAS DISTRAKSI (THEATRE MODE)
-   Pemutar Ganda (YouTube JS-API & HTML5 Lab), Seeking Bab Instan Tanpa Reload,
-   Penyimpanan Catatan Siswa, & Lembar Rangkuman Belajar Cetak/PDF Resmi
+   UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN
+   Pemutar Ganda (YouTube JS-API & HTML5 Offline Lab), Lompatan Bab Instan,
+   Rangkuman Resmi Guru, & Mesin Cetak PDF Dokumen Sekolah Anti-Glitch
    ========================================================================== */
 
 const VideoPlayer = {
   currentVideo: null,
   currentMode: "youtube", // 'youtube' atau 'html5'
-  notesSaveTimer: null,
   activeChapterIndex: 0,
+  activeBlobUrl: null,
 
-  // Buka Modal Pemutar Video
+  // Buka Pemutar Video Fokus
   openPlayer: function (video, forceMode = "youtube") {
     this.currentVideo = video;
     this.currentMode = forceMode;
@@ -20,38 +21,38 @@ const VideoPlayer = {
     const backdrop = document.getElementById("theatreModalBackdrop");
     if (!modal || !backdrop) return;
 
-    // Set Judul & Info Dasar
-    document.getElementById("modalVideoTitle").textContent = video.title;
-    document.getElementById("modalTeacherName").textContent = video.teacher;
-    document.getElementById("modalTeacherNip").textContent = video.teacherNip ? `NIP. ${video.teacherNip}` : "Dewan Guru SMPN 7 Tangsel";
-    document.getElementById("modalSubjectGrade").textContent = `${video.subject} • Kelas ${video.grade}`;
-    document.getElementById("modalDescription").textContent = video.description;
-    document.getElementById("modalLearningOutcome").textContent = video.learningOutcome;
+    // Set Judul & Informasi Skolastik
+    const titleElem = document.getElementById("modalVideoTitle");
+    const teacherElem = document.getElementById("modalTeacherName");
+    const nipElem = document.getElementById("modalTeacherNip");
+    const subjectGradeElem = document.getElementById("modalSubjectGrade");
+    const descElem = document.getElementById("modalDescription");
+    const outcomeElem = document.getElementById("modalLearningOutcome");
+    const summaryElem = document.getElementById("modalTeacherSummary");
 
-    // Render Iframe atau Video HTML5
+    if (titleElem) titleElem.textContent = video.title;
+    if (teacherElem) teacherElem.textContent = video.teacher;
+    if (nipElem) nipElem.textContent = video.teacherNip ? `NIP. ${video.teacherNip}` : "Dewan Guru SMPN 7 Tangsel";
+    if (subjectGradeElem) subjectGradeElem.textContent = `${video.subject} • Kelas ${video.grade}`;
+    if (descElem) descElem.textContent = video.description;
+    if (outcomeElem) outcomeElem.textContent = video.learningOutcome;
+    if (summaryElem) summaryElem.textContent = video.pdfContent || video.description;
+
+    // Render Pemutar Video
     this.renderActivePlayer();
 
-    // Render Daftar Bab / Timecode (Untuk Repetisi Siswa)
+    // Render Daftar Bab Repetisi
     this.renderChapters(video.chapters || []);
-
-    // Muat Catatan Pribadi Siswa
-    const notesInput = document.getElementById("studentNotesInput");
-    if (notesInput) {
-      notesInput.value = StorageManager.getStudentNotes(video.id);
-      document.getElementById("notesSavedStatus").textContent = "Tersimpan di perangkat ini";
-    }
 
     // Set Status Selesai Belajar
     this.updateCompletionButton();
 
     // Tampilkan Modal
     backdrop.classList.add("active");
-    document.body.style.overflow = "hidden"; // Kunci scroll halaman
+    document.body.style.overflow = "hidden";
   },
 
-  activeBlobUrl: null,
-
-  // Render Player Sesuai Mode (File Video Lokal vs YouTube vs Fallback)
+  // Render Pemutar Video (File Komputer vs YouTube vs Fallback)
   renderActivePlayer: async function () {
     const playerContainer = document.getElementById("modalPlayerContainer");
     if (!playerContainer || !this.currentVideo) return;
@@ -95,7 +96,6 @@ const VideoPlayer = {
         modeLabel.textContent = `File Video Komputer (${v.fileName || 'MP4'})`;
       }
     } else if (this.currentMode === "youtube" && v.embedUrl) {
-      // Pastikan URL embed memiliki parameter enablejsapi=1
       let embedSrc = v.embedUrl;
       if (!embedSrc.includes("enablejsapi=1")) {
         const sep = embedSrc.includes("?") ? "&" : "?";
@@ -143,7 +143,7 @@ const VideoPlayer = {
   togglePlayerMode: function () {
     if (!this.currentVideo) return;
     if (this.currentVideo.sourceType === "local") {
-      App.showToast("Materi ini adalah file video lokal yang diunggah langsung oleh guru.");
+      App.showToast("Materi ini adalah file video komputer lokal.");
       return;
     }
     this.currentMode = this.currentMode === "youtube" ? "html5" : "youtube";
@@ -153,13 +153,11 @@ const VideoPlayer = {
 
   // Tutup Modal & Hentikan Audio/Video Seketika
   closePlayer: function () {
-    // Bersihkan URL blob jika ada
     if (this.activeBlobUrl) {
       URL.revokeObjectURL(this.activeBlobUrl);
       this.activeBlobUrl = null;
     }
 
-    // Kirim sinyal pause ke iframe YouTube
     const iframe = document.getElementById("activeVideoIframe");
     if (iframe && iframe.contentWindow) {
       try {
@@ -168,7 +166,6 @@ const VideoPlayer = {
       } catch (e) {}
     }
 
-    // Hentikan video HTML5
     const video = document.getElementById("activeHtml5Video");
     if (video) {
       video.pause();
@@ -177,7 +174,7 @@ const VideoPlayer = {
     const backdrop = document.getElementById("theatreModalBackdrop");
     const playerContainer = document.getElementById("modalPlayerContainer");
     if (backdrop) backdrop.classList.remove("active");
-    if (playerContainer) playerContainer.innerHTML = ""; // Bersihkan DOM untuk mencegah audio bocor
+    if (playerContainer) playerContainer.innerHTML = "";
     document.body.style.overflow = "auto";
     this.currentVideo = null;
   },
@@ -196,7 +193,7 @@ const VideoPlayer = {
       <div 
         class="chapter-item ${idx === this.activeChapterIndex ? 'active-chapter' : ''}" 
         onclick="VideoPlayer.jumpToChapter(${ch.seconds}, ${idx})"
-        title="Putar dari menit ${ch.time}">
+        title="Ulangi penjelasan bab dari menit ${ch.time}">
         <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
           <span style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--color-ink-subtle);">#${idx + 1}</span>
           <span style="font-weight: 500; font-size: 0.875rem; color: var(--color-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -208,7 +205,7 @@ const VideoPlayer = {
     `).join("");
   },
 
-  // Lompat ke Detik Tertentu Secara Instan (Tanpa Reload Iframe)
+  // Lompat ke Detik Tertentu Secara Instan
   jumpToChapter: function (seconds, index = 0) {
     if (!this.currentVideo) return;
     this.activeChapterIndex = index;
@@ -216,7 +213,6 @@ const VideoPlayer = {
     if (this.currentMode === "youtube") {
       const iframe = document.getElementById("activeVideoIframe");
       if (iframe && iframe.contentWindow) {
-        // Kirim perintah seekTo via YouTube Iframe API
         iframe.contentWindow.postMessage(JSON.stringify({
           event: "command",
           func: "seekTo",
@@ -228,12 +224,10 @@ const VideoPlayer = {
           args: []
         }), "*");
       } else {
-        // Fallback jika iframe belum siap
         let baseUrl = this.currentVideo.embedUrl.split("?")[0];
         iframe.src = `${baseUrl}?start=${seconds}&autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
       }
     } else {
-      // Mode HTML5
       const video = document.getElementById("activeHtml5Video");
       if (video) {
         video.currentTime = seconds;
@@ -241,7 +235,6 @@ const VideoPlayer = {
       }
     }
 
-    // Perbarui highlight bab
     this.renderChapters(this.currentVideo.chapters || []);
     const ch = (this.currentVideo.chapters && this.currentVideo.chapters[index]) ? this.currentVideo.chapters[index].title : "Bab";
     App.showToast(`Memutar: ${ch}`);
@@ -263,141 +256,259 @@ const VideoPlayer = {
       const video = document.getElementById("activeHtml5Video");
       if (video) video.playbackRate = numSpeed;
     }
-    App.showToast(`Kecepatan video diubah ke ${speed}x`);
+    App.showToast(`Kecepatan video: ${speed}x`);
   },
 
-  // Simpan Catatan Siswa Otomatis (Debounced)
-  handleNotesInput: function (text) {
-    if (!this.currentVideo) return;
-    const statusElem = document.getElementById("notesSavedStatus");
-    if (statusElem) statusElem.textContent = "Menyimpan catatan...";
-
-    clearTimeout(this.notesSaveTimer);
-    this.notesSaveTimer = setTimeout(() => {
-      StorageManager.saveStudentNotes(this.currentVideo.id, text);
-      if (statusElem) statusElem.textContent = "Catatan tersimpan otomatis";
-    }, 500);
-  },
-
-  // Salin Catatan Siswa ke Clipboard
-  copyStudentNotes: function () {
-    if (!this.currentVideo) return;
-    const notes = StorageManager.getStudentNotes(this.currentVideo.id);
-    if (!notes.trim()) {
-      App.showToast("Belum ada catatan yang ditulis.", "danger");
-      return;
-    }
-    navigator.clipboard.writeText(notes).then(() => {
-      App.showToast("Catatan berhasil disalin ke clipboard!");
-    }).catch(() => {
-      App.showToast("Gagal menyalin catatan.", "danger");
-    });
-  },
-
-  // Buka Dialog Cetak / Simpan PDF Lembar Belajar Resmi SMPN 7
+  // Buka Dialog Cetak / Simpan PDF Lembar Belajar Resmi SMPN 7 (Tanpa Merusak Tampilan Layar)
   openPrintSummary: function () {
     if (!this.currentVideo) return;
     const v = this.currentVideo;
-    const studentNotes = StorageManager.getStudentNotes(v.id) || "Tidak ada catatan tambahan.";
 
-    let container = document.getElementById("printableSheetContainer");
-    if (!container) {
-      container = document.createElement("div");
-      container.id = "printableSheetContainer";
-      document.body.appendChild(container);
+    // Gunakan hidden iframe agar cetak terisolasi dan tidak merusak layout layar/modal
+    let printFrame = document.getElementById("hiddenPrintIframe");
+    if (!printFrame) {
+      printFrame = document.createElement("iframe");
+      printFrame.id = "hiddenPrintIframe";
+      printFrame.style.position = "fixed";
+      printFrame.style.right = "0";
+      printFrame.style.bottom = "0";
+      printFrame.style.width = "0";
+      printFrame.style.height = "0";
+      printFrame.style.border = "none";
+      printFrame.style.visibility = "hidden";
+      document.body.appendChild(printFrame);
     }
 
-    container.innerHTML = `
-      <div style="font-family: Arial, sans-serif; color: #111; max-width: 800px; margin: 0 auto; line-height: 1.5;">
-        <!-- KOP SURAT RESMI SEKOLAH -->
-        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 18px;">
-          <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" style="width: 70px; height: 70px;">
-          <div style="text-align: center; flex: 1; padding: 0 16px;">
-            <h4 style="margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase;">PEMERINTAH KOTA TANGERANG SELATAN</h4>
-            <h4 style="margin: 0; font-size: 13pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN DAN KEBUDAYAAN</h4>
-            <h3 style="margin: 2px 0; font-size: 16pt; font-weight: 800; text-transform: uppercase;">UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN</h3>
-            <p style="margin: 0; font-size: 9pt; color: #333;">Jl. Cicentang Pulo, RT.006/RW.001, Kel. Rawa Buntu, Kec. Serpong, Kota Tangerang Selatan, Banten 15318</p>
+    const doc = printFrame.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html lang="id">
+      <head>
+        <meta charset="UTF-8">
+        <title>Lembar Belajar - ${v.title}</title>
+        <style>
+          @page {
+            size: A4 portrait;
+            margin: 15mm 15mm 15mm 15mm;
+          }
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111827;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-size: 10.5pt;
+            line-height: 1.5;
+          }
+          .kop-surat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px double #000000;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+          }
+          .kop-logo {
+            width: 72px;
+            height: 72px;
+          }
+          .kop-text {
+            flex: 1;
+            text-align: center;
+            padding: 0 12px;
+          }
+          .kop-text h4 {
+            margin: 0;
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          .kop-text h3 {
+            margin: 2px 0;
+            font-size: 14pt;
+            font-weight: 800;
+            text-transform: uppercase;
+          }
+          .kop-text p {
+            margin: 2px 0 0 0;
+            font-size: 8.5pt;
+            color: #374151;
+          }
+          .doc-title {
+            text-align: center;
+            margin-bottom: 16px;
+          }
+          .doc-title h2 {
+            margin: 0;
+            font-size: 12pt;
+            font-weight: 800;
+            text-decoration: underline;
+            text-transform: uppercase;
+          }
+          .doc-title span {
+            font-size: 9.5pt;
+            color: #4b5563;
+          }
+          table.meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 10pt;
+          }
+          table.meta-table td {
+            padding: 3px 0;
+            vertical-align: top;
+          }
+          .section-box {
+            margin-bottom: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 10px 14px;
+            background-color: #f9fafb;
+          }
+          .section-title {
+            font-size: 10.5pt;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #0b1e4f;
+            text-transform: uppercase;
+          }
+          .section-body {
+            font-size: 9.5pt;
+            line-height: 1.5;
+            white-space: pre-line;
+            color: #1f2937;
+          }
+          .worksheet-box {
+            margin-bottom: 16px;
+            border: 1px dashed #6b7280;
+            border-radius: 4px;
+            padding: 12px 14px;
+            background-color: #ffffff;
+            min-height: 90px;
+          }
+          .ttd-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+            page-break-inside: avoid;
+          }
+          .ttd-col {
+            width: 42%;
+            text-align: center;
+            font-size: 10pt;
+          }
+          .ttd-space {
+            height: 55px;
+          }
+          .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb; /* taste-skill-ignore */
+            font-size: 8pt;
+            color: #6b7280;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="kop-surat">
+          <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" class="kop-logo">
+          <div class="kop-text">
+            <h4>PEMERINTAH KOTA TANGERANG SELATAN</h4>
+            <h4>DINAS PENDIDIKAN DAN KEBUDAYAAN</h4>
+            <h3>UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN</h3>
+            <p>Jl. Cicentang Pulo RT.006/RW.001, Kel. Rawa Buntu, Kec. Serpong, Kota Tangerang Selatan, Banten 15318 • Website: smpn7tangsel.sch.id</p>
           </div>
         </div>
 
-        <!-- JUDUL DOKUMEN -->
-        <div style="text-align: center; margin-bottom: 16px;">
-          <h2 style="margin: 0; font-size: 14pt; font-weight: bold; text-decoration: underline;">LEMBAR RANGKUMAN MATERI & BELAJAR MANDIRI</h2>
-          <p style="margin: 2px 0; font-size: 10pt; font-weight: 600;">Kurikulum Merdeka - Tahun Ajaran 2026/2027</p>
+        <div class="doc-title">
+          <h2>LEMBAR MODUL RANGKUMAN &amp; BELAJAR MANDIRI</h2>
+          <span>Kurikulum Merdeka (Fase D SMP) • Tahun Ajaran 2026/2027</span>
         </div>
 
-        <!-- TABEL METADATA PELAJARAN -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 10.5pt;">
+        <table class="meta-table">
           <tr>
-            <td style="width: 25%; font-weight: bold; padding: 4px 0;">Mata Pelajaran</td>
+            <td style="width: 25%; font-weight: bold;">Mata Pelajaran</td>
             <td style="width: 2%;">:</td>
-            <td style="width: 73%;">${v.subject}</td>
+            <td style="width: 73%; font-weight: bold;">${v.subject}</td>
           </tr>
           <tr>
-            <td style="font-weight: bold; padding: 4px 0;">Jenjang / Kelas</td>
+            <td style="font-weight: bold;">Jenjang / Fase</td>
             <td>:</td>
-            <td>Kelas ${v.grade} (Fase D SMP)</td>
+            <td>Kelas ${v.grade} (Fase D SMP Negeri 7 Tangerang Selatan)</td>
           </tr>
           <tr>
-            <td style="font-weight: bold; padding: 4px 0;">Topik / Pokok Bahasan</td>
+            <td style="font-weight: bold;">Topik Pokok Bahasan</td>
             <td>:</td>
-            <td style="font-weight: bold;">${v.title}</td>
+            <td>${v.title}</td>
           </tr>
           <tr>
-            <td style="font-weight: bold; padding: 4px 0;">Guru Pengampu</td>
+            <td style="font-weight: bold;">Guru Pengampu</td>
             <td>:</td>
             <td>${v.teacher} ${v.teacherNip ? `(NIP. ${v.teacherNip})` : ''}</td>
           </tr>
           <tr>
-            <td style="font-weight: bold; padding: 4px 0;">Tanggal Belajar</td>
+            <td style="font-weight: bold;">Tanggal Akses</td>
             <td>:</td>
-            <td>${new Date().toLocaleDateString('id-ID', { dateStyle: 'full' })}</td>
+            <td>${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</td>
           </tr>
         </table>
 
-        <!-- CAPAIAN PEMBELAJARAN -->
-        <div style="margin-bottom: 16px; border: 1px solid #999; padding: 10px; border-radius: 4px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 11pt; font-weight: bold;">I. Capaian Pembelajaran (CP) / Indikator Materi</h4>
-          <p style="margin: 0; font-size: 10pt; text-align: justify;">${v.learningOutcome}</p>
+        <div class="section-box">
+          <div class="section-title">I. Capaian Pembelajaran (CP) / Indikator Materi</div>
+          <div class="section-body">${v.learningOutcome}</div>
         </div>
 
-        <!-- RANGKUMAN GURU -->
-        <div style="margin-bottom: 16px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 11pt; font-weight: bold;">II. Rangkuman Materi Pembelajaran</h4>
-          <div style="font-size: 10pt; white-space: pre-line; background: #fafafa; padding: 12px; border: 1px solid #ccc; border-radius: 4px;">
-            ${v.pdfContent || v.description}
+        <div class="section-box" style="background-color: #ffffff;">
+          <div class="section-title">II. Rangkuman Materi Pembelajaran dari Dewan Guru</div>
+          <div class="section-body">${v.pdfContent || v.description}</div>
+        </div>
+
+        <div class="section-title" style="margin-top: 14px;">III. Lembar Catatan &amp; Refleksi Mandiri Peserta Didik</div>
+        <div class="worksheet-box">
+          <p style="margin: 0 0 6px 0; font-size: 8.5pt; color: #6b7280; font-style: italic;">
+            Tuliskan rumus penting, istilah baru, atau poin yang ingin kamu tanyakan ke bapak/ibu guru pada pertemuan tatap muka berikutnya:
+          </p>
+          <div style="font-size: 9.5pt; color: #111827; white-space: pre-line;">
+            ${StorageManager.getStudentNotes(v.id) || ''}
           </div>
         </div>
 
-        <!-- CATATAN MANDIRI SISWA -->
-        <div style="margin-bottom: 24px;">
-          <h4 style="margin: 0 0 6px 0; font-size: 11pt; font-weight: bold;">III. Catatan & Poin Penting Peserta Didik</h4>
-          <div style="font-size: 10pt; white-space: pre-line; border: 1px dashed #666; padding: 12px; min-height: 80px; border-radius: 4px;">
-            ${studentNotes}
+        <div class="ttd-grid">
+          <div class="ttd-col">
+            <p style="margin: 0;">Mengetahui,<br>Orang Tua / Wali Murid</p>
+            <div class="ttd-space"></div>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline;">( .................................................... )</p>
           </div>
-        </div>
-
-        <!-- KOLOM TANDA TANGAN -->
-        <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 10.5pt;">
-          <div style="text-align: center; width: 40%;">
-            <p style="margin: 0 0 50px 0;">Mengetahui,<br>Orang Tua / Wali Siswa</p>
-            <p style="margin: 0; font-weight: bold; text-decoration: underline;">( .................................................. )</p>
-          </div>
-          <div style="text-align: center; width: 40%;">
-            <p style="margin: 0 0 50px 0;">Tangerang Selatan, ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}<br>Guru Pengampu,</p>
+          <div class="ttd-col">
+            <p style="margin: 0;">Tangerang Selatan, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Guru Pengampu,</p>
+            <div class="ttd-space"></div>
             <p style="margin: 0; font-weight: bold; text-decoration: underline;">${v.teacher}</p>
-            <p style="margin: 0; font-size: 9pt;">${v.teacherNip ? `NIP. ${v.teacherNip}` : 'NIP Sekolah'}</p>
+            <p style="margin: 0; font-size: 8.5pt; color: #4b5563;">${v.teacherNip ? `NIP. ${v.teacherNip}` : 'Dewan Guru SMPN 7 Tangsel'}</p>
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 30px; font-size: 8pt; color: #777; padding-top: 8px;">
-          Dicetak melalui Repositori Video Pembelajaran Mandiri SMPN 7 Tangsel • Program PkM Mahasiswa Teknik Informatika S-1 UNPAM
+        <div class="footer-note">
+          Dokumen resmi bahan ajar mandiri digital UPTD SMP Negeri 7 Kota Tangerang Selatan • Kemitraan Program PkM S-1 Teknik Informatika Universitas Pamulang
         </div>
-      </div>
-    `;
+      </body>
+      </html>
+    `);
+    doc.close();
 
-    // Jalankan cetak browser (Simpan sebagai PDF atau cetak fisik)
-    window.print();
+    // Trigger print pada iframe secara terisolasi
+    setTimeout(() => {
+      printFrame.contentWindow.focus();
+      printFrame.contentWindow.print();
+    }, 200);
   },
 
   // Toggle Selesai Dipelajari
@@ -405,12 +516,11 @@ const VideoPlayer = {
     if (!this.currentVideo) return;
     const isDone = StorageManager.toggleCompleted(this.currentVideo.id);
     this.updateCompletionButton();
-    App.renderVideoGrid(); // Perbarui lencana centang pada grid
-    App.renderStats(); // Perbarui persentase progres
-    App.showToast(isDone ? "Hebat! Materi telah ditandai selesai dipelajari." : "Status materi diubah ke belum ditonton.");
+    App.renderVideoGrid();
+    App.renderStats();
+    App.showToast(isDone ? "Materi ditandai selesai dipelajari." : "Status materi diubah ke belum ditonton.");
   },
 
-  // Perbarui Tampilan Tombol Selesai
   updateCompletionButton: function () {
     if (!this.currentVideo) return;
     const btn = document.getElementById("btnToggleComplete");

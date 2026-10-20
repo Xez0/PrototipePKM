@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgPpkn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14532d"/>
+      <stop offset="50%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <pattern id="gridPpkn" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgPpkn)"/>
+  <rect width="640" height="360" fill="url(#gridPpkn)"/>
+
+  <!-- Garuda Shield / Pancasila Symbol Vector Graphic -->
+  <g transform="translate(460, 60)" opacity="0.35">
+    <polygon points="70,15 125,45 125,120 70,170 15,120 15,45" fill="none" stroke="#bbf7d0" stroke-width="2.5"/>
+    <polygon points="70,30 110,55 110,115 70,155 30,115 30,55" fill="none" stroke="#86efac" stroke-width="1.8"/>
+    <!-- Five-pointed Star -->
+    <polygon points="70,55 74,68 87,68 76,76 80,89 70,81 60,89 64,76 53,68 66,68" fill="#fef08a"/>
+    <text x="70" y="195" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="700" fill="#bbf7d0" text-anchor="middle">NORMA &amp; KEADILAN</text>
+  </g>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="170" height="26" rx="6" fill="#15803d"/>
+  <text x="121" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">PENDIDIKAN PANCASILA</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Norma &amp; Keadilan</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#bbf7d0">Ketaatan Hukum dalam Kehidupan Bermasyarakat</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#052e16"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 7</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#166534"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#bbf7d0" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#052e16" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#bbf7d0">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#4ade80" text-anchor="end">Epi Suhaepi, S.Pd.</text>
+</svg>

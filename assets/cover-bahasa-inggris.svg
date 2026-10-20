@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="bgEng" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#311042"/>
+      <stop offset="50%" stop-color="#581c87"/>
+      <stop offset="100%" stop-color="#7e22ce"/>
+    </linearGradient>
+    <pattern id="gridEng" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bgEng)"/>
+  <rect width="640" height="360" fill="url(#gridEng)"/>
+
+  <!-- English Language & Recipe / Procedure Icons Graphic -->
+  <g transform="translate(450, 60)" opacity="0.35">
+    <rect x="20" y="20" width="130" height="180" rx="8" fill="none" stroke="#d8b4fe" stroke-width="2"/>
+    <line x1="40" y1="50" x2="130" y2="50" stroke="#d8b4fe" stroke-width="2"/>
+    <line x1="40" y1="75" x2="110" y2="75" stroke="#d8b4fe" stroke-width="2"/>
+    <circle cx="45" cy="110" r="5" fill="#d8b4fe"/>
+    <line x1="60" y1="110" x2="130" y2="110" stroke="#d8b4fe" stroke-width="1.5"/>
+    <circle cx="45" cy="135" r="5" fill="#d8b4fe"/>
+    <line x1="60" y1="135" x2="120" y2="135" stroke="#d8b4fe" stroke-width="1.5"/>
+    <circle cx="45" cy="160" r="5" fill="#d8b4fe"/>
+    <line x1="60" y1="160" x2="130" y2="160" stroke="#d8b4fe" stroke-width="1.5"/>
+    <text x="85" y="235" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="700" fill="#e9d5ff" text-anchor="middle">FIRST • THEN • FINALLY</text>
+  </g>
+
+  <!-- Left Content Box -->
+  <rect x="36" y="36" width="136" height="26" rx="6" fill="#7e22ce"/>
+  <text x="104" y="53" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">BAHASA INGGRIS</text>
+
+  <text x="36" y="105" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="800" fill="#ffffff">Procedure Text</text>
+  <text x="36" y="135" font-family="'Plus Jakarta Sans', sans-serif" font-size="17" font-weight="600" fill="#e9d5ff">Generic Structure &amp; Imperative Verbs</text>
+
+  <!-- Grade Pill & Curriculum -->
+  <rect x="36" y="160" width="76" height="24" rx="4" fill="#3b0764"/>
+  <text x="74" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">KELAS 9</text>
+
+  <rect x="120" y="160" width="136" height="24" rx="4" fill="#6b21a8"/>
+  <text x="188" y="176" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" fill="#e9d5ff" text-anchor="middle">KURIKULUM MERDEKA</text>
+
+  <!-- Bottom School Branding Bar -->
+  <rect x="36" y="300" width="568" height="28" rx="6" fill="#1e102d" fill-opacity="0.8"/>
+  <text x="50" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#d8b4fe">UPTD SMPN 7 KOTA TANGERANG SELATAN</text>
+  <text x="590" y="318" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="700" fill="#c084fc" text-anchor="end">Agung Firmansyah, S.S.</text>
+</svg>

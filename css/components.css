@@ -197,51 +197,7 @@ kbd.key-hint {
 
 /* -------------------------------------------------------------
    3. BILAH PROGRES BELAJAR SISWA
-   ------------------------------------------------------------- */
-.progress-strip {
-  background-color: var(--color-surface-1);
-  padding: 10px 0;
-  font-size: 0.8125rem;
-}
 
-.progress-strip-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-}
-
-.progress-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-ink);
-  font-weight: 500;
-}
-
-.progress-track {
-  flex: 1;
-  min-width: 140px;
-  max-width: 320px;
-  height: 8px;
-  background-color: var(--color-surface-3);
-  border-radius: var(--radius-pill);
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background-color: var(--color-success);
-  transition: width var(--duration-normal) var(--ease-standard);
-  border-radius: var(--radius-pill);
-}
-
-.progress-percent {
-  font-weight: 700;
-  color: var(--color-success);
-}
 
 /* -------------------------------------------------------------
    4. HERO SECTION (EDUKASI INSTITUSIONAL BERSIH)
@@ -1154,40 +1110,45 @@ kbd.key-hint {
   border: 1px solid var(--color-hairline);
 }
 
-.student-notes-area {
+.teacher-notes-display {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
 }
 
-.notes-textarea {
-  width: 100%;
-  flex: 1;
-  min-height: 180px;
+.cp-compact-box {
   background-color: var(--color-surface-2);
-  border: 1px solid var(--color-hairline-strong);
-  border-radius: var(--radius-md);
-  padding: var(--space-sm);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  line-height: 1.5;
-  resize: vertical;
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
 }
 
-.notes-textarea:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-  border-color: var(--color-primary);
+.cp-badge-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  margin-bottom: 4px;
 }
 
-.notes-status-text {
+.cp-text-content {
   font-size: 0.8125rem;
-  color: var(--color-ink-subtle);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+  margin: 0;
+}
+
+.teacher-summary-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-ink);
+  white-space: pre-line;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-hairline);
 }
 
 /* -------------------------------------------------------------

@@ -557,14 +557,6 @@ const App = {
     if (statSubjects) statSubjects.textContent = stats.totalSubjects;
     if (statTeachers) statTeachers.textContent = stats.totalTeachers;
 
-    const progressFill = document.getElementById("userProgressFill");
-    const progressText = document.getElementById("userProgressText");
-    const progressPercent = document.getElementById("userProgressPercent");
-
-    if (progressFill) progressFill.style.width = `${stats.progressPercent}%`;
-    if (progressText) progressText.textContent = `${stats.completedVideos} dari ${stats.totalVideos} materi selesai dipelajari`;
-    if (progressPercent) progressPercent.textContent = `${stats.progressPercent}%`;
-
     this.updateCategoryChipCounts();
   },
 
@@ -607,7 +599,7 @@ const App = {
 
     const resultCountElem = document.getElementById("searchResultCount");
     if (resultCountElem) {
-      resultCountElem.textContent = `${filtered.length} materi ditemukan`;
+      resultCountElem.textContent = `${filtered.length} materi tersedia`;
     }
 
     if (filtered.length === 0) {
@@ -618,7 +610,7 @@ const App = {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
           <h3 class="empty-title">Materi Tidak Ditemukan</h3>
-          <p class="empty-desc">Coba sesuaikan kata kunci pencarian atau ubah pilihan jenjang kelas dan kelompok mapel.</p>
+          <p class="empty-desc">Coba sesuaikan kata kunci pencarian atau ubah pilihan jenjang kelas dan mata pelajaran.</p>
           <button type="button" class="btn btn-secondary btn-sm" onclick="App.resetFilters()">Tampilkan Semua Materi</button>
         </div>
       `;
@@ -639,7 +631,7 @@ const App = {
           aria-label="Pelajari materi ${v.title} untuk ${v.subject} Kelas ${v.grade}"
         >
           <div class="card-thumbnail-wrap">
-            <img src="${v.thumbnail || 'assets/hero-mockup.webp'}" alt="${v.title}" loading="lazy">
+            <img src="${v.thumbnail || 'assets/cover-matematika.svg'}" alt="${v.title}" loading="lazy">
             <span class="card-badge-grade" data-grade="${v.grade}">Kelas ${v.grade}</span>
             <span class="card-badge-source ${isLocal ? 'badge-local' : 'badge-yt'}">
               ${isLocal ? 'Berkas Laptop' : 'YouTube'}
@@ -657,13 +649,11 @@ const App = {
             <div class="card-meta-row">
               <span class="card-meta-subject">${v.subject}</span>
               ${isDone ? `
-                <span class="status-completed-badge" title="Telah kamu pelajari mandiri">
+                <span class="status-completed-badge" title="Telah kamu pelajari">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   Selesai
                 </span>
-              ` : `
-                <span class="status-unwatched-badge">Materi Baru</span>
-              `}
+              ` : ''}
             </div>
             
             <h3 class="card-title" title="${v.title}">${v.title}</h3>

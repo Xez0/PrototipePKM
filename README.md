@@ -41,9 +41,9 @@ Aplikasi ini dibangun menggunakan arsitektur **Single Page Application (SPA)** b
 ## ✨ Fitur-Fitur Utama Sistem
 
 ### 1. Halaman Siswa & Katalog Publik Bebas Distraksi
-* **Katalog Berjenjang:** Pembagian materi jelas berdasarkan Kelas 7, Kelas 8, dan Kelas 9 serta rumpun mata pelajaran (MIPA, Informatika, Bahasa, dan IPS).
+* **Katalog Berjenjang:** Pembagian materi jelas berdasarkan Kelas 7, Kelas 8, dan Kelas 9 serta rumpun mata pelajaran (MIPA, Informatika, Bahasa, dan IPS/PPKn).
 * **Pencarian Cerdas Instan:** Pencarian materi berdasarkan judul bab, nama guru pengampu, atau topik pelajaran.
-* **Pelacak Progres Mandiri:** Bilah progres yang mencatat berapa materi yang telah dipelajari siswa secara mandiri di perangkat masing-masing.
+* **Tanda Selesai Dipelajari:** Penanda mandiri bagi siswa untuk mengingat materi apa saja yang sudah dipahami.
 
 ### 2. Portal & Ruang Pengelolaan Dewan Guru
 * **Akses Terpisah (Role Separation):** Alur masuk terdedikasi untuk dewan guru pengampu dengan opsi Masuk Cepat (Akun Demo) untuk kemudahan peninjauan prototipe.
@@ -55,13 +55,13 @@ Aplikasi ini dibangun menggunakan arsitektur **Single Page Application (SPA)** b
 * **Cadangan & Pemulihan Data:** Fitur ekspor/impor JSON untuk mengamankan data materi antarperangkat komputer sekolah.
 
 ### 3. Pemutar Video Pembelajaran Fokus (Theatre Mode)
-* **Dukungan Ganda (Dual-Source Playback):** Memutar file video lokal dari IndexedDB via Object URL Blob secara mulus, atau memutar tautan YouTube dengan API bebas iklan pengganggu.
+* **Dukungan Ganda (Dual-Source Playback):** Memutar file video lokal dari IndexedDB via Object URL Blob secara mulus, atau memutar tautan YouTube edukatif.
 * **Navigasi Bab Instan:** Siswa dapat mengulang bagian materi tertentu yang sulit langsung dengan mengeklik daftar bab tanpa harus memuat ulang video.
 * **Pengatur Kecepatan:** Kecepatan putar fleksibel (0.75x hingga 1.5x) untuk memfasilitasi repetisi konsep.
-* **Buku Catatan Digital Siswa:** Ruang catatan mandiri yang otomatis tersimpan saat video disimak.
+* **Rangkuman Guru & Capaian Pembelajaran:** Ringkasan materi inti resmi dari guru pengampu serta target Capaian Pembelajaran Kurikulum Merdeka Fase D.
 
 ### 4. Modul Lembar Belajar Cetak / PDF Resmi Sekolah
-* Menghasilkan dokumen cetak resmi lengkap dengan Kop UPTD SMP Negeri 7 Kota Tangerang Selatan, Capaian Pembelajaran Kurikulum Merdeka, rangkuman materi dari guru, serta lembar tanda tangan guru dan orang tua.
+* Menghasilkan dokumen cetak resmi terisolasi lengkap dengan Kop UPTD SMP Negeri 7 Kota Tangerang Selatan, Capaian Pembelajaran Kurikulum Merdeka, rangkuman materi dari dewan guru, lembar refleksi mandiri, serta kolom tanda tangan guru pengampu dan orang tua murid.
 
 ---
 

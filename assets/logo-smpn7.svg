@@ -1,23 +1,73 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="gradShield" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A8A" />
-      <stop offset="100%" stop-color="#0284C7" />
+    <!-- Gradients -->
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1e4f"/>
+      <stop offset="60%" stop-color="#14327a"/>
+      <stop offset="100%" stop-color="#1e469c"/>
     </linearGradient>
-    <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F59E0B" />
-      <stop offset="100%" stop-color="#D97706" />
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+    <filter id="badgeShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
   </defs>
-  <!-- Shield Background -->
-  <path d="M50 8 L85 22 V52 C85 72 50 92 50 92 C50 92 15 72 15 52 V22 Z" fill="url(#gradShield)" stroke="#FFFFFF" stroke-width="2.5" />
-  <!-- Inner Ring / Border -->
-  <path d="M50 14 L80 26 V51 C80 68 50 84 50 84 C50 84 20 68 20 51 V26 Z" fill="none" stroke="url(#gradGold)" stroke-width="1.8" />
-  <!-- Open Book Symbol -->
-  <path d="M50 56 C42 51 32 52 26 55 V39 C32 36 42 35 50 40 C58 35 68 36 74 39 V55 C68 52 58 51 50 56 Z" fill="#FFFFFF" opacity="0.95" />
-  <line x1="50" y1="40" x2="50" y2="56" stroke="#1E3A8A" stroke-width="1.5" />
-  <!-- Graduation / Digital Torch Flame -->
-  <path d="M50 25 C47 31 53 33 50 37 C49 33 52 30 50 25 Z" fill="url(#gradGold)" />
-  <!-- Number 7 Accent -->
-  <text x="50" y="73" font-family="'Outfit', sans-serif" font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="middle">7</text>
+
+  <!-- Outer Circular Ring (Emblem Basis) -->
+  <circle cx="100" cy="100" r="94" fill="#ffffff" stroke="#0b1e4f" stroke-width="4" filter="url(#badgeShadow)"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#goldGrad)" stroke-width="2.5"/>
+
+  <!-- Shield Body (Pentagon Emblem of Tangsel) -->
+  <path d="M100 22 L164 42 V106 C164 145 100 174 100 174 C100 174 36 145 36 106 V42 Z" 
+        fill="url(#shieldGrad)" stroke="url(#goldGrad)" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Inner Decorative Border -->
+  <path d="M100 28 L157 46 V104 C157 139 100 166 100 166 C100 166 43 139 43 104 V46 Z" 
+        fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.6"/>
+
+  <!-- Star at Top (Pancasila) -->
+  <polygon points="100,34 103,42 111,42 105,47 107,55 100,50 93,55 95,47 89,42 97,42" fill="url(#goldGrad)"/>
+
+  <!-- Padi dan Kapas (Prosperity & Tangsel Agriculture Heritage) -->
+  <!-- Left Padi -->
+  <path d="M52 110 C46 95 50 78 60 65" fill="none" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="98" r="2.5" fill="url(#goldGrad)"/>
+  <circle cx="53" cy="88" r="2.5" fill="url(#goldGrad)"/>
+  <circle cx="58" cy="78" r="2.5" fill="url(#goldGrad)"/>
+  
+  <!-- Right Kapas -->
+  <path d="M148 110 C154 95 150 78 140 65" fill="none" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="150" cy="98" r="2.5" fill="#ffffff"/>
+  <circle cx="147" cy="88" r="2.5" fill="#ffffff"/>
+  <circle cx="142" cy="78" r="2.5" fill="#ffffff"/>
+
+  <!-- Tugu / Monumen Tangerang Selatan (Centerpiece Landmark) -->
+  <polygon points="100,56 103,64 107,95 93,95 97,64" fill="url(#goldGrad)"/>
+  <rect x="91" y="95" width="18" height="4" rx="1" fill="#ffffff"/>
+  <rect x="88" y="99" width="24" height="3" rx="1" fill="url(#goldGrad)"/>
+
+  <!-- Open Book of Knowledge (Pendidikan) -->
+  <path d="M100 120 C88 113 74 114 62 118 V138 C74 134 88 133 100 139 C112 133 126 134 138 138 V118 C126 114 112 113 100 120 Z" 
+        fill="#ffffff" stroke="#0b1e4f" stroke-width="1.8"/>
+  <line x1="100" y1="120" x2="100" y2="139" stroke="#0b1e4f" stroke-width="1.8"/>
+  <path d="M68 123 C76 120 86 120 95 124" fill="none" stroke="#94a3b8" stroke-width="1"/>
+  <path d="M68 128 C76 125 86 125 95 129" fill="none" stroke="#94a3b8" stroke-width="1"/>
+  <path d="M105 124 C114 120 124 120 132 123" fill="none" stroke="#94a3b8" stroke-width="1"/>
+  <path d="M105 129 C114 125 124 125 132 128" fill="none" stroke="#94a3b8" stroke-width="1"/>
+
+  <!-- Number "7" Inscription Badge (SMP Negeri 7) -->
+  <circle cx="100" cy="111" r="10" fill="url(#goldGrad)" stroke="#0b1e4f" stroke-width="1.5"/>
+  <text x="100" y="115.5" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="900" fill="#0b1e4f" text-anchor="middle">7</text>
+
+  <!-- Official Ribbon Banner at Bottom -->
+  <path d="M48 147 L62 142 L100 148 L138 142 L152 147 L147 160 L100 165 L53 160 Z" 
+        fill="url(#goldGrad)" stroke="#0b1e4f" stroke-width="1.8"/>
+  <text x="100" y="157.5" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="8.5" font-weight="800" fill="#0b1e4f" text-anchor="middle" letter-spacing="0.5">SMPN 7 TANGSEL</text>
 </svg>

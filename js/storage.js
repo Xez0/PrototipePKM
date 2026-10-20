@@ -6,11 +6,11 @@
    ========================================================================== */
 
 const STORAGE_KEYS = {
-  VIDEOS: "smpn7_repo_videos_v3",
-  STUDENT_NOTES: "smpn7_repo_student_notes_v3",
-  WATCH_PROGRESS: "smpn7_repo_watch_progress_v3",
-  THEME_PREF: "smpn7_repo_theme_pref_v3",
-  TEACHER_SESSION: "smpn7_teacher_session_v3"
+  VIDEOS: "smpn7_repo_videos_v5",
+  STUDENT_NOTES: "smpn7_repo_student_notes_v4",
+  WATCH_PROGRESS: "smpn7_repo_watch_progress_v4",
+  THEME_PREF: "smpn7_repo_theme_pref_v4",
+  TEACHER_SESSION: "smpn7_teacher_session_v4"
 };
 
 // ==========================================================================
@@ -110,13 +110,13 @@ const VideoDB = {
 // 2. AUTHENTICATION MANAGER (KHUSUS DEWAN GURU SMPN 7)
 // ==========================================================================
 const AuthManager = {
-  // Akun Demo Bawaan untuk Peninjau & Dewan Guru
+  // Akun Demo Faktual untuk Peninjau & Dewan Guru SMPN 7 Tangsel
   defaultTeacher: {
-    name: "Dra. Hj. Nurjanah, M.Pd.",
-    nip: "19750812 200212 2 003",
-    email: "nurjanah@smpn7.sch.id",
+    name: "Tri Elmania, S.Pd.",
+    nip: "19800512 200604 2 018",
+    email: "tri.elmania@smpn7tangsel.sch.id",
     subject: "Matematika",
-    role: "Guru Mata Pelajaran"
+    role: "Guru Mata Pelajaran Matematika"
   },
 
   isLoggedIn: function () {
