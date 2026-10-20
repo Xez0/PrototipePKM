@@ -93,15 +93,16 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polygon points="5 3 19 12 5 21 5 3"/>
                 </svg>
-                Jelajahi Materi Belajar
+                Jelajahi Katalog Materi
               </a>
-              <button class="btn btn-secondary" onclick="App.openFeaturedHero()">
+              <a href="#prinsip" class="btn btn-secondary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10"></circle>
-                  <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                Tonton Materi Terpopuler
-              </button>
+                Prinsip Belajar Mandiri
+              </a>
             </div>
 
             <!-- STATISTIK REPOSITORI (FLAT METRICS) -->
@@ -415,7 +416,11 @@
             
             <!-- BLOK 1A: PILIH FILE VIDEO LOKAL -->
             <div id="sourceFileBlock">
-              <div class="video-file-dropzone" onclick="document.getElementById('inputVideoLocalFile').click()">
+              <div class="video-file-dropzone" id="videoFileDropzone" 
+                onclick="document.getElementById('inputVideoLocalFile').click()"
+                ondragover="App.handleDragOver(event)"
+                ondragleave="App.handleDragLeave(event)"
+                ondrop="App.handleDrop(event)">
                 <div class="dropzone-icon">
                   <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
@@ -428,9 +433,9 @@
                     <line x1="17" y1="7" x2="22" y2="7"></line>
                   </svg>
                 </div>
-                <div class="dropzone-title" id="dropzoneTitleText">Klik untuk Memilih File Video dari Laptop / HP</div>
-                <div class="dropzone-hint">Format MP4 atau WebM. Tersimpan aman di memori lokal peramban.</div>
-                <input type="file" id="inputVideoLocalFile" accept="video/mp4,video/webm,video/*" style="display: none;" onchange="App.handleFileSelected(this)">
+                <div class="dropzone-title" id="dropzoneTitleText">Tarik &amp; Lepas File Video di Sini atau Klik untuk Memilih</div>
+                <div class="dropzone-hint">Format MP4, WebM, atau MKV. Tersimpan di IndexedDB peramban lokal komputer.</div>
+                <input type="file" id="inputVideoLocalFile" accept="video/mp4,video/webm,video/mkv,video/*" style="display: none;" onchange="App.handleFileSelected(this)">
               </div>
 
               <div id="fileSelectedDisplay" class="file-selected-info" style="display: none;">
@@ -448,11 +453,11 @@
                   id="inputTeacherYoutubeUrl" 
                   placeholder="Contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/..."
                 >
-                <span class="form-hint">Sistem akan otomatis mengambil thumbnail dan memutar video tanpa iklan komersial.</span>
+                <span class="form-hint">Sistem akan memutar video secara langsung tanpa iklan komersial pengganggu.</span>
               </div>
             </div>
 
-            <!-- BLOK 2: IDENTITAS MATERI (SANGAT MUDAH) -->
+            <!-- BLOK 2: IDENTITAS MATERI -->
             <div class="form-group" style="margin-top: var(--space-sm);">
               <label for="simpleVideoTitle">Judul Materi Pembelajaran *</label>
               <input 
@@ -481,7 +486,7 @@
                   <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
                   <option value="Bahasa Indonesia">Bahasa Indonesia</option>
                   <option value="Bahasa Inggris">Bahasa Inggris</option>
-                  <option value="Informatika / TIK">Informatika / TIK</option>
+                  <option value="Informatika">Informatika</option>
                   <option value="Ilmu Pengetahuan Sosial (IPS)">Ilmu Pengetahuan Sosial (IPS)</option>
                   <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
                   <option value="Seni Budaya">Seni Budaya</option>
@@ -490,18 +495,37 @@
               </div>
             </div>
 
-            <!-- BLOK 3: CATATAN GURU UNTUK SISWA (OPSIONAL) -->
+            <!-- BLOK 3: CATATAN & DETAIL OPSIONAL DARI GURU -->
             <div class="form-group">
-              <label for="simpleVideoNotes">Ringkasan / Pesan Guru untuk Siswa (Opsional)</label>
+              <label for="simpleVideoOutcome">Capaian Pembelajaran (CP) / Target Kompetensi (Opsional)</label>
+              <input 
+                type="text" 
+                id="simpleVideoOutcome" 
+                placeholder="Contoh: Peserta didik dapat menyelesaikan operasi aljabar linear..."
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="simpleVideoNotes">Rangkuman / Catatan Pokok Guru untuk Siswa (Opsional)</label>
               <textarea 
                 id="simpleVideoNotes" 
                 style="height: 75px;" 
-                placeholder="Tuliskan poin kunci atau instruksi tugas yang perlu diperhatikan siswa saat menonton materi ini..."
+                placeholder="Tuliskan poin kunci materi atau rumus penting yang harus dicatat siswa..."
               ></textarea>
             </div>
 
+            <div class="form-group">
+              <label for="simpleVideoChapters">Daftar Bab / Menit Repetisi (Manual, Opsional)</label>
+              <textarea 
+                id="simpleVideoChapters" 
+                style="height: 75px; font-size: 0.8125rem;" 
+                placeholder="Contoh format satu bab per baris:&#10;00:00 Pengantar Materi&#10;03:15 Penjelasan Variabel&#10;07:30 Contoh Soal"
+              ></textarea>
+              <span class="form-hint">Jika dikosongkan, tab repetisi tidak akan ditampilkan pada sisi siswa.</span>
+            </div>
+
             <button type="submit" id="btnSubmitSimpleVideo" class="btn btn-primary" style="margin-top: var(--space-sm); width: 100%; justify-content: center; padding: 14px;">
-              Simpan & Tayangkan Materi ke Siswa
+              Simpan &amp; Tayangkan Materi ke Siswa
             </button>
           </form>
         </div>
@@ -514,7 +538,7 @@
                 Daftar Materi Pembelajaran di Repositori
               </h3>
               <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
-                Bapak/Ibu guru dapat melihat materi di sisi siswa atau menghapus materi lama.
+                Bapak/Ibu dewan guru dapat mempratinjau, mengedit, atau menghapus materi lama.
               </p>
             </div>
 
@@ -531,10 +555,10 @@
               <thead>
                 <tr>
                   <th style="width: 40px;">No</th>
-                  <th>Judul & Pelajaran</th>
+                  <th>Judul &amp; Pelajaran</th>
+                  <th>Tanggal Tayang</th>
                   <th>Sumber Video</th>
-                  <th>Guru Pengampu</th>
-                  <th style="text-align: right; width: 180px;">Tindakan</th>
+                  <th style="text-align: right; width: 220px;">Tindakan</th>
                 </tr>
               </thead>
               <tbody id="teacherVideoTableBody">
@@ -547,6 +571,85 @@
     </div>
   </div>
 </main>
+
+  <!-- ==================== MODAL EDIT MATERI PEMBELAJARAN (GURU) ==================== -->
+  <div class="modal-backdrop" id="editVideoModalBackdrop" data-ui="dialog" onclick="if (event.target === this) App.closeEditModal()">
+    <div class="edit-modal-card" id="editVideoModal" data-ui="dialog" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="edit-modal-header">
+        <h3 id="editModalTitle" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--color-ink);">
+          Edit Materi Pembelajaran
+        </h3>
+        <button type="button" class="btn-close-modal" onclick="App.closeEditModal()" aria-label="Tutup form edit">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editTeacherVideoForm" onsubmit="event.preventDefault(); App.handleEditFormSubmit();" style="display: flex; flex-direction: column; gap: var(--space-md); margin-top: var(--space-md);">
+        <input type="hidden" id="editVideoId">
+
+        <div class="form-group">
+          <label for="editVideoTitle">Judul Materi Pembelajaran *</label>
+          <input type="text" id="editVideoTitle" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editVideoGrade">Jenjang Kelas *</label>
+            <select id="editVideoGrade" required>
+              <option value="7">Kelas 7</option>
+              <option value="8">Kelas 8</option>
+              <option value="9">Kelas 9</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editVideoSubject">Mata Pelajaran *</label>
+            <select id="editVideoSubject" required>
+              <option value="Matematika">Matematika</option>
+              <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
+              <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+              <option value="Bahasa Inggris">Bahasa Inggris</option>
+              <option value="Informatika">Informatika</option>
+              <option value="Ilmu Pengetahuan Sosial (IPS)">Ilmu Pengetahuan Sosial (IPS)</option>
+              <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+              <option value="Seni Budaya">Seni Budaya</option>
+              <option value="Pendidikan Jasmani (PJOK)">Pendidikan Jasmani (PJOK)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="editYoutubeGroup">
+          <label for="editVideoEmbedUrl">Tautan Video YouTube</label>
+          <input type="url" id="editVideoEmbedUrl" placeholder="https://www.youtube.com/watch?v=...">
+          <span class="form-hint">Kosongkan jika materi menggunakan file video lokal komputer.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="editVideoOutcome">Capaian Pembelajaran (CP) / Target Kompetensi (Opsional)</label>
+          <input type="text" id="editVideoOutcome" placeholder="Contoh: Peserta didik dapat menguasai...">
+        </div>
+
+        <div class="form-group">
+          <label for="editVideoNotes">Rangkuman / Catatan Pokok Guru (Opsional)</label>
+          <textarea id="editVideoNotes" style="height: 75px;" placeholder="Tuliskan poin penting materi pembelajaran..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="editVideoChapters">Daftar Bab / Menit Repetisi (Manual, Opsional)</label>
+          <textarea id="editVideoChapters" style="height: 75px; font-size: 0.8125rem;" placeholder="Contoh format satu bab per baris:&#10;00:00 Pengantar&#10;02:30 Rumus Pokok"></textarea>
+          <span class="form-hint">Tuliskan format menit:detik diikuti judul bab. Kosongkan jika materi tidak memiliki pembagian bab.</span>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: var(--space-sm);">
+          <button type="button" class="btn btn-secondary" onclick="App.closeEditModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ==================== THEATRE MODAL (PEMUTAR VIDEO FOKUS) ==================== -->
   <div class="modal-backdrop" id="theatreModalBackdrop" data-ui="dialog" onclick="if (event.target === this) VideoPlayer.closePlayer()">
@@ -603,42 +706,16 @@
               </button>
             </div>
 
-            <p id="modalDescription" style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-ink-muted); margin-bottom: var(--space-md);">
+            <p id="modalDescription" style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-ink-muted); margin-bottom: var(--space-xs);">
               Deskripsi materi pembelajaran ajar.
             </p>
-
-            <!-- KARTU CETAK LEMBAR MODUL BELAJAR RESMI -->
-            <div class="pdf-download-card" id="pdfDownloadCard">
-              <div class="pdf-info">
-                <div class="pdf-icon-badge">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                  </svg>
-                </div>
-                <div class="pdf-text">
-                  <h5>Lembar Modul &amp; Rangkuman Belajar Resmi</h5>
-                  <p>Format resmi SMPN 7 lengkap dengan Capaian Pembelajaran &amp; paraf guru</p>
-                </div>
-              </div>
-              <button type="button" class="btn btn-primary btn-sm" onclick="VideoPlayer.openPrintSummary()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                  <rect x="6" y="14" width="12" height="8"></rect>
-                </svg>
-                Cetak / Simpan PDF
-              </button>
-            </div>
           </div>
         </div>
 
         <!-- KOLOM KANAN: BAB REPETISI & RANGKUMAN RESMI GURU -->
-        <div class="theatre-sidebar">
-          <div class="theatre-tab-nav">
-            <button class="theatre-tab-btn active" data-tab="tabChapters">
+        <div class="theatre-sidebar" id="theatreSidebar">
+          <div class="theatre-tab-nav" id="theatreTabNav">
+            <button class="theatre-tab-btn active" id="btnTabChapters" data-tab="tabChapters">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="8" y1="6" x2="21" y2="6"></line>
                 <line x1="8" y1="12" x2="21" y2="12"></line>
@@ -647,9 +724,9 @@
                 <line x1="3" y1="12" x2="3.01" y2="12"></line>
                 <line x1="3" y1="18" x2="3.01" y2="18"></line>
               </svg>
-              Daftar Bab (Repetisi)
+              Daftar Bab
             </button>
-            <button class="theatre-tab-btn" data-tab="tabTeacherNotes">
+            <button class="theatre-tab-btn" id="btnTabTeacherNotes" data-tab="tabTeacherNotes">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -663,24 +740,24 @@
           <!-- TAB 1: DAFTAR BAB REPETISI -->
           <div class="theatre-tab-pane active" id="tabChapters">
             <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-bottom: 8px;">
-              Klik menit bab di bawah untuk mengulang bagian materi tertentu:
+              Pilih bagian materi di bawah untuk mengulang penjelasan konsep:
             </p>
             <div class="chapter-list" id="chapterListContainer">
               <!-- Diisi dinamis -->
             </div>
           </div>
 
-          <!-- TAB 2: RANGKUMAN GURU & CP -->
+          <!-- TAB 2: RANGKUMAN GURU & CP (BERSIH & TERSTRUKTUR) -->
           <div class="theatre-tab-pane" id="tabTeacherNotes">
-            <div class="teacher-notes-display">
-              <div class="cp-compact-box">
-                <span class="cp-badge-label">Capaian Pembelajaran (CP)</span>
-                <p id="modalLearningOutcome" class="cp-text-content">Capaian pembelajaran materi.</p>
+            <div class="scholastic-reading-sheet">
+              <div id="boxLearningOutcomeWrap" class="reading-card">
+                <span class="reading-badge">Target Capaian Pembelajaran</span>
+                <p id="modalLearningOutcome" class="reading-text">Capaian pembelajaran materi.</p>
               </div>
 
-              <div style="margin-top: var(--space-sm);">
-                <span class="cp-badge-label">Ringkasan Konsep dari Dewan Guru</span>
-                <div id="modalTeacherSummary" class="teacher-summary-text">
+              <div id="boxTeacherSummaryWrap" class="reading-card" style="margin-top: var(--space-sm);">
+                <span class="reading-badge">Rangkuman Konsep dari Dewan Guru</span>
+                <div id="modalTeacherSummary" class="reading-text pre-line">
                   Rangkuman materi pembelajaran dari guru pengampu.
                 </div>
               </div>

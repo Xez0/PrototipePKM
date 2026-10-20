@@ -6,7 +6,7 @@
    ========================================================================== */
 
 const STORAGE_KEYS = {
-  VIDEOS: "smpn7_repo_videos_v5",
+  VIDEOS: "smpn7_repo_videos_v6",
   STUDENT_NOTES: "smpn7_repo_student_notes_v4",
   WATCH_PROGRESS: "smpn7_repo_watch_progress_v4",
   THEME_PREF: "smpn7_repo_theme_pref_v4",
@@ -197,6 +197,16 @@ const StorageManager = {
     }
   },
 
+  // Format Tanggal dan Hari Bahasa Indonesia (Contoh: Rabu, 21 Okt 2026)
+  formatDate: function (dateStr) {
+    if (!dateStr) return "Terbaru";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  },
+
   // Tambah Video Baru (Mendukung File Lokal & Tautan YouTube)
   addVideo: async function (newVideo, videoFile = null) {
     const videos = this.getVideos();
@@ -204,7 +214,8 @@ const StorageManager = {
 
     const videoWithId = {
       ...newVideo,
-      id: videoId
+      id: videoId,
+      publishedAt: newVideo.publishedAt || new Date().toISOString()
     };
 
     // Jika guru mengunggah file video langsung dari komputer
@@ -229,17 +240,20 @@ const StorageManager = {
     const index = videos.findIndex(v => v.id === id);
     if (index === -1) return false;
 
+    let mergedData = { ...updatedData };
+
     if (videoFile && videoFile instanceof Blob) {
-      updatedData.sourceType = "local";
-      updatedData.fileName = videoFile.name || "video-materi.mp4";
-      updatedData.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
+      mergedData.sourceType = "local";
+      mergedData.fileName = videoFile.name || "video-materi.mp4";
+      mergedData.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
       await VideoDB.saveVideoFile(id, videoFile);
     }
 
     videos[index] = {
       ...videos[index],
-      ...updatedData,
-      id
+      ...mergedData,
+      id,
+      updatedAt: new Date().toISOString()
     };
     this.saveVideos(videos);
     return true;

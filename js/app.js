@@ -1,8 +1,8 @@
 /* ==========================================================================
    APLIKASI UTAMA: REPOSITORI VIDEO SMPN 7 TANGERANG SELATAN
-   Linear Design System & Pengontrol Navigasi:
-   Katalog Siswa, Login Guru Mandiri, Ruang Unggah Video Berkas Lokal & YouTube,
-   Pencarian Cerdas, Filter Jenjang, & Pelacak Progres Belajar
+   Linear Design System & Pengontrol Antarmuka:
+   Katalog Siswa, Login Dewan Guru, Pengelolaan Video (Unggah & Edit),
+   Drag & Drop Video Komputer, Filter Jenjang, & Navigasi Terpadu
    ========================================================================== */
 
 const App = {
@@ -20,9 +20,68 @@ const App = {
     this.updateAuthUI();
     this.handleHashChange();
     window.addEventListener("hashchange", () => this.handleHashChange());
+    VideoPlayer.init();
     this.renderStats();
     this.renderVideoGrid();
     this.renderTeacherTable();
+  },
+
+  // Dapatkan Cover SVG Skolastik Sesuai Mata Pelajaran
+  getCoverBySubject: function (subject) {
+    const s = (subject || "").toLowerCase();
+    if (s.includes("matematika")) return "assets/cover-matematika.svg";
+    if (s.includes("ipa") || s.includes("alam")) return "assets/cover-ipa.svg";
+    if (s.includes("informatika") || s.includes("tik") || s.includes("komputer")) return "assets/cover-informatika.svg";
+    if (s.includes("inggris")) return "assets/cover-bahasa-inggris.svg";
+    if (s.includes("indonesia")) return "assets/cover-bahasa-indonesia.svg";
+    if (s.includes("ips") || s.includes("sosial")) return "assets/cover-ips.svg";
+    if (s.includes("pancasila") || s.includes("ppkn") || s.includes("pkn")) return "assets/cover-ppkn.svg";
+    return "assets/cover-matematika.svg";
+  },
+
+  // Ekstrak Snapshot Frame Video Lokal (Jika Didukung Browser)
+  generateVideoThumbnail: function (file) {
+    return new Promise((resolve) => {
+      try {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.muted = true;
+        video.playsInline = true;
+        const fileUrl = URL.createObjectURL(file);
+        video.src = fileUrl;
+
+        video.onloadedmetadata = () => {
+          video.currentTime = Math.min(1, video.duration / 2 || 0.5);
+        };
+
+        video.onseeked = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = 640;
+            canvas.height = 360;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const thumbUrl = canvas.toDataURL("image/jpeg", 0.75);
+            URL.revokeObjectURL(fileUrl);
+            resolve(thumbUrl);
+          } catch (e) {
+            URL.revokeObjectURL(fileUrl);
+            resolve(null);
+          }
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(fileUrl);
+          resolve(null);
+        };
+
+        setTimeout(() => {
+          resolve(null);
+        }, 1200);
+      } catch (err) {
+        resolve(null);
+      }
+    });
   },
 
   // Sinkronisasi Hash URL dengan Tampilan View
@@ -32,17 +91,15 @@ const App = {
       this.navigateTo("teacher");
     } else if (hash === "login-guru" || hash === "masuk-guru") {
       this.navigateTo("login");
-    } else if (hash === "katalog" || hash === "edukasi-pkm" || hash === "beranda") {
+    } else if (hash === "katalog" || hash === "edukasi-pkm" || hash === "beranda" || hash === "prinsip") {
       this.navigateTo("student", hash);
     } else {
-      // Tampilan default: siswa
       this.navigateTo("student");
     }
   },
 
   // Navigasi Terpadu Antar Halaman (Siswa / Login / Ruang Guru)
   navigateTo: function (viewName, targetSectionId = null) {
-    // Proteksi Ruang Pengelolaan Guru: Harus login terlebih dahulu
     if (viewName === "teacher" && !AuthManager.isLoggedIn()) {
       this.showToast("Silakan masuk terlebih dahulu dengan akun dewan guru.", "normal");
       this.navigateTo("login");
@@ -55,7 +112,6 @@ const App = {
 
     if (!viewStudent || !viewLogin || !viewTeacherPortal) return;
 
-    // Sembunyikan semua view
     viewStudent.classList.add("hidden");
     viewLogin.classList.add("hidden");
     viewTeacherPortal.classList.add("hidden");
@@ -71,7 +127,6 @@ const App = {
       this.renderTeacherTable();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      // Default: Student View
       viewStudent.classList.remove("hidden");
       this.currentView = "student";
       if (targetSectionId) {
@@ -113,7 +168,7 @@ const App = {
     }
   },
 
-  // Render Profil Guru di Tampilan Ruang Guru
+  // Render Profil Guru di Ruang Guru
   renderTeacherProfile: function () {
     const teacher = AuthManager.getTeacher() || AuthManager.defaultTeacher;
     const greetingElem = document.getElementById("teacherDisplayGreeting");
@@ -139,15 +194,13 @@ const App = {
     const res = AuthManager.login(identifier, password);
     if (res.success) {
       this.showToast(`Selamat datang, ${res.teacher.name}!`, "success");
-      if (identifierInput) identifierInput.value = "";
-      if (passwordInput) passwordInput.value = "";
       this.navigateTo("teacher");
     } else {
-      this.showToast(res.message, "danger");
+      this.showToast(res.message || "Gagal masuk. Periksa kembali NIP/email Anda.", "danger");
     }
   },
 
-  // Masuk Instan (Akun Demo Guru untuk Kemudahan Penguji PkM)
+  // Masuk Instan (Akun Demo Guru untuk Kemudahan Penilai PkM)
   handleFastLogin: function () {
     const res = AuthManager.loginFastDemo();
     this.showToast(`Masuk berhasil sebagai ${res.teacher.name}`, "success");
@@ -182,25 +235,54 @@ const App = {
     }
   },
 
-  // Penanganan File Video Dipilih dari Komputer
-  handleFileSelected: function (input) {
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.pendingVideoFile = file;
+  // Drag & Drop Handlers
+  handleDragOver: function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById("videoFileDropzone");
+    if (dropzone) dropzone.classList.add("dragover");
+  },
 
-      const display = document.getElementById("fileSelectedDisplay");
-      const nameElem = document.getElementById("selectedFileName");
-      const sizeElem = document.getElementById("selectedFileSize");
-      const dropzoneTitle = document.getElementById("dropzoneTitleText");
+  handleDragLeave: function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById("videoFileDropzone");
+    if (dropzone) dropzone.classList.remove("dragover");
+  },
 
-      if (nameElem) nameElem.textContent = file.name;
-      if (sizeElem) sizeElem.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-      if (display) display.style.display = "flex";
-      if (dropzoneTitle) dropzoneTitle.textContent = "Berkas Video Siap Ditayangkan";
+  handleDrop: function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = document.getElementById("videoFileDropzone");
+    if (dropzone) dropzone.classList.remove("dragover");
+
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      this.handleFileSelectedFile(file);
     }
   },
 
-  // Pemilihan Jenjang Kelas Cepat (Radio Button Sederhana)
+  handleFileSelected: function (input) {
+    if (input.files && input.files[0]) {
+      this.handleFileSelectedFile(input.files[0]);
+    }
+  },
+
+  handleFileSelectedFile: function (file) {
+    this.pendingVideoFile = file;
+
+    const display = document.getElementById("fileSelectedDisplay");
+    const nameElem = document.getElementById("selectedFileName");
+    const sizeElem = document.getElementById("selectedFileSize");
+    const dropzoneTitle = document.getElementById("dropzoneTitleText");
+
+    if (nameElem) nameElem.textContent = file.name;
+    if (sizeElem) sizeElem.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+    if (display) display.style.display = "flex";
+    if (dropzoneTitle) dropzoneTitle.textContent = "Berkas Video Siap Ditayangkan";
+  },
+
+  // Pemilihan Jenjang Kelas Cepat
   selectGradeBtn: function (grade) {
     const gradeInput = document.getElementById("simpleVideoGrade");
     if (gradeInput) gradeInput.value = grade;
@@ -223,18 +305,44 @@ const App = {
     return "IPS";
   },
 
-  // Penanganan Simpan Video Guru (Form Sederhana Ramah Guru)
+  // Parser Bab Manual dari Input Guru
+  parseChaptersInput: function (rawText) {
+    if (!rawText || !rawText.trim()) return [];
+    const lines = rawText.split("\n");
+    const chapters = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const match = trimmed.match(/^(\d{1,2}:\d{2})\s+(.+)$/);
+      if (match) {
+        const timeStr = match[1];
+        const title = match[2].trim();
+        const parts = timeStr.split(":");
+        const secs = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        chapters.push({ time: timeStr, title, seconds: secs });
+      } else {
+        chapters.push({ time: "00:00", title: trimmed, seconds: 0 });
+      }
+    }
+    return chapters;
+  },
+
+  // Penanganan Simpan Video Guru
   handleTeacherFormSubmit: async function () {
     const titleInput = document.getElementById("simpleVideoTitle");
     const gradeInput = document.getElementById("simpleVideoGrade");
     const subjectInput = document.getElementById("simpleVideoSubject");
+    const outcomeInput = document.getElementById("simpleVideoOutcome");
     const notesInput = document.getElementById("simpleVideoNotes");
+    const chaptersInput = document.getElementById("simpleVideoChapters");
     const submitBtn = document.getElementById("btnSubmitSimpleVideo");
 
     const title = titleInput ? titleInput.value.trim() : "";
     const grade = gradeInput ? gradeInput.value : "7";
     const subject = subjectInput ? subjectInput.value : "Matematika";
+    const outcome = outcomeInput ? outcomeInput.value.trim() : "";
     const notes = notesInput ? notesInput.value.trim() : "";
+    const chaptersRaw = chaptersInput ? chaptersInput.value.trim() : "";
 
     if (!title) {
       this.showToast("Mohon tuliskan judul materi pembelajaran.", "danger");
@@ -243,6 +351,8 @@ const App = {
     }
 
     const teacher = AuthManager.getTeacher() || AuthManager.defaultTeacher;
+    const defaultCover = this.getCoverBySubject(subject);
+
     let videoPayload = {
       title,
       grade,
@@ -251,22 +361,27 @@ const App = {
       teacher: teacher.name,
       teacherNip: teacher.nip || "",
       duration: "15:00",
-      description: notes || `Materi pembelajaran mandiri untuk mata pelajaran ${subject} Kelas ${grade}. Silakan dipelajari siswa secara berulang.`,
-      learningOutcome: `Peserta didik menguasai materi ${title} dengan baik secara mandiri melalui tayangan video pembelajaran.`,
-      chapters: [
-        { time: "00:00", title: "Pembahasan Inti Materi", seconds: 0 }
-      ],
-      pdfTitle: `Rangkuman_${subject.replace(/[^a-zA-Z0-9]/g, "_")}_Kelas${grade}.pdf`,
-      pdfContent: `Rangkuman belajar materi ${title} (${subject} Kelas ${grade}). Disediakan oleh ${teacher.name} untuk pendalaman mandiri peserta didik UPTD SMP Negeri 7 Kota Tangerang Selatan.`
+      description: notes || `Materi pembelajaran mandiri mata pelajaran ${subject} Kelas ${grade}. Silakan dipelajari siswa secara berulang.`,
+      learningOutcome: outcome || "",
+      pdfContent: notes || "",
+      thumbnail: defaultCover,
+      publishedAt: new Date().toISOString(),
+      chapters: this.parseChaptersInput(chaptersRaw)
     };
 
     if (this.currentUploadSource === "file") {
       if (!this.pendingVideoFile) {
-        this.showToast("Silakan pilih berkas video MP4 dari komputer Anda terlebih dahulu.", "danger");
+        this.showToast("Silakan pilih berkas video MP4/WebM dari komputer Anda terlebih dahulu.", "danger");
         return;
       }
+      videoPayload.sourceType = "local";
       videoPayload.embedUrl = "";
-      videoPayload.thumbnail = "assets/hero-mockup.webp";
+
+      // Coba hasilkan thumbnail frame otomatis dari file video
+      const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
+      if (snapshot) {
+        videoPayload.thumbnail = snapshot;
+      }
     } else {
       const ytInput = document.getElementById("inputTeacherYoutubeUrl");
       const ytUrl = ytInput ? ytInput.value.trim() : "";
@@ -275,11 +390,11 @@ const App = {
         if (ytInput) ytInput.focus();
         return;
       }
+      videoPayload.sourceType = "youtube";
       videoPayload.embedUrl = StorageManager.formatVideoEmbedUrl(ytUrl);
-      videoPayload.thumbnail = StorageManager.getThumbnailUrl(ytUrl);
+      videoPayload.thumbnail = StorageManager.getThumbnailUrl(ytUrl) || defaultCover;
     }
 
-    // Tampilkan Status Simpan
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = "Menyimpan ke Repositori...";
@@ -291,7 +406,9 @@ const App = {
 
       // Reset Formulir
       if (titleInput) titleInput.value = "";
+      if (outcomeInput) outcomeInput.value = "";
       if (notesInput) notesInput.value = "";
+      if (chaptersInput) chaptersInput.value = "";
       const ytInput = document.getElementById("inputTeacherYoutubeUrl");
       if (ytInput) ytInput.value = "";
       const fileInput = document.getElementById("inputVideoLocalFile");
@@ -301,9 +418,8 @@ const App = {
       const fileDisplay = document.getElementById("fileSelectedDisplay");
       if (fileDisplay) fileDisplay.style.display = "none";
       const dropzoneTitle = document.getElementById("dropzoneTitleText");
-      if (dropzoneTitle) dropzoneTitle.textContent = "Klik untuk Memilih File Video dari Laptop / HP";
+      if (dropzoneTitle) dropzoneTitle.textContent = "Tarik & Lepas File Video di Sini atau Klik untuk Memilih";
 
-      // Sinkronisasi data ke tampilan
       this.renderStats();
       this.renderVideoGrid();
       this.renderTeacherTable();
@@ -316,6 +432,72 @@ const App = {
         submitBtn.textContent = "Simpan & Tayangkan Materi ke Siswa";
       }
     }
+  },
+
+  // Modal Edit Video Guru
+  openEditModal: function (id) {
+    const videos = StorageManager.getVideos();
+    const v = videos.find(item => item.id === id);
+    if (!v) return;
+
+    document.getElementById("editVideoId").value = v.id;
+    document.getElementById("editVideoTitle").value = v.title;
+    document.getElementById("editVideoGrade").value = v.grade;
+    document.getElementById("editVideoSubject").value = v.subject;
+    document.getElementById("editVideoEmbedUrl").value = v.embedUrl || "";
+    document.getElementById("editVideoOutcome").value = v.learningOutcome || "";
+    document.getElementById("editVideoNotes").value = v.pdfContent || "";
+
+    const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
+    document.getElementById("editVideoChapters").value = chapText;
+
+    const backdrop = document.getElementById("editVideoModalBackdrop");
+    if (backdrop) backdrop.classList.add("active");
+  },
+
+  closeEditModal: function () {
+    const backdrop = document.getElementById("editVideoModalBackdrop");
+    if (backdrop) backdrop.classList.remove("active");
+  },
+
+  handleEditFormSubmit: async function () {
+    const id = document.getElementById("editVideoId").value;
+    const title = document.getElementById("editVideoTitle").value.trim();
+    const grade = document.getElementById("editVideoGrade").value;
+    const subject = document.getElementById("editVideoSubject").value;
+    const embedUrl = document.getElementById("editVideoEmbedUrl").value.trim();
+    const outcome = document.getElementById("editVideoOutcome").value.trim();
+    const notes = document.getElementById("editVideoNotes").value.trim();
+    const chaptersRaw = document.getElementById("editVideoChapters").value.trim();
+
+    if (!title) {
+      this.showToast("Judul materi pembelajaran tidak boleh kosong.", "danger");
+      return;
+    }
+
+    const updatedData = {
+      title,
+      grade,
+      subject,
+      category: this.mapCategoryBySubject(subject),
+      learningOutcome: outcome,
+      pdfContent: notes,
+      description: notes || `Materi pembelajaran untuk ${subject} Kelas ${grade}.`,
+      chapters: this.parseChaptersInput(chaptersRaw)
+    };
+
+    if (embedUrl) {
+      updatedData.embedUrl = StorageManager.formatVideoEmbedUrl(embedUrl);
+      updatedData.thumbnail = StorageManager.getThumbnailUrl(embedUrl) || this.getCoverBySubject(subject);
+      updatedData.sourceType = "youtube";
+    }
+
+    await StorageManager.updateVideo(id, updatedData);
+    this.closeEditModal();
+    this.showToast("Perubahan materi berhasil diperbarui!", "success");
+    this.renderStats();
+    this.renderVideoGrid();
+    this.renderTeacherTable();
   },
 
   // Render Tabel Materi di Ruang Guru
@@ -345,6 +527,7 @@ const App = {
 
     tableBody.innerHTML = videos.map((v, idx) => {
       const isLocal = v.sourceType === "local";
+      const formattedDate = StorageManager.formatDate(v.publishedAt);
       return `
         <tr>
           <td style="color: var(--color-ink-subtle);">${idx + 1}</td>
@@ -354,17 +537,22 @@ const App = {
               ${v.subject} • Kelas ${v.grade}
             </div>
           </td>
+          <td style="font-size: 0.8125rem; color: var(--color-ink-muted);">
+            ${formattedDate}
+          </td>
           <td>
             <span class="table-badge-source ${isLocal ? 'local' : 'youtube'}">
               ${isLocal ? 'Berkas Laptop' : 'YouTube'}
             </span>
           </td>
-          <td style="font-size: 0.8125rem; color: var(--color-ink-muted);">${v.teacher}</td>
           <td style="text-align: right; white-space: nowrap;">
             <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${v.id}')" title="Uji putar materi">
-              Putar Video
+              Tonton
             </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="App.deleteVideoItem('${v.id}')" title="Hapus materi" style="margin-left: 6px; color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openEditModal('${v.id}')" title="Edit materi" style="margin-left: 4px;">
+              Edit
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="App.deleteVideoItem('${v.id}')" title="Hapus materi" style="margin-left: 4px; color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
               Hapus
             </button>
           </td>
@@ -429,7 +617,6 @@ const App = {
 
   // Event Listeners Terpusat
   bindEvents: function () {
-    // 1. Pencarian Cerdas di Katalog Siswa
     const searchInput = document.getElementById("searchInput");
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
@@ -438,7 +625,6 @@ const App = {
       });
     }
 
-    // 2. Tombol Reset / Clear Search
     const clearBtn = document.getElementById("clearSearchBtn");
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
@@ -448,178 +634,140 @@ const App = {
       });
     }
 
-    // 3. Filter Jenjang Kelas
-    const gradeChips = document.querySelectorAll("[data-filter-grade]");
-    gradeChips.forEach(chip => {
-      chip.addEventListener("click", () => {
-        gradeChips.forEach(c => c.classList.remove("active"));
-        chip.classList.add("active");
-        this.activeGradeFilter = chip.getAttribute("data-filter-grade");
-        this.renderVideoGrid();
-      });
-    });
-
-    // 4. Filter Kategori Mapel
-    const catChips = document.querySelectorAll("[data-filter-category]");
-    catChips.forEach(chip => {
-      chip.addEventListener("click", () => {
-        catChips.forEach(c => c.classList.remove("active"));
-        chip.classList.add("active");
-        this.activeCategoryFilter = chip.getAttribute("data-filter-category");
-        this.renderVideoGrid();
-      });
-    });
-
-    // 5. Navigasi Tab dalam Theatre Modal
-    const tabBtns = document.querySelectorAll(".theatre-tab-btn");
-    tabBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const targetTab = btn.getAttribute("data-tab");
-        tabBtns.forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".theatre-tab-pane").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll("[data-filter-grade]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll("[data-filter-grade]").forEach(c => c.classList.remove("active"));
         btn.classList.add("active");
-        const pane = document.getElementById(targetTab);
-        if (pane) pane.classList.add("active");
+        this.activeGradeFilter = btn.getAttribute("data-filter-grade");
+        this.renderVideoGrid();
       });
     });
 
-    // 6. Input Catatan Mandiri Siswa
-    const notesInput = document.getElementById("studentNotesInput");
-    if (notesInput) {
-      notesInput.addEventListener("input", (e) => {
-        VideoPlayer.handleNotesInput(e.target.value);
+    document.querySelectorAll("[data-filter-category]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll("[data-filter-category]").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        this.activeCategoryFilter = btn.getAttribute("data-filter-category");
+        this.renderVideoGrid();
       });
-    }
+    });
 
-    // 7. Pintasan Keyboard Linear
     document.addEventListener("keydown", (e) => {
-      const tag = e.target.tagName.toLowerCase();
-      const isInput = tag === "input" || tag === "textarea" || tag === "select";
-
-      if (e.key === "Escape") {
-        VideoPlayer.closePlayer();
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        if (e.key === "Escape") {
+          e.target.blur();
+        }
         return;
       }
 
-      if (!isInput) {
-        if (e.key === "/" || e.key === "k" || e.key === "K") {
-          e.preventDefault();
-          if (searchInput && this.currentView === "student") {
-            searchInput.focus();
-            searchInput.select();
-          }
-        } else if (e.key === "g" || e.key === "G") {
-          e.preventDefault();
-          this.handleTeacherNavClick();
-        } else if (e.key === "t" || e.key === "T") {
-          e.preventDefault();
-          this.toggleTheme();
-        } else if (e.key === "p" || e.key === "P") {
-          if (VideoPlayer.currentVideo) {
-            e.preventDefault();
-            VideoPlayer.openPrintSummary();
-          }
+      if (e.key === "/" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        const searchInput = document.getElementById("searchInput");
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
         }
+      } else if (e.key === "g" || e.key === "G") {
+        e.preventDefault();
+        this.handleTeacherNavClick();
+      } else if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        this.toggleTheme();
+      } else if (e.key === "Escape") {
+        VideoPlayer.closePlayer();
+        this.closeEditModal();
       }
     });
 
-    // 8. Impor File Cadangan
     const importInput = document.getElementById("importFileInput");
     if (importInput) {
       importInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const res = StorageManager.importData(event.target.result);
-          if (res.success) {
-            this.showToast(`Berhasil memulihkan ${res.count} materi video!`, "success");
-            this.renderStats();
-            this.renderVideoGrid();
-            this.renderTeacherTable();
-          } else {
-            this.showToast(res.message, "danger");
-          }
-        };
-        reader.readAsText(file);
+        if (e.target.files && e.target.files[0]) {
+          StorageManager.importData(e.target.files[0]);
+        }
       });
     }
   },
 
-  // Perbarui Counter Statistik Hero & Progres Siswa
+  // Notifikasi Toast Modern
+  showToast: function (message, type = "normal") {
+    const container = document.getElementById("toastContainer");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("active");
+    }, 10);
+
+    setTimeout(() => {
+      toast.classList.remove("active");
+      setTimeout(() => {
+        if (container.contains(toast)) container.removeChild(toast);
+      }, 200);
+    }, 3200);
+  },
+
+  // Render Metrik Statistik
   renderStats: function () {
-    const stats = StorageManager.getStatistics();
-    const statVideos = document.getElementById("statTotalVideos");
-    const statSubjects = document.getElementById("statTotalSubjects");
-    const statTeachers = document.getElementById("statTotalTeachers");
-
-    if (statVideos) statVideos.textContent = stats.totalVideos;
-    if (statSubjects) statSubjects.textContent = stats.totalSubjects;
-    if (statTeachers) statTeachers.textContent = stats.totalTeachers;
-
-    this.updateCategoryChipCounts();
-  },
-
-  updateCategoryChipCounts: function () {
     const videos = StorageManager.getVideos();
-    const counts = {
-      all: videos.length,
-      MIPA: videos.filter(v => v.category === "MIPA").length,
-      Informatika: videos.filter(v => v.category === "Informatika").length,
-      Bahasa: videos.filter(v => v.category === "Bahasa").length,
-      IPS: videos.filter(v => v.category === "IPS").length
-    };
+    const totalVideos = videos.length;
+    const subjects = new Set(videos.map(v => v.subject)).size;
+    const teachers = new Set(videos.map(v => v.teacher)).size;
 
-    document.querySelectorAll("[data-chip-count]").forEach(span => {
-      const cat = span.getAttribute("data-chip-count");
-      if (counts[cat] !== undefined) {
-        span.textContent = counts[cat];
-      }
-    });
+    const totalElem = document.getElementById("statTotalVideos");
+    const subElem = document.getElementById("statTotalSubjects");
+    const teachElem = document.getElementById("statTotalTeachers");
+
+    if (totalElem) totalElem.textContent = totalVideos;
+    if (subElem) subElem.textContent = subjects;
+    if (teachElem) teachElem.textContent = teachers;
   },
 
-  // Render Grid Video Siswa
+  // Render Grid Video Pembelajaran Siswa
   renderVideoGrid: function () {
     const gridContainer = document.getElementById("videoGridContainer");
+    const emptyState = document.getElementById("catalogEmptyState");
+    const countLabel = document.getElementById("catalogResultsCount");
+
     if (!gridContainer) return;
 
     const allVideos = StorageManager.getVideos();
+
     const filtered = allVideos.filter(v => {
       const matchGrade = this.activeGradeFilter === "all" || v.grade === this.activeGradeFilter;
       const matchCat = this.activeCategoryFilter === "all" || v.category === this.activeCategoryFilter;
-      const query = this.searchQuery;
-      const matchSearch = !query ||
-        v.title.toLowerCase().includes(query) ||
-        v.subject.toLowerCase().includes(query) ||
-        v.teacher.toLowerCase().includes(query) ||
-        v.description.toLowerCase().includes(query);
+      const matchSearch = !this.searchQuery ||
+        v.title.toLowerCase().includes(this.searchQuery) ||
+        v.subject.toLowerCase().includes(this.searchQuery) ||
+        v.teacher.toLowerCase().includes(this.searchQuery) ||
+        (v.description && v.description.toLowerCase().includes(this.searchQuery));
 
       return matchGrade && matchCat && matchSearch;
     });
 
-    const resultCountElem = document.getElementById("searchResultCount");
-    if (resultCountElem) {
-      resultCountElem.textContent = `${filtered.length} materi tersedia`;
+    if (countLabel) {
+      countLabel.textContent = `${filtered.length} materi tersedia`;
     }
 
     if (filtered.length === 0) {
-      gridContainer.innerHTML = `
-        <div class="empty-state">
-          <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <h3 class="empty-title">Materi Tidak Ditemukan</h3>
-          <p class="empty-desc">Coba sesuaikan kata kunci pencarian atau ubah pilihan jenjang kelas dan mata pelajaran.</p>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="App.resetFilters()">Tampilkan Semua Materi</button>
-        </div>
-      `;
+      gridContainer.innerHTML = "";
+      if (emptyState) emptyState.style.display = "block";
       return;
     }
+
+    if (emptyState) emptyState.style.display = "none";
 
     gridContainer.innerHTML = filtered.map(v => {
       const isDone = StorageManager.isCompleted(v.id);
       const isLocal = v.sourceType === "local";
+      const formattedDate = StorageManager.formatDate(v.publishedAt);
+      const coverSrc = v.thumbnail || this.getCoverBySubject(v.subject);
+
       return `
         <article 
           class="video-card ${isDone ? 'video-card-completed' : ''}" 
@@ -631,7 +779,12 @@ const App = {
           aria-label="Pelajari materi ${v.title} untuk ${v.subject} Kelas ${v.grade}"
         >
           <div class="card-thumbnail-wrap">
-            <img src="${v.thumbnail || 'assets/cover-matematika.svg'}" alt="${v.title}" loading="lazy">
+            <img 
+              src="${coverSrc}" 
+              alt="${v.title}" 
+              loading="lazy"
+              onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');"
+            >
             <span class="card-badge-grade" data-grade="${v.grade}">Kelas ${v.grade}</span>
             <span class="card-badge-source ${isLocal ? 'badge-local' : 'badge-yt'}">
               ${isLocal ? 'Berkas Laptop' : 'YouTube'}
@@ -648,6 +801,7 @@ const App = {
           <div class="card-body">
             <div class="card-meta-row">
               <span class="card-meta-subject">${v.subject}</span>
+              <span class="card-meta-date">${formattedDate}</span>
               ${isDone ? `
                 <span class="status-completed-badge" title="Telah kamu pelajari">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -670,24 +824,12 @@ const App = {
                 class="btn btn-primary btn-sm btn-card-watch" 
                 onclick="event.stopPropagation(); App.openVideoById('${v.id}')"
                 title="Buka dan tonton video materi sekarang"
+                style="width: 100%; justify-content: center;"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="6 4 20 12 6 20 6 4"/>
                 </svg>
                 <span>Tonton Video</span>
-              </button>
-              
-              <button 
-                type="button" 
-                class="btn btn-secondary btn-sm btn-card-print" 
-                onclick="event.stopPropagation(); App.openAndPrint('${v.id}')"
-                title="Cetak lembar rangkuman & modul belajar resmi SMPN 7"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                <span>Cetak PDF</span>
               </button>
             </div>
           </div>
@@ -726,59 +868,13 @@ const App = {
     }
   },
 
-  openAndPrint: function (id) {
-    const videos = StorageManager.getVideos();
-    const target = videos.find(v => v.id === id);
-    if (target) {
-      VideoPlayer.currentVideo = target;
-      VideoPlayer.openPrintSummary();
-    }
-  },
-
-  openFeaturedHero: function () {
-    const videos = StorageManager.getVideos();
-    if (videos.length > 0) {
-      VideoPlayer.openPlayer(videos[0]);
-    }
-  },
-
   triggerImport: function () {
     const input = document.getElementById("importFileInput");
     if (input) input.click();
-  },
-
-  toggleFaq: function (cardElement) {
-    const isOpen = cardElement.classList.contains("open");
-    document.querySelectorAll(".faq-card").forEach(c => c.classList.remove("open"));
-    if (!isOpen) {
-      cardElement.classList.add("open");
-    }
-  },
-
-  showToast: function (msg, type = "normal") {
-    const container = document.getElementById("toastContainer");
-    if (!container) return;
-
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      <span>${msg}</span>
-    `;
-
-    container.appendChild(toast);
-    setTimeout(() => toast.classList.add("active"), 10);
-    setTimeout(() => {
-      toast.classList.remove("active");
-      setTimeout(() => toast.remove(), 250);
-    }, 2800);
   }
 };
 
+// Jalankan saat halaman siap
 document.addEventListener("DOMContentLoaded", () => {
   App.init();
 });

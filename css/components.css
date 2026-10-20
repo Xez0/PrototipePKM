@@ -976,46 +976,14 @@ kbd.key-hint {
   margin: 0;
 }
 
-/* Modul Cetak PDF Card */
-.pdf-download-card {
-  display: flex;
+/* Modul Cetak PDF Card telah dihapus per permintaan pengguna */
+.card-meta-date {
+  font-size: 0.75rem;
+  color: var(--color-ink-subtle);
+  font-weight: 500;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-md);
-  background-color: var(--color-primary-tint);
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md);
-  gap: var(--space-md);
-}
-
-.pdf-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.pdf-icon-badge {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface-1);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-primary-border);
-}
-
-.pdf-text h5 {
-  font-size: 0.95rem;
-  color: var(--color-ink);
-  margin-bottom: 2px;
-}
-
-.pdf-text p {
-  font-size: 0.8125rem;
-  color: var(--color-ink-muted);
-  margin: 0;
+  gap: 4px;
 }
 
 /* Theatre Sidebar */
@@ -1110,45 +1078,71 @@ kbd.key-hint {
   border: 1px solid var(--color-hairline);
 }
 
-.teacher-notes-display {
+.scholastic-reading-sheet {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
-.cp-compact-box {
+.reading-card {
+  padding: var(--space-md);
   background-color: var(--color-surface-2);
-  border-left: 3px solid var(--color-primary);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
 }
 
-.cp-badge-label {
-  display: block;
+.reading-badge {
+  display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.cp-text-content {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-ink-muted);
-  margin: 0;
+[data-theme="dark"] .reading-badge {
+  color: var(--color-accent);
 }
 
-.teacher-summary-text {
+.reading-text {
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--color-ink);
+  margin: 0;
+}
+
+.reading-text.pre-line {
   white-space: pre-line;
-  background-color: var(--color-surface-2);
-  border-radius: var(--radius-sm);
-  padding: var(--space-md);
-  border: 1px solid var(--color-hairline);
+}
+
+.theatre-content-grid.no-sidebar {
+  grid-template-columns: 1fr;
+}
+
+.video-file-dropzone.dragover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-tint);
+}
+
+.edit-modal-card {
+  background-color: var(--color-surface-1);
+  color: var(--color-ink);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-modal); /* taste-skill-ignore */
+  animation: modalScaleIn var(--duration-normal) var(--ease-standard) forwards;
+}
+
+.edit-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-hairline); /* taste-skill-ignore */
 }
 
 /* -------------------------------------------------------------
@@ -1770,15 +1764,23 @@ kbd.key-hint {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-md);
-  background-color: var(--color-ink);
-  color: #ffffff;
+  background-color: #0f172a;
+  color: #f8fafc;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); /* taste-skill-ignore */
   font-size: 0.875rem;
   font-weight: 500;
   opacity: 0;
   transform: translateY(10px);
   transition: transform var(--duration-fast), opacity var(--duration-fast);
+  z-index: 2001;
+}
+
+[data-theme="dark"] .toast {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .toast.active {
@@ -1787,11 +1789,23 @@ kbd.key-hint {
 }
 
 .toast.success {
-  background-color: var(--color-success);
+  background-color: #15803d;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .toast.success {
+  background-color: #166534;
+  color: #ffffff;
 }
 
 .toast.danger {
-  background-color: var(--color-danger);
+  background-color: #b91c1c;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .toast.danger {
+  background-color: #991b1b;
+  color: #ffffff;
 }
 
 /* -------------------------------------------------------------
