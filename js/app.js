@@ -5,6 +5,17 @@
    Drag & Drop Video Komputer, Filter Jenjang, & Navigasi Terpadu
    ========================================================================== */
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+window.escapeHtml = escapeHtml;
+
 const App = {
   currentView: "student", // 'student' | 'login' | 'teacher'
   currentUploadSource: "file", // 'file' | 'youtube'
@@ -402,6 +413,12 @@ const App = {
         if (ytInput) ytInput.focus();
         return;
       }
+      const ytId = RepoStorage.extractYouTubeId(ytUrl);
+      if (!ytId) {
+        this.showToast("Tautan video YouTube tidak valid. Mohon masukkan URL YouTube yang benar (contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/...)", "danger");
+        if (ytInput) ytInput.focus();
+        return;
+      }
       videoPayload.sourceType = "youtube";
       videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
       videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
@@ -499,6 +516,11 @@ const App = {
     };
 
     if (embedUrl) {
+      const ytId = RepoStorage.extractYouTubeId(embedUrl);
+      if (!ytId) {
+        this.showToast("Tautan video YouTube tidak valid. Mohon periksa kembali tautan yang dimasukkan.", "danger");
+        return;
+      }
       updatedData.embedUrl = RepoStorage.formatVideoEmbedUrl(embedUrl);
       updatedData.thumbnail = RepoStorage.getThumbnailUrl(embedUrl) || this.getCoverBySubject(subject);
       updatedData.sourceType = "youtube";
@@ -540,13 +562,16 @@ const App = {
     tableBody.innerHTML = videos.map((v, idx) => {
       const isLocal = v.sourceType === "local";
       const formattedDate = RepoStorage.formatDate(v.publishedAt);
+      const safeTitle = escapeHtml(v.title);
+      const safeSubject = escapeHtml(v.subject);
+      const safeGrade = escapeHtml(v.grade);
       return `
         <tr>
           <td style="color: var(--color-ink-subtle);">${idx + 1}</td>
           <td>
-            <div style="font-weight: 600; color: var(--color-ink);">${v.title}</div>
+            <div style="font-weight: 600; color: var(--color-ink);">${safeTitle}</div>
             <div style="font-size: 0.775rem; color: var(--color-ink-subtle); margin-top: 2px;">
-              ${v.subject} • Kelas ${v.grade}
+              ${safeSubject} • Kelas ${safeGrade}
             </div>
           </td>
           <td style="font-size: 0.8125rem; color: var(--color-ink-muted);">
@@ -696,6 +721,7 @@ const App = {
       importInput.addEventListener("change", (e) => {
         if (e.target.files && e.target.files[0]) {
           RepoStorage.importData(e.target.files[0]);
+          e.target.value = "";
         }
       });
     }
@@ -744,7 +770,8 @@ const App = {
   renderVideoGrid: function () {
     const gridContainer = document.getElementById("videoGridContainer");
     const emptyState = document.getElementById("catalogEmptyState");
-    const countLabel = document.getElementById("catalogResultsCount");
+    const countLabel = document.getElementById("searchResultCount");
+    const countLabelAlt = document.getElementById("catalogResultsCount");
 
     if (!gridContainer) return;
 
@@ -762,9 +789,9 @@ const App = {
       return matchGrade && matchCat && matchSearch;
     });
 
-    if (countLabel) {
-      countLabel.textContent = `${filtered.length} materi tersedia`;
-    }
+    const countText = `${filtered.length} materi tersedia`;
+    if (countLabel) countLabel.textContent = countText;
+    if (countLabelAlt) countLabelAlt.textContent = countText;
 
     if (filtered.length === 0) {
       gridContainer.innerHTML = "";
@@ -779,6 +806,11 @@ const App = {
       const isLocal = v.sourceType === "local";
       const formattedDate = RepoStorage.formatDate(v.publishedAt);
       const coverSrc = v.thumbnail || this.getCoverBySubject(v.subject);
+      const safeTitle = escapeHtml(v.title);
+      const safeDesc = escapeHtml(v.description || "");
+      const safeSubject = escapeHtml(v.subject);
+      const safeTeacher = escapeHtml(v.teacher);
+      const safeGrade = escapeHtml(v.grade);
 
       return `
         <article 
@@ -788,20 +820,20 @@ const App = {
           onkeydown="App.handleCardKeydown(event, '${v.id}')"
           tabindex="0"
           role="button"
-          aria-label="Pelajari materi ${v.title} untuk ${v.subject} Kelas ${v.grade}"
+          aria-label="Pelajari materi ${safeTitle} untuk ${safeSubject} Kelas ${safeGrade}"
         >
           <div class="card-thumbnail-wrap">
             <img 
               src="${coverSrc}" 
-              alt="${v.title}" 
+              alt="${safeTitle}" 
               loading="lazy"
               onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');"
             >
-            <span class="card-badge-grade" data-grade="${v.grade}">Kelas ${v.grade}</span>
+            <span class="card-badge-grade" data-grade="${safeGrade}">Kelas ${safeGrade}</span>
             <span class="card-badge-source ${isLocal ? 'badge-local' : 'badge-yt'}">
               ${isLocal ? 'Berkas Laptop' : 'YouTube'}
             </span>
-            <span class="card-duration">${v.duration || '15:00'}</span>
+            <span class="card-duration">${escapeHtml(v.duration || '15:00')}</span>
             <div class="card-play-overlay">
               <div class="card-play-btn" title="Putar Video Materi">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -812,7 +844,7 @@ const App = {
           </div>
           <div class="card-body">
             <div class="card-meta-row">
-              <span class="card-meta-subject">${v.subject}</span>
+              <span class="card-meta-subject">${safeSubject}</span>
               <span class="card-meta-date">${formattedDate}</span>
               ${isDone ? `
                 <span class="status-completed-badge" title="Telah kamu pelajari">
@@ -822,12 +854,12 @@ const App = {
               ` : ''}
             </div>
             
-            <h3 class="card-title" title="${v.title}">${v.title}</h3>
-            <p class="card-desc-snippet">${v.description}</p>
+            <h3 class="card-title" title="${safeTitle}">${safeTitle}</h3>
+            <p class="card-desc-snippet">${safeDesc}</p>
             
             <div class="card-teacher">
-              <div class="teacher-avatar-tiny">${v.teacher.replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase()}</div>
-              <span class="teacher-name-txt">${v.teacher}</span>
+              <div class="teacher-avatar-tiny">${safeTeacher.replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase()}</div>
+              <span class="teacher-name-txt">${safeTeacher}</span>
             </div>
 
             <div class="card-footer-action">
@@ -870,6 +902,17 @@ const App = {
     const input = document.getElementById("searchInput");
     if (input) input.value = "";
     this.renderVideoGrid();
+  },
+
+  openFeaturedHero: function () {
+    const videos = RepoStorage.getVideos();
+    // Buka materi aljabar kelas 7 atau video pertama sebagai materi unggulan
+    const featured = videos.find(v => v.id === "smpn7-mat-07-01") || videos[0];
+    if (featured) {
+      this.openVideoById(featured.id);
+    } else {
+      this.showToast("Materi unggulan belum tersedia.", "normal");
+    }
   },
 
   openVideoById: function (id) {

@@ -60,8 +60,8 @@ Aplikasi ini dibangun menggunakan arsitektur **Single Page Application (SPA)** b
 * **Pengatur Kecepatan:** Kecepatan putar fleksibel (0.75x hingga 1.5x) untuk memfasilitasi repetisi konsep.
 * **Rangkuman Guru & Capaian Pembelajaran:** Ringkasan materi inti resmi dari guru pengampu serta target Capaian Pembelajaran Kurikulum Merdeka Fase D.
 
-### 4. Modul Lembar Belajar Cetak / PDF Resmi Sekolah
-* Menghasilkan dokumen cetak resmi terisolasi lengkap dengan Kop UPTD SMP Negeri 7 Kota Tangerang Selatan, Capaian Pembelajaran Kurikulum Merdeka, rangkuman materi dari dewan guru, lembar refleksi mandiri, serta kolom tanda tangan guru pengampu dan orang tua murid.
+### 4. Lembar Ringkasan & Capaian Pembelajaran Mandiri
+* Ringkasan materi pokok dan target Capaian Pembelajaran (CP) Fase D yang disiapkan langsung oleh dewan guru pengampu. Dilengkapi catatan digital mandiri siswa yang tersimpan otomatis di browser tanpa memerlukan server berbayar.
 
 ---
 
@@ -72,7 +72,6 @@ Aplikasi ini dibangun menggunakan arsitektur **Single Page Application (SPA)** b
 | `/` atau `K` | Langsung memusatkan kursor ke kotak pencarian katalog materi |
 | `G` | Buka Portal Masuk Dewan Guru / Ruang Pengelolaan Guru |
 | `T` | Beralih tema tampilan (Mode Terang Sekolah / Mode Gelap Malam) |
-| `P` | Buka dialog cetak lembar modul PDF resmi saat materi sedang diputar |
 | `Esc` | Menutup pemutar video fokus |
 
 ---
@@ -85,7 +84,7 @@ Aplikasi ini dapat dibuka secara langsung tanpa proses instalasi dependensi tamb
 * Buka berkas `index.html` menggunakan peramban modern (Google Chrome, Microsoft Edge, Mozilla Firefox, atau Safari).
 
 ### Cara 2: Menjalankan Server Lokal (Opsional)
-Jika ingin menguji fitur Service Worker atau protokol HTTP lokal:
+Jika ingin menjalankan prototipe melalui server HTTP lokal:
 ```bash
 python -m http.server 8877
 ```

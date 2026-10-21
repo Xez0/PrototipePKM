@@ -375,19 +375,32 @@ const RepoStorage = {
 
   // Helper Ekstraksi ID & URL Embed YouTube
   extractYouTubeId: function (url) {
-    if (!url) return "";
+    if (!url || typeof url !== "string") return "";
+    const cleanUrl = url.trim();
+    // Validasi domain YouTube yang sah
+    const isYt = /^(https?:\/\/)?(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(cleanUrl) || cleanUrl.includes("youtube-nocookie.com");
+    if (!isYt) return "";
+
     let videoId = "";
-    if (url.includes("youtu.be/")) {
-      videoId = url.split("youtu.be/")[1].split("?")[0].split("&")[0];
-    } else if (url.includes("v=")) {
-      const params = new URLSearchParams(url.split("?")[1]);
-      videoId = params.get("v") || "";
-    } else if (url.includes("/embed/")) {
-      videoId = url.split("/embed/")[1].split("?")[0].split("&")[0];
-    } else if (url.includes("shorts/")) {
-      videoId = url.split("shorts/")[1].split("?")[0].split("&")[0];
+    if (cleanUrl.includes("youtu.be/")) {
+      videoId = cleanUrl.split("youtu.be/")[1].split("?")[0].split("&")[0];
+    } else if (cleanUrl.includes("v=")) {
+      try {
+        const queryPart = cleanUrl.split("?")[1];
+        if (queryPart) {
+          const params = new URLSearchParams(queryPart);
+          videoId = params.get("v") || "";
+        }
+      } catch (e) {
+        videoId = "";
+      }
+    } else if (cleanUrl.includes("/embed/")) {
+      videoId = cleanUrl.split("/embed/")[1].split("?")[0].split("&")[0];
+    } else if (cleanUrl.includes("shorts/")) {
+      videoId = cleanUrl.split("shorts/")[1].split("?")[0].split("&")[0];
     }
-    return videoId.trim();
+    videoId = videoId.replace(/[^a-zA-Z0-9_-]/g, "");
+    return videoId.length >= 6 ? videoId : "";
   },
 
   formatVideoEmbedUrl: function (url) {
@@ -403,7 +416,90 @@ const RepoStorage = {
     if (videoId) {
       return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     }
-    return defaultImg || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=640&q=80";
+    return defaultImg || "assets/cover-matematika.svg";
+  },
+
+  // ==========================================================================
+  // 4. CADANGAN & PEMULIHAN DATA RESMI SEKOLAH (JSON BACKUP / RESTORE)
+  // ==========================================================================
+  exportData: function () {
+    try {
+      const videos = this.getVideos();
+      const exportPayload = {
+        app: "Repositori Video Pembelajaran SMPN 7 Tangsel",
+        version: "1.0",
+        school: "UPTD SMP Negeri 7 Kota Tangerang Selatan",
+        exportedAt: new Date().toISOString(),
+        totalVideos: videos.length,
+        videos: videos
+      };
+      const jsonStr = JSON.stringify(exportPayload, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = new Date();
+      const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      a.href = url;
+      a.download = `cadangan-materi-smpn7-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (window.App && typeof App.showToast === "function") {
+        App.showToast("Cadangan data materi (JSON) berhasil diunduh.", "success");
+      }
+    } catch (err) {
+      console.error("Gagal mengekspor data cadangan:", err);
+      if (window.App && typeof App.showToast === "function") {
+        App.showToast("Gagal mengekspor cadangan data.", "danger");
+      }
+    }
+  },
+
+  importData: function (file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result;
+        const parsed = JSON.parse(content);
+        let videoList = null;
+        if (Array.isArray(parsed)) {
+          videoList = parsed;
+        } else if (parsed && Array.isArray(parsed.videos)) {
+          videoList = parsed.videos;
+        }
+
+        if (!videoList || !Array.isArray(videoList) || videoList.length === 0) {
+          throw new Error("Berkas JSON cadangan tidak memuat daftar video materi yang valid.");
+        }
+
+        // Validasi struktur minimal tiap item video
+        const validVideos = videoList.filter(item => item && typeof item === "object" && item.id && item.title && item.subject);
+        if (validVideos.length === 0) {
+          throw new Error("Tidak ditemukan materi pembelajaran yang valid dalam berkas cadangan.");
+        }
+
+        this.saveVideos(validVideos);
+        if (window.App) {
+          App.showToast(`Berhasil memulihkan ${validVideos.length} materi dari cadangan!`, "success");
+          if (typeof App.renderStats === "function") App.renderStats();
+          if (typeof App.renderVideoGrid === "function") App.renderVideoGrid();
+          if (typeof App.renderTeacherTable === "function") App.renderTeacherTable();
+        }
+      } catch (err) {
+        console.error("Gagal memulihkan cadangan:", err);
+        if (window.App && typeof App.showToast === "function") {
+          App.showToast(err.message || "Gagal memproses berkas cadangan JSON.", "danger");
+        }
+      }
+    };
+    reader.onerror = () => {
+      if (window.App && typeof App.showToast === "function") {
+        App.showToast("Gagal membaca berkas cadangan dari perangkat Anda.", "danger");
+      }
+    };
+    reader.readAsText(file);
   }
 };
 window.RepoStorage = RepoStorage;
