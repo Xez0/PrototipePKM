@@ -23,6 +23,7 @@ window.escapeHtml = escapeHtml;
 const YouTubeUploader = {
   CLIENT_ID: "609447982110-6bv5uh18pordb7sh3u1q7l3jvo5ehhpb.apps.googleusercontent.com",
   SCOPES: "https://www.googleapis.com/auth/youtube.upload",
+  DEFAULT_EMAIL: "xezakahadi97@gmail.com",
   tokenClient: null,
   accessToken: null,
   tokenExpiresAt: 0,
@@ -33,6 +34,7 @@ const YouTubeUploader = {
         this.tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: this.CLIENT_ID,
           scope: this.SCOPES,
+          hint: this.DEFAULT_EMAIL,
           callback: () => {}
         });
         const savedToken = localStorage.getItem("smpn7_yt_access_token");
@@ -63,7 +65,7 @@ const YouTubeUploader = {
 
       this.tokenClient.callback = (resp) => {
         if (resp.error) {
-          reject(new Error("Otorisasi akun YouTube sekolah dibatalkan atau gagal: " + resp.error));
+          reject(new Error("Otorisasi akun YouTube dibatalkan atau gagal: " + resp.error));
         } else if (resp.access_token) {
           this.accessToken = resp.access_token;
           const expiresIn = parseInt(resp.expires_in || "3600", 10) * 1000;
@@ -76,7 +78,7 @@ const YouTubeUploader = {
         }
       };
 
-      this.tokenClient.requestAccessToken({ prompt: "" });
+      this.tokenClient.requestAccessToken({ prompt: "", hint: this.DEFAULT_EMAIL });
     });
   },
 
