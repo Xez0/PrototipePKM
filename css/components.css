@@ -52,6 +52,14 @@
   gap: 8px;
 }
 
+.brand-title-full {
+  display: inline;
+}
+
+.brand-title-short {
+  display: none;
+}
+
 .brand-badge-tag {
   font-size: 0.8125rem;
   font-weight: 600;
@@ -1855,6 +1863,10 @@ kbd.key-hint {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .filter-primary-row {
@@ -1862,14 +1874,19 @@ kbd.key-hint {
   align-items: center;
   gap: var(--space-md);
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .filter-search-box {
-  flex: 1;
-  min-width: 280px;
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 100%;
   position: relative;
   display: flex;
   align-items: center;
+  box-sizing: border-box;
 }
 
 .filter-search-icon {
@@ -1881,6 +1898,8 @@ kbd.key-hint {
 
 .filter-search-input {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   height: 44px;
   padding: 0 85px 0 42px;
   font-family: var(--font-sans);
@@ -1933,6 +1952,9 @@ kbd.key-hint {
   padding: 4px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-hairline);
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .segmented-track-label {
@@ -1973,9 +1995,14 @@ kbd.key-hint {
   align-items: center;
   gap: 6px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   padding-top: var(--space-xs);
+  padding-bottom: 2px;
   border-top: 1px solid var(--color-hairline);
   scrollbar-width: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .filter-subject-strip::-webkit-scrollbar {
@@ -1996,6 +2023,7 @@ kbd.key-hint {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--duration-fast);
 }
 
