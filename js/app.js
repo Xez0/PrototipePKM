@@ -357,6 +357,18 @@ const App = {
     }
   },
 
+  // Gulir Halus ke Atas Halaman Tanpa Mengubah Konten / View
+  scrollToTop: function (event) {
+    if (event) {
+      if (typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof event.stopPropagation === "function") event.stopPropagation();
+    }
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  },
+
   // Perbarui UI Sesuai Status Autentikasi
   updateAuthUI: function () {
     const isLoggedIn = AuthManager.isLoggedIn();
