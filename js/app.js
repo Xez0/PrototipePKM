@@ -16,6 +16,142 @@ function escapeHtml(str) {
 }
 window.escapeHtml = escapeHtml;
 
+// ==========================================================================
+// PENGUNGGAH RESMI GOOGLE YOUTUBE DATA API V3 (DIRECT UPLOAD UNTUK GURU)
+// Mengunggah file MP4 langsung ke Channel YouTube Resmi Sekolah (Unlisted)
+// ==========================================================================
+const YouTubeUploader = {
+  CLIENT_ID: "609447982110-6bv5uh18pordb7sh3u1q7l3jvo5ehhpb.apps.googleusercontent.com",
+  SCOPES: "https://www.googleapis.com/auth/youtube.upload",
+  tokenClient: null,
+  accessToken: null,
+  tokenExpiresAt: 0,
+
+  init: function () {
+    if (window.google && google.accounts && google.accounts.oauth2) {
+      try {
+        this.tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: this.CLIENT_ID,
+          scope: this.SCOPES,
+          callback: () => {}
+        });
+        const savedToken = localStorage.getItem("smpn7_yt_access_token");
+        const savedExp = parseInt(localStorage.getItem("smpn7_yt_token_exp") || "0", 10);
+        if (savedToken && Date.now() < savedExp) {
+          this.accessToken = savedToken;
+          this.tokenExpiresAt = savedExp;
+        }
+      } catch (e) {
+        console.warn("[YOUTUBE API] Gagal inisialisasi token client:", e);
+      }
+    }
+  },
+
+  getAccessToken: function () {
+    return new Promise((resolve, reject) => {
+      if (this.accessToken && Date.now() < this.tokenExpiresAt - 60000) {
+        return resolve(this.accessToken);
+      }
+
+      if (!this.tokenClient) {
+        this.init();
+      }
+
+      if (!this.tokenClient) {
+        return reject(new Error("Layanan Google Identity Services belum siap. Pastikan peramban terhubung internet."));
+      }
+
+      this.tokenClient.callback = (resp) => {
+        if (resp.error) {
+          reject(new Error("Otorisasi akun YouTube sekolah dibatalkan atau gagal: " + resp.error));
+        } else if (resp.access_token) {
+          this.accessToken = resp.access_token;
+          const expiresIn = parseInt(resp.expires_in || "3600", 10) * 1000;
+          this.tokenExpiresAt = Date.now() + expiresIn;
+          localStorage.setItem("smpn7_yt_access_token", this.accessToken);
+          localStorage.setItem("smpn7_yt_token_exp", String(this.tokenExpiresAt));
+          resolve(this.accessToken);
+        } else {
+          reject(new Error("Gagal memperoleh token akses YouTube."));
+        }
+      };
+
+      this.tokenClient.requestAccessToken({ prompt: "" });
+    });
+  },
+
+  uploadVideo: async function (file, metadata, onProgress) {
+    const token = await this.getAccessToken();
+
+    // 1. Inisiasi Resumable Upload
+    const initResponse = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json; charset=UTF-8",
+        "X-Upload-Content-Length": String(file.size),
+        "X-Upload-Content-Type": file.type || "video/mp4"
+      },
+      body: JSON.stringify({
+        snippet: {
+          title: metadata.title || "Materi SMPN 7 Tangsel",
+          description: metadata.description || "Video materi pembelajaran resmi UPTD SMP Negeri 7 Kota Tangerang Selatan.",
+          categoryId: "27"
+        },
+        status: {
+          privacyStatus: "unlisted",
+          selfDeclaredMadeForKids: false
+        }
+      })
+    });
+
+    if (!initResponse.ok) {
+      const errText = await initResponse.text();
+      throw new Error("Gagal inisialisasi upload YouTube: " + errText);
+    }
+
+    const uploadUrl = initResponse.headers.get("Location");
+    if (!uploadUrl) {
+      throw new Error("Google tidak mengembalikan endpoint unggah.");
+    }
+
+    // 2. Unggah data biner video via XHR untuk melacak persentase progress
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", uploadUrl, true);
+      xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+
+      if (xhr.upload && onProgress) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        if (xhr.status === 200 || xhr.status === 201) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            resolve(res.id);
+          } catch (e) {
+            reject(new Error("Format respon YouTube tidak valid"));
+          }
+        } else {
+          reject(new Error("Upload ke YouTube gagal dengan status: " + xhr.status));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Koneksi jaringan terputus saat mengunggah video."));
+      xhr.onabort = () => reject(new Error("Pengunggahan video dibatalkan."));
+
+      xhr.send(file);
+    });
+  }
+};
+window.YouTubeUploader = YouTubeUploader;
+
 const App = {
   currentView: "student", // 'student' | 'login' | 'teacher'
   currentUploadSource: "file", // 'file' | 'youtube'
@@ -317,7 +453,19 @@ const App = {
     if (nameElem) nameElem.textContent = file.name;
     if (sizeElem) sizeElem.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
     if (display) display.style.display = "flex";
-    if (dropzoneTitle) dropzoneTitle.textContent = "Berkas Video Siap Ditayangkan";
+    if (dropzoneTitle) dropzoneTitle.textContent = "Berkas Video Siap Diunggah ke Channel Sekolah";
+  },
+
+  clearSelectedVideoFile: function () {
+    this.pendingVideoFile = null;
+    const input = document.getElementById("inputVideoLocalFile");
+    if (input) input.value = "";
+    const display = document.getElementById("fileSelectedDisplay");
+    if (display) display.style.display = "none";
+    const dropzoneTitle = document.getElementById("dropzoneTitleText");
+    if (dropzoneTitle) dropzoneTitle.textContent = "Tarik & Lepas File Video di Sini atau Klik untuk Memilih";
+    const progressWrapper = document.getElementById("videoUploadProgressWrapper");
+    if (progressWrapper) progressWrapper.style.display = "none";
   },
 
   // Pemilihan Jenjang Kelas Cepat
@@ -419,6 +567,7 @@ const App = {
     const tableSection = document.getElementById("teacherTableSection");
     if (formSection) formSection.style.display = "none";
     if (tableSection) tableSection.style.display = "block";
+    this.clearSelectedVideoFile();
     window.scrollTo({ top: 120, behavior: "smooth" });
   },
 
@@ -554,12 +703,51 @@ const App = {
             if (submitBtn) submitBtn.disabled = false;
             return;
           }
-          videoPayload.sourceType = "local";
-          videoPayload.embedUrl = "";
 
-          const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
-          if (snapshot) {
-            videoPayload.thumbnail = snapshot;
+          const progressWrapper = document.getElementById("videoUploadProgressWrapper");
+          const progressBar = document.getElementById("uploadProgressBar");
+          const progressPercent = document.getElementById("uploadProgressPercentText");
+          const progressStatus = document.getElementById("uploadProgressStatusText");
+
+          if (progressWrapper) progressWrapper.style.display = "block";
+          if (progressBar) progressBar.style.width = "10%";
+          if (progressPercent) progressPercent.textContent = "10%";
+          if (progressStatus) progressStatus.textContent = "Menghubungkan ke Channel YouTube Sekolah...";
+
+          let uploadedToYouTube = false;
+          try {
+            const ytVideoId = await YouTubeUploader.uploadVideo(
+              this.pendingVideoFile,
+              {
+                title: title,
+                description: videoPayload.description
+              },
+              (percent) => {
+                if (progressBar) progressBar.style.width = `${percent}%`;
+                if (progressPercent) progressPercent.textContent = `${percent}%`;
+                if (progressStatus) progressStatus.textContent = `Mengunggah ke YouTube Channel Sekolah... ${percent}%`;
+              }
+            );
+
+            if (ytVideoId) {
+              uploadedToYouTube = true;
+              if (progressStatus) progressStatus.textContent = "Unggah selesai! Menyimpan data materi...";
+              videoPayload.sourceType = "youtube";
+              videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl("https://youtu.be/" + ytVideoId);
+              videoPayload.thumbnail = `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
+            }
+          } catch (uploadErr) {
+            console.warn("[YOUTUBE UPLOAD] Direct upload ke YouTube tidak dapat dilanjutkan, beralih ke lokal:", uploadErr);
+            this.showToast("Mengalihkan ke penyimpanan lokal peramban (mode mandiri)...", "info");
+          }
+
+          if (!uploadedToYouTube) {
+            videoPayload.sourceType = "local";
+            videoPayload.embedUrl = "";
+            const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
+            if (snapshot) {
+              videoPayload.thumbnail = snapshot;
+            }
           }
         } else {
           const ytInput = document.getElementById("inputTeacherYoutubeUrl");
@@ -627,6 +815,8 @@ const App = {
       console.error("Gagal memproses materi:", err);
       this.showToast("Terjadi kendala saat menyimpan video. Silakan coba kembali.", "danger");
     } finally {
+      const progressWrapper = document.getElementById("videoUploadProgressWrapper");
+      if (progressWrapper) progressWrapper.style.display = "none";
       if (submitBtn) {
         submitBtn.disabled = false;
       }

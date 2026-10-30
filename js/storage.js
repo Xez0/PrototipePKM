@@ -175,8 +175,79 @@ window.AuthManager = AuthManager;
 const RepoStorage = {
   isServerOnline: false,
 
-  // Cek Status & Sinkronisasi Data Otomatis dari Backend Server
+  SUPABASE_CONFIG: {
+    url: "https://cblawulqssslvjtpygmw.supabase.co",
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNibGF3dWxxc3NzbHZqdHB5Z213Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzNjc4NjksImV4cCI6MjEwODk0Mzg2OX0.m5xcLaybO1JlVXNRx8hIoWz-AIC9yIbE4z8ov6W0nIE"
+  },
+  supabaseClient: null,
+
+  // Inisialisasi Sinkronisasi Cloud Supabase & Realtime
+  initSupabase: async function () {
+    if (window.supabase && typeof window.supabase.createClient === "function") {
+      try {
+        this.supabaseClient = window.supabase.createClient(
+          this.SUPABASE_CONFIG.url,
+          this.SUPABASE_CONFIG.anonKey
+        );
+        const cloudVideos = await this.fetchFromSupabase();
+        this.subscribeRealtime();
+        if (cloudVideos) return cloudVideos;
+      } catch (err) {
+        console.warn("[SUPABASE] Inisialisasi client gagal:", err);
+      }
+    }
+    return null;
+  },
+
+  // Ambil Data Terkini dari Supabase Cloud
+  fetchFromSupabase: async function () {
+    if (!this.supabaseClient) return null;
+    try {
+      const { data, error } = await this.supabaseClient
+        .from("videos")
+        .select("*")
+        .order("publishedAt", { ascending: false });
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        this.isServerOnline = true;
+        this.saveVideos(data);
+        this.updateSyncUI("online");
+        return data;
+      }
+    } catch (err) {
+      console.warn("[SUPABASE] Gagal mengambil data materi dari cloud:", err);
+    }
+    return null;
+  },
+
+  // Berlangganan (Subscribe) Realtime Multi-Device
+  subscribeRealtime: function () {
+    if (!this.supabaseClient) return;
+    try {
+      this.supabaseClient
+        .channel("public:videos")
+        .on("postgres_changes", { event: "*", schema: "public", table: "videos" }, async (payload) => {
+          console.log("[SUPABASE REALTIME] Perubahan data multi-device:", payload.eventType);
+          await this.fetchFromSupabase();
+          if (window.App) {
+            if (typeof App.renderStats === "function") App.renderStats();
+            if (typeof App.renderVideoGrid === "function") App.renderVideoGrid();
+            if (typeof App.renderTeacherTable === "function") App.renderTeacherTable();
+          }
+        })
+        .subscribe();
+    } catch (err) {
+      console.warn("[SUPABASE] Gagal mengaktifkan realtime channel:", err);
+    }
+  },
+
+  // Cek Status & Sinkronisasi Data Otomatis dari Backend Server / Supabase
   syncWithBackend: async function () {
+    // 1. Coba sinkronkan dengan Supabase Cloud (Prioritas Utama)
+    const supabaseData = await this.initSupabase();
+    if (supabaseData) return supabaseData;
+
+    // 2. Fallback jika ada server internal Node.js
     try {
       const res = await fetch("/api/videos", { method: "GET", cache: "no-store" });
       if (res.ok) {
@@ -292,7 +363,17 @@ const RepoStorage = {
       videoWithId.sourceType = "youtube";
     }
 
-    // Simpan ke Backend jika server online
+    // Simpan ke Supabase Cloud jika client aktif
+    if (this.supabaseClient) {
+      try {
+        const { error } = await this.supabaseClient.from("videos").insert([videoWithId]);
+        if (error) console.warn("[SUPABASE] Gagal simpan video ke cloud:", error);
+      } catch (err) {
+        console.warn("[SUPABASE] Error simpan:", err);
+      }
+    }
+
+    // Simpan ke Backend lokal jika server online
     if (this.isServerOnline) {
       try {
         await fetch("/api/videos", {
@@ -349,6 +430,16 @@ const RepoStorage = {
       updatedAt: new Date().toISOString()
     };
 
+    // Perbarui di Supabase Cloud jika client aktif
+    if (this.supabaseClient) {
+      try {
+        const { error } = await this.supabaseClient.from("videos").update(finalVideo).eq("id", id);
+        if (error) console.warn("[SUPABASE] Gagal perbarui video di cloud:", error);
+      } catch (err) {
+        console.warn("[SUPABASE] Error update:", err);
+      }
+    }
+
     if (this.isServerOnline) {
       try {
         await fetch(`/api/videos/${encodeURIComponent(id)}`, {
@@ -366,12 +457,22 @@ const RepoStorage = {
     return true;
   },
 
-  // Hapus Video (Hapus dari Backend, LocalStorage, dan IndexedDB)
+  // Hapus Video (Hapus dari Supabase, Backend, LocalStorage, dan IndexedDB)
   deleteVideo: async function (id) {
     let videos = this.getVideos();
     const target = videos.find(v => v.id === id);
     if (target && target.sourceType === "local") {
       await VideoDB.deleteVideoFile(id);
+    }
+
+    // Hapus dari Supabase Cloud jika client aktif
+    if (this.supabaseClient) {
+      try {
+        const { error } = await this.supabaseClient.from("videos").delete().eq("id", id);
+        if (error) console.warn("[SUPABASE] Gagal hapus video dari cloud:", error);
+      } catch (err) {
+        console.warn("[SUPABASE] Error delete:", err);
+      }
     }
 
     if (this.isServerOnline) {
@@ -389,6 +490,14 @@ const RepoStorage = {
 
   // Reset Kembali ke Data Standar SMPN 7
   resetToDefault: async function () {
+    if (this.supabaseClient) {
+      try {
+        await this.supabaseClient.from("videos").delete().neq("id", "none");
+        await this.supabaseClient.from("videos").insert(INITIAL_VIDEO_DATA);
+      } catch (e) {
+        console.warn("[SUPABASE] Gagal reset cloud:", e);
+      }
+    }
     if (this.isServerOnline) {
       try {
         await fetch("/api/reset", { method: "POST" });
