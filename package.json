@@ -4,7 +4,6 @@
   "description": "Repositori Video Pembelajaran Mandiri UPTD SMP Negeri 7 Tangerang Selatan - Program PkM Universitas Pamulang",
   "main": "server.js",
   "scripts": {
-    "build": "echo 'Static assets ready for Vercel deployment'",
     "start": "node server.js 8877",
     "dev": "node server.js 8877"
   },
