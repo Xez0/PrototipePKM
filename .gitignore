@@ -4,3 +4,8 @@ uploads/*
 !uploads/.gitkeep
 .DS_Store
 Thumbs.db
+.env*
+google-oauth-config.json
+*token*.json
+data/*token*.json
+api/*token*.json

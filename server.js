@@ -186,6 +186,23 @@ function handleFileUpload(req, res) {
   }
 }
 
+// Helper: Ambil Konfigurasi OAuth Google secara aman
+function getGoogleOAuthConfig() {
+  const configPath = path.join(ROOT_DIR, "google-oauth-config.json");
+  let cfg = {};
+  if (fs.existsSync(configPath)) {
+    try {
+      cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    } catch (e) {}
+  }
+  return {
+    clientId: process.env.GOOGLE_CLIENT_ID || cfg.client_id || "",
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || cfg.client_secret || "",
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || cfg.redirect_uri || "http://localhost:8877",
+    channelEmail: process.env.GOOGLE_CHANNEL_EMAIL || cfg.channel_email || "xezman88@gmail.com"
+  };
+}
+
 // Router Utama HTTP
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || "127.0.0.1"}`);
@@ -201,6 +218,159 @@ const server = http.createServer(async (req, res) => {
       "Access-Control-Max-Age": "86400"
     });
     return res.end();
+  }
+
+  // Handle Google OAuth Callback (menangkap ?code= saat user mengotorisasi akun)
+  if (parsedUrl.searchParams.has("code")) {
+    const code = parsedUrl.searchParams.get("code");
+    const googleCfg = getGoogleOAuthConfig();
+    try {
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code: code,
+          client_id: googleCfg.clientId,
+          client_secret: googleCfg.clientSecret,
+          redirect_uri: googleCfg.redirectUri,
+          grant_type: "authorization_code"
+        }).toString()
+      });
+      const tokenData = await tokenRes.json();
+      if (tokenData.refresh_token) {
+        fs.writeFileSync(path.join(DATA_DIR, "youtube-token.json"), JSON.stringify(tokenData, null, 2), "utf8");
+        const apiDir = path.join(ROOT_DIR, "api");
+        if (!fs.existsSync(apiDir)) fs.mkdirSync(apiDir, { recursive: true });
+        fs.writeFileSync(path.join(apiDir, "youtube-token.json"), JSON.stringify(tokenData, null, 2), "utf8");
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        return res.end(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Otorisasi YouTube Sukses</title><meta charset="utf-8"></head>
+          <body style="font-family: system-ui, sans-serif; text-align: center; padding: 60px; line-height: 1.6; background: #f8fafc; color: #1e293b;">
+            <div style="max-width: 540px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+              <div style="font-size: 54px; margin-bottom: 16px;">🎉</div>
+              <h1 style="color: #059669; margin-bottom: 8px;">Channel YouTube Berhasil Terhubung!</h1>
+              <p style="color: #64748b; margin-bottom: 24px;">Kunci akses permanen (Refresh Token) akun <strong>${googleCfg.channelEmail}</strong> telah berhasil disimpan di server.</p>
+              <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: left; font-size: 14px; margin-bottom: 24px;">
+                ✅ <strong>Otomatisasi Penuh Aktif:</strong><br>
+                Mulai saat ini, seluruh guru yang mengunggah video dari perangkat mana pun <strong>sama sekali tidak perlu login Google</strong>. Video akan otomatis masuk ke channel YouTube Anda.
+              </div>
+              <a href="/" style="display: inline-block; background: #004d40; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                Buka Repositori SMPN 7
+              </a>
+            </div>
+          </body>
+          </html>
+        `);
+      } else {
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        return res.end(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Pemberitahuan Otorisasi</title><meta charset="utf-8"></head>
+          <body style="font-family: system-ui, sans-serif; text-align: center; padding: 60px;">
+            <h2>⚠️ Izin Sudah Terdaftar Sebelumnya</h2>
+            <p>Google mengonfirmasi akun Anda sudah pernah diizinkan. Refresh token yang sudah ada tetap aktif.</p>
+            <a href="/">Kembali ke Beranda</a>
+          </body>
+          </html>
+        `);
+      }
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "text/html; charset=utf-8" });
+      return res.end(`<h1>Gagal Menukar Kode Otorisasi: ${err.message}</h1>`);
+    }
+  }
+
+  // Endpoint Redirect ke Google OAuth Consent Screen
+  if (pathname === "/api/youtube-auth") {
+    const googleCfg = getGoogleOAuthConfig();
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(googleCfg.clientId)}&redirect_uri=${encodeURIComponent(googleCfg.redirectUri)}&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload&access_type=offline&prompt=consent&login_hint=${encodeURIComponent(googleCfg.channelEmail)}`;
+    res.writeHead(302, { "Location": authUrl });
+    return res.end();
+  }
+
+  // Endpoint untuk membuat Pre-Authorized Resumable Upload URL di YouTube
+  if (pathname === "/api/youtube-init" && method === "POST") {
+    try {
+      const payload = await parseJsonBody(req);
+      const googleCfg = getGoogleOAuthConfig();
+      const tokenPath = path.join(DATA_DIR, "youtube-token.json");
+      const apiTokenPath = path.join(ROOT_DIR, "api", "youtube-token.json");
+      let refreshToken = process.env.YOUTUBE_REFRESH_TOKEN;
+
+      if (!refreshToken) {
+        if (fs.existsSync(tokenPath)) {
+          try {
+            refreshToken = JSON.parse(fs.readFileSync(tokenPath, "utf8")).refresh_token;
+          } catch (e) {}
+        } else if (fs.existsSync(apiTokenPath)) {
+          try {
+            refreshToken = JSON.parse(fs.readFileSync(apiTokenPath, "utf8")).refresh_token;
+          } catch (e) {}
+        }
+      }
+
+      if (!refreshToken) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Channel YouTube belum diotorisasi di server. Buka http://localhost:8877/api/youtube-auth untuk mengaktifkannya."
+        });
+      }
+
+      // Ambil Access Token Segar
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: googleCfg.clientId,
+          client_secret: googleCfg.clientSecret,
+          refresh_token: refreshToken,
+          grant_type: "refresh_token"
+        }).toString()
+      });
+
+      const tokenJson = await tokenRes.json();
+      if (!tokenJson.access_token) {
+        return sendJson(res, 500, {
+          success: false,
+          error: "Gagal me-refresh token akses: " + (tokenJson.error_description || tokenJson.error)
+        });
+      }
+
+      // Inisiasi Resumable Upload ke YouTube
+      const ytRes = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${tokenJson.access_token}`,
+          "Content-Type": "application/json; charset=UTF-8",
+          "X-Upload-Content-Length": String(payload.fileSize || 0),
+          "X-Upload-Content-Type": payload.fileType || "video/mp4"
+        },
+        body: JSON.stringify({
+          snippet: {
+            title: payload.title || "Materi SMPN 7 Tangsel",
+            description: payload.description || "Materi Pembelajaran UPTD SMP Negeri 7 Kota Tangerang Selatan.",
+            categoryId: "27"
+          },
+          status: {
+            privacyStatus: "unlisted",
+            selfDeclaredMadeForKids: false
+          }
+        })
+      });
+
+      const uploadUrl = ytRes.headers.get("Location");
+      if (!uploadUrl) {
+        const errText = await ytRes.text();
+        return sendJson(res, 500, { success: false, error: "YouTube API error: " + errText });
+      }
+
+      return sendJson(res, 200, { success: true, uploadUrl });
+    } catch (err) {
+      return sendJson(res, 500, { success: false, error: err.message });
+    }
   }
 
   // ==========================================================================

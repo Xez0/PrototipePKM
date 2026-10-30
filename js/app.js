@@ -23,7 +23,7 @@ window.escapeHtml = escapeHtml;
 const YouTubeUploader = {
   CLIENT_ID: "609447982110-6bv5uh18pordb7sh3u1q7l3jvo5ehhpb.apps.googleusercontent.com",
   SCOPES: "https://www.googleapis.com/auth/youtube.upload",
-  DEFAULT_EMAIL: "xezakahadi97@gmail.com",
+  DEFAULT_EMAIL: "xezman88@gmail.com",
   tokenClient: null,
   accessToken: null,
   tokenExpiresAt: 0,
@@ -83,41 +83,69 @@ const YouTubeUploader = {
   },
 
   uploadVideo: async function (file, metadata, onProgress) {
-    const token = await this.getAccessToken();
+    let uploadUrl = null;
 
-    // 1. Inisiasi Resumable Upload
-    const initResponse = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json; charset=UTF-8",
-        "X-Upload-Content-Length": String(file.size),
-        "X-Upload-Content-Type": file.type || "video/mp4"
-      },
-      body: JSON.stringify({
-        snippet: {
+    // Prioritas 1: Minta URL Unggah Pra-Otorisasi dari Backend (Zero-Popup untuk Guru)
+    try {
+      const initRes = await fetch("/api/youtube-init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           title: metadata.title || "Materi SMPN 7 Tangsel",
-          description: metadata.description || "Video materi pembelajaran resmi UPTD SMP Negeri 7 Kota Tangerang Selatan.",
-          categoryId: "27"
-        },
-        status: {
-          privacyStatus: "unlisted",
-          selfDeclaredMadeForKids: false
+          description: metadata.description || "Video materi pembelajaran resmi SMPN 7 Tangsel.",
+          fileSize: file.size,
+          fileType: file.type || "video/mp4"
+        })
+      });
+
+      if (initRes.ok) {
+        const initData = await initRes.json();
+        if (initData.success && initData.uploadUrl) {
+          uploadUrl = initData.uploadUrl;
+          console.log("[YOUTUBE API] Direct upload aktif via backend channel xezman88@gmail.com (Tanpa Popup Guru).");
         }
-      })
-    });
-
-    if (!initResponse.ok) {
-      const errText = await initResponse.text();
-      throw new Error("Gagal inisialisasi upload YouTube: " + errText);
+      }
+    } catch (e) {
+      console.warn("[YOUTUBE API] Backend init dilewati:", e);
     }
 
-    const uploadUrl = initResponse.headers.get("Location");
+    // Prioritas 2: Fallback ke otorisasi browser jika serverless backend belum dikonfigurasi
     if (!uploadUrl) {
-      throw new Error("Google tidak mengembalikan endpoint unggah.");
+      const token = await this.getAccessToken();
+
+      const initResponse = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json; charset=UTF-8",
+          "X-Upload-Content-Length": String(file.size),
+          "X-Upload-Content-Type": file.type || "video/mp4"
+        },
+        body: JSON.stringify({
+          snippet: {
+            title: metadata.title || "Materi SMPN 7 Tangsel",
+            description: metadata.description || "Video materi pembelajaran resmi UPTD SMP Negeri 7 Kota Tangerang Selatan.",
+            categoryId: "27"
+          },
+          status: {
+            privacyStatus: "unlisted",
+            selfDeclaredMadeForKids: false
+          }
+        })
+      });
+
+      if (!initResponse.ok) {
+        const errText = await initResponse.text();
+        throw new Error("Gagal inisialisasi upload YouTube: " + errText);
+      }
+
+      uploadUrl = initResponse.headers.get("Location");
+      if (!uploadUrl) {
+        throw new Error("Google tidak mengembalikan endpoint unggah.");
+      }
     }
 
-    // 2. Unggah data biner video via XHR untuk melacak persentase progress
+    // Unggah biner video langsung ke YouTube dengan progress bar
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", uploadUrl, true);
