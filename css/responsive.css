@@ -679,6 +679,44 @@
     font-size: 0.6875rem;
   }
 
+  .video-file-preview-card {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .file-preview-body {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .file-preview-icon-box {
+    width: 46px;
+    height: 46px;
+  }
+
+  .file-preview-filename {
+    font-size: 0.875rem;
+  }
+
+  .file-preview-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .file-preview-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .bottom-upload-progress-wrap {
+    padding: 12px;
+  }
+
+  .bottom-upload-pct {
+    font-size: 1.125rem;
+  }
+
   .teacher-form-action-bar {
     flex-direction: column-reverse;
     gap: 8px;
@@ -765,11 +803,28 @@
     width: 100%;
     max-width: 100%;
     max-height: 96vh;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
   }
 
   .theatre-header {
     padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .theatre-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .theatre-header-title .badge {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 3px 8px;
   }
 
   .theatre-header-title h2 {
@@ -777,20 +832,94 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 220px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Player Mode Bar Mobile Clean Stack */
+  .player-mode-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .player-mode-tag {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .player-controls-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .player-controls-right .btn {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-height: 36px;
+  }
+
+  .player-controls-right label {
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+
+  .player-controls-right .speed-select {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-height: 36px;
+    max-width: 110px;
   }
 
   .theatre-content-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-    max-height: calc(96vh - 56px);
-    overflow-y: auto;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: calc(96vh - 56px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .theatre-main-view {
+    overflow-y: visible !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-hairline);
   }
 
   .theatre-sidebar {
-    height: auto;
-    min-height: 280px;
-    border-top: 1px solid var(--color-hairline);
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .theatre-quiz-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .theatre-quiz-banner .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .theatre-meta-bar {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .theatre-tab-btn {
@@ -801,6 +930,21 @@
 
   .theatre-details-box {
     padding: var(--space-sm);
+  }
+
+  .thumbnail-selector-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .thumb-main-preview-box {
+    max-width: 320px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .thumb-options-grid {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 8px;
   }
 }
 

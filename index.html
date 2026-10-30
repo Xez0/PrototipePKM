@@ -605,12 +605,147 @@
                   <input type="file" id="inputVideoLocalFile" accept="video/mp4,video/webm,video/mkv,video/*" style="display: none;" onchange="App.handleFileSelected(this)">
                 </div>
 
-                <div id="fileSelectedDisplay" class="file-selected-info" style="display: none;">
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <span class="file-selected-name" id="selectedFileName">video-materi.mp4</span>
-                    <span class="file-selected-size" id="selectedFileSize">0 MB</span>
+                <!-- Pratinjau Berkas Ringan & Cepat (Non-Player: Bebas Lag Walau Berkas Besar) -->
+                <div id="fileSelectedDisplay" class="video-file-preview-card" style="display: none;">
+                  <div class="file-preview-header">
+                    <div class="file-preview-status-badge">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <span>Berkas Video Siap Diunggah</span>
+                    </div>
+                    <span class="file-preview-mode-tag">Pratinjau Metadata Ringan</span>
                   </div>
-                  <button type="button" class="btn btn-sm btn-outline" onclick="App.clearSelectedVideoFile()" style="margin-left: auto;">Ganti</button>
+
+                  <div class="file-preview-body">
+                    <div class="file-preview-icon-box">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="2" y="2" width="20" height="20" rx="3" ry="3"></rect>
+                        <line x1="7" y1="2" x2="7" y2="22"></line>
+                        <line x1="17" y1="2" x2="17" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
+                      </svg>
+                      <span class="file-preview-ext-badge" id="selectedFileExt">MP4</span>
+                    </div>
+
+                    <div class="file-preview-meta-details">
+                      <div class="file-preview-filename" id="selectedFileName">video-materi.mp4</div>
+                      <div class="file-preview-submeta">
+                        <span class="file-preview-chip chip-size" id="selectedFileSize">0 MB</span>
+                        <span class="file-preview-chip chip-duration" id="selectedFileDuration">⏱ Durasi: Mendeteksi...</span>
+                        <span class="file-preview-chip chip-format" id="selectedFileType">Video MP4</span>
+                        <span class="file-preview-chip chip-dest">Unggah Langsung ke Channel Sekolah</span>
+                      </div>
+                      <div class="file-preview-tip">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 1px;">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Pratinjau menggunakan metadata cepat tanpa memutar video, sehingga browser tetap ringan dan lancar walau berkas video berukuran besar.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="file-preview-actions">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('inputVideoLocalFile').click()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      Ganti Berkas Video
+                    </button>
+                    <button type="button" class="btn-ghost-danger" onclick="App.clearSelectedVideoFile()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+
+                <!-- KUSTOMISASI THUMBNAIL (YOUTUBE-STYLE SELECTOR) -->
+                <div id="thumbnailCustomizerBlock" class="thumbnail-customizer-wrap" style="display: none;">
+                  <div class="thumb-section-header">
+                    <div class="thumb-section-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                      <span>Gambar Sampul / Thumbnail Video</span>
+                    </div>
+                    <span class="badge-optional">Pilih 1 Frame Video Otomatis atau Unggah Desain Sendiri</span>
+                  </div>
+
+                  <div class="thumbnail-selector-layout">
+                    <!-- Live Thumbnail Preview (16:9 Card) -->
+                    <div class="thumb-main-preview-box">
+                      <div class="thumb-preview-ratio">
+                        <img id="activeThumbnailPreviewImg" src="assets/cover-matematika.svg" alt="Pratinjau Thumbnail Video" class="thumb-main-img">
+                        <span class="thumb-duration-badge" id="thumbPreviewDurationPill">00:00</span>
+                      </div>
+                      <div class="thumb-preview-caption" id="activeThumbnailLabel">Frame Rekomendasi Video</div>
+                    </div>
+
+                    <!-- Pilihan Frame Snapshots & Upload Kustom -->
+                    <div class="thumb-options-container">
+                      <div class="thumb-options-label">Pilihan Thumbnail (Klik untuk Menggunakan):</div>
+                      <div class="thumb-options-grid" id="thumbOptionsGrid">
+                        <!-- Frame 1 -->
+                        <div class="thumb-option-tile" id="tileThumbFrame1" onclick="App.selectThumbnailOption('frame1')">
+                          <div class="thumb-tile-img-wrap">
+                            <img id="imgThumbFrame1" src="assets/cover-matematika.svg" alt="Frame Awal">
+                            <span class="thumb-tile-time" id="timeThumbFrame1">00:01</span>
+                          </div>
+                          <span class="thumb-tile-tag">Frame Awal</span>
+                        </div>
+
+                        <!-- Frame 2 -->
+                        <div class="thumb-option-tile active" id="tileThumbFrame2" onclick="App.selectThumbnailOption('frame2')">
+                          <div class="thumb-tile-img-wrap">
+                            <img id="imgThumbFrame2" src="assets/cover-matematika.svg" alt="Frame Tengah">
+                            <span class="thumb-tile-time" id="timeThumbFrame2">01:30</span>
+                          </div>
+                          <span class="thumb-tile-tag">Frame Tengah</span>
+                        </div>
+
+                        <!-- Frame 3 -->
+                        <div class="thumb-option-tile" id="tileThumbFrame3" onclick="App.selectThumbnailOption('frame3')">
+                          <div class="thumb-tile-img-wrap">
+                            <img id="imgThumbFrame3" src="assets/cover-matematika.svg" alt="Frame Akhir">
+                            <span class="thumb-tile-time" id="timeThumbFrame3">03:15</span>
+                          </div>
+                          <span class="thumb-tile-tag">Frame Akhir</span>
+                        </div>
+
+                        <!-- Opsi Cover Standar Mata Pelajaran -->
+                        <div class="thumb-option-tile" id="tileThumbSubject" onclick="App.selectThumbnailOption('subject')">
+                          <div class="thumb-tile-img-wrap">
+                            <img id="imgThumbSubject" src="assets/cover-matematika.svg" alt="Cover Mapel">
+                          </div>
+                          <span class="thumb-tile-tag">Cover Mapel</span>
+                        </div>
+
+                        <!-- Opsi Unggah Gambar Kustom Sendiri -->
+                        <div class="thumb-option-tile tile-upload-custom" id="tileThumbCustom" onclick="document.getElementById('inputCustomThumbnailFile').click()">
+                          <div class="thumb-tile-upload-box">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="17 8 12 3 7 8"></polyline>
+                              <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span class="upload-custom-label">Unggah Gambar</span>
+                          </div>
+                          <span class="thumb-tile-tag">Kustom</span>
+                          <input type="file" id="inputCustomThumbnailFile" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="App.handleCustomThumbnailSelected(this)">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Indikator Progress Bar Unggah YouTube -->
@@ -738,16 +873,37 @@
             <!-- ========================================== -->
             <!-- ACTION BAR BAWAH                           -->
             <!-- ========================================== -->
+            <!-- ========================================== -->
+            <!-- ACTION BAR BAWAH & INDIKATOR PROGRES UPLOAD -->
+            <!-- ========================================== -->
+            <div id="bottomUploadProgressWrapper" class="bottom-upload-progress-wrap" style="display: none;">
+              <div class="bottom-upload-status-row">
+                <div class="bottom-upload-pulse-box">
+                  <span class="upload-spinner-ring"></span>
+                  <div>
+                    <div id="bottomUploadProgressStatusText" class="bottom-upload-title">Sedang Mengunggah ke YouTube Channel Sekolah...</div>
+                    <div id="bottomUploadSubText" class="bottom-upload-subtitle">Mohon jangan menutup jendela ini hingga proses selesai</div>
+                  </div>
+                </div>
+                <div id="bottomUploadProgressPercentText" class="bottom-upload-pct">0%</div>
+              </div>
+              <div class="bottom-progress-track">
+                <div id="bottomUploadProgressBar" class="bottom-progress-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+
             <div class="teacher-form-action-bar">
               <button type="button" class="btn btn-secondary" onclick="App.closeTeacherForm()">
                 Batal
               </button>
               <button type="submit" id="btnSubmitSimpleVideo" class="btn btn-primary btn-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
+                <span id="btnSubmitIcon" style="display: inline-flex; align-items: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                </span>
                 <span id="btnSubmitText">Simpan &amp; Tayangkan Materi ke Siswa</span>
               </button>
             </div>
@@ -1023,14 +1179,13 @@
     </div>
   </footer>
 
-  <!-- Cloud Services: Supabase Realtime Database & Google YouTube Data API -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Cloud Services: Supabase Realtime Database -->
+  <script src="js/supabase.js"></script>
 
   <!-- Core App Scripts -->
-  <script src="js/data.js?v=20261031_v3"></script>
-  <script src="js/storage.js?v=20261031_v3"></script>
-  <script src="js/player.js?v=20261031_v3"></script>
-  <script src="js/app.js?v=20261031_v3"></script>
+  <script src="js/data.js?v=20261031_v4"></script>
+  <script src="js/storage.js?v=20261031_v4"></script>
+  <script src="js/player.js?v=20261031_v4"></script>
+  <script src="js/app.js?v=20261031_v4"></script>
 </body>
 </html>

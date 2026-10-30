@@ -472,30 +472,358 @@ const App = {
     }
   },
 
-  handleFileSelectedFile: function (file) {
+  // Format detik ke mm:ss atau hh:mm:ss
+  formatDuration: function (seconds) {
+    const s = Math.round(seconds || 0);
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const secs = s % 60;
+    if (hrs > 0) {
+      return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  },
+
+  // Deteksi durasi asli video berkas secara presisi dari metadata
+  extractVideoDuration: function (file) {
+    return new Promise((resolve) => {
+      try {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.muted = true;
+        const url = URL.createObjectURL(file);
+        video.src = url;
+
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(url);
+          const totalSecs = Math.round(video.duration || 0);
+          if (totalSecs > 0) {
+            resolve({ seconds: totalSecs, formatted: this.formatDuration(totalSecs) });
+          } else {
+            resolve({ seconds: 0, formatted: "10:00" });
+          }
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve({ seconds: 0, formatted: "10:00" });
+        };
+      } catch (e) {
+        resolve({ seconds: 0, formatted: "10:00" });
+      }
+    });
+  },
+
+  // Ekstrak 3 frame video snapshot (Thumbnail YouTube Style)
+  generateVideoFrames: function (file) {
+    return new Promise((resolve) => {
+      try {
+        const video = document.createElement("video");
+        video.preload = "auto";
+        video.muted = true;
+        video.playsInline = true;
+        const url = URL.createObjectURL(file);
+        video.src = url;
+
+        video.onloadedmetadata = async () => {
+          const duration = video.duration || 10;
+          const t1 = Math.min(2, Math.max(0.5, duration * 0.1));
+          const t2 = Math.max(t1 + 0.5, duration * 0.5);
+          const t3 = Math.max(t2 + 0.5, duration * 0.85);
+
+          const captureFrameAt = (targetSecs) => {
+            return new Promise((res) => {
+              const onSeeked = () => {
+                video.removeEventListener("seeked", onSeeked);
+                try {
+                  const canvas = document.createElement("canvas");
+                  canvas.width = 640;
+                  canvas.height = 360;
+                  const ctx = canvas.getContext("2d");
+                  ctx.drawImage(video, 0, 0, 640, 360);
+                  res(canvas.toDataURL("image/jpeg", 0.85));
+                } catch (e) {
+                  res(null);
+                }
+              };
+              video.addEventListener("seeked", onSeeked);
+              video.currentTime = Math.min(targetSecs, Math.max(0, duration - 0.2));
+            });
+          };
+
+          const frame1 = await captureFrameAt(t1);
+          const frame2 = await captureFrameAt(t2);
+          const frame3 = await captureFrameAt(t3);
+
+          URL.revokeObjectURL(url);
+          resolve({
+            frame1: frame1 || this.getCoverBySubject("Matematika"),
+            frame2: frame2 || frame1 || this.getCoverBySubject("Matematika"),
+            frame3: frame3 || frame2 || this.getCoverBySubject("Matematika"),
+            time1: this.formatDuration(t1),
+            time2: this.formatDuration(t2),
+            time3: this.formatDuration(t3),
+            durationFormatted: this.formatDuration(duration)
+          });
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve(null);
+        };
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  },
+
+  // Pemilihan Opsi Thumbnail (Frame 1, Frame 2, Frame 3, Cover Mapel)
+  selectThumbnailOption: function (optionKey) {
+    const previewImg = document.getElementById("activeThumbnailPreviewImg");
+    const labelElem = document.getElementById("activeThumbnailLabel");
+    const grid = document.getElementById("thumbOptionsGrid");
+
+    if (grid) {
+      grid.querySelectorAll(".thumb-option-tile").forEach(tile => tile.classList.remove("active"));
+    }
+
+    if (optionKey === "frame1" && this.extractedFrames) {
+      const tile = document.getElementById("tileThumbFrame1");
+      if (tile) tile.classList.add("active");
+      this.selectedThumbnailUrl = this.extractedFrames.frame1;
+      if (labelElem) labelElem.textContent = "Frame Awal Video (" + this.extractedFrames.time1 + ")";
+    } else if (optionKey === "frame2" && this.extractedFrames) {
+      const tile = document.getElementById("tileThumbFrame2");
+      if (tile) tile.classList.add("active");
+      this.selectedThumbnailUrl = this.extractedFrames.frame2;
+      if (labelElem) labelElem.textContent = "Frame Tengah Video (" + this.extractedFrames.time2 + ")";
+    } else if (optionKey === "frame3" && this.extractedFrames) {
+      const tile = document.getElementById("tileThumbFrame3");
+      if (tile) tile.classList.add("active");
+      this.selectedThumbnailUrl = this.extractedFrames.frame3;
+      if (labelElem) labelElem.textContent = "Frame Akhir Video (" + this.extractedFrames.time3 + ")";
+    } else if (optionKey === "subject") {
+      const tile = document.getElementById("tileThumbSubject");
+      if (tile) tile.classList.add("active");
+      const subjectInput = document.getElementById("simpleVideoSubject");
+      const subj = subjectInput ? subjectInput.value : "Matematika";
+      this.selectedThumbnailUrl = this.getCoverBySubject(subj);
+      if (labelElem) labelElem.textContent = "Cover Standar Mata Pelajaran (" + subj + ")";
+    }
+
+    if (previewImg && this.selectedThumbnailUrl) {
+      previewImg.src = this.selectedThumbnailUrl;
+    }
+  },
+
+  // Upload Thumbnail Kustom Sendiri (Canva/Gambar Laptop)
+  handleCustomThumbnailSelected: function (input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        this.selectedThumbnailUrl = dataUrl;
+        const previewImg = document.getElementById("activeThumbnailPreviewImg");
+        const labelElem = document.getElementById("activeThumbnailLabel");
+        const grid = document.getElementById("thumbOptionsGrid");
+        const customTile = document.getElementById("tileThumbCustom");
+
+        if (grid) {
+          grid.querySelectorAll(".thumb-option-tile").forEach(tile => tile.classList.remove("active"));
+        }
+        if (customTile) customTile.classList.add("active");
+        if (previewImg) previewImg.src = dataUrl;
+        if (labelElem) labelElem.textContent = "Thumbnail Kustom (" + file.name + ")";
+        this.showToast("Thumbnail kustom berhasil dipasang!", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+
+  handleFileSelectedFile: async function (file) {
+    if (!file) return;
     this.pendingVideoFile = file;
 
-    const display = document.getElementById("fileSelectedDisplay");
+    const dropzone = document.getElementById("videoFileDropzone");
+    const previewCard = document.getElementById("fileSelectedDisplay");
     const nameElem = document.getElementById("selectedFileName");
     const sizeElem = document.getElementById("selectedFileSize");
-    const dropzoneTitle = document.getElementById("dropzoneTitleText");
+    const typeElem = document.getElementById("selectedFileType");
+    const extElem = document.getElementById("selectedFileExt");
+    const durElem = document.getElementById("selectedFileDuration");
 
+    // Sembunyikan dropzone kosong dan tampilkan preview card yang kaya metadata
+    if (dropzone) dropzone.style.display = "none";
+    if (previewCard) previewCard.style.display = "flex";
+
+    // Tampilkan nama berkas
     if (nameElem) nameElem.textContent = file.name;
-    if (sizeElem) sizeElem.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
-    if (display) display.style.display = "flex";
-    if (dropzoneTitle) dropzoneTitle.textContent = "Berkas Video Siap Diunggah ke Channel Sekolah";
+
+    // Ekstrak ekstensi berkas untuk badge (MP4, WEBM, MKV, dll.)
+    const extMatch = file.name.match(/\.([0-9a-z]+)$/i);
+    const ext = extMatch ? extMatch[1].toUpperCase() : "MP4";
+    if (extElem) extElem.textContent = ext;
+
+    // Hitung ukuran berkas secara presisi
+    let formattedSize = "0 MB";
+    if (file.size < 1024 * 1024) {
+      formattedSize = (file.size / 1024).toFixed(1) + " KB";
+    } else if (file.size < 1024 * 1024 * 1024) {
+      formattedSize = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+    } else {
+      formattedSize = (file.size / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+    }
+    if (sizeElem) sizeElem.textContent = formattedSize;
+
+    // Tampilkan format MIME
+    if (typeElem) {
+      typeElem.textContent = file.type ? file.type : `Video ${ext}`;
+    }
+
+    // 1. Ekstrak durasi asli video
+    if (durElem) durElem.textContent = "⏱ Mendeteksi durasi...";
+    const durInfo = await this.extractVideoDuration(file);
+    this.pendingVideoDuration = durInfo.formatted;
+    if (durElem) durElem.textContent = "⏱ Durasi Asli: " + durInfo.formatted;
+
+    // 2. Ekstrak 3 frame video snapshot (Thumbnail YouTube Style)
+    const customizerBlock = document.getElementById("thumbnailCustomizerBlock");
+    const durationPill = document.getElementById("thumbPreviewDurationPill");
+    if (durationPill) durationPill.textContent = durInfo.formatted;
+
+    const frames = await this.generateVideoFrames(file);
+    if (frames) {
+      this.extractedFrames = frames;
+      const img1 = document.getElementById("imgThumbFrame1");
+      const img2 = document.getElementById("imgThumbFrame2");
+      const img3 = document.getElementById("imgThumbFrame3");
+      const time1 = document.getElementById("timeThumbFrame1");
+      const time2 = document.getElementById("timeThumbFrame2");
+      const time3 = document.getElementById("timeThumbFrame3");
+
+      if (img1) img1.src = frames.frame1;
+      if (img2) img2.src = frames.frame2;
+      if (img3) img3.src = frames.frame3;
+      if (time1) time1.textContent = frames.time1;
+      if (time2) time2.textContent = frames.time2;
+      if (time3) time3.textContent = frames.time3;
+
+      // Update Cover Mapel tile
+      const subjectInput = document.getElementById("simpleVideoSubject");
+      const subj = subjectInput ? subjectInput.value : "Matematika";
+      const imgSubj = document.getElementById("imgThumbSubject");
+      if (imgSubj) imgSubj.src = this.getCoverBySubject(subj);
+
+      // Default pilih Frame 2 (tengah)
+      this.selectThumbnailOption("frame2");
+      if (customizerBlock) customizerBlock.style.display = "block";
+    } else {
+      // Fallback jika video codec tidak didukung canvas
+      const subjectInput = document.getElementById("simpleVideoSubject");
+      const subj = subjectInput ? subjectInput.value : "Matematika";
+      this.selectedThumbnailUrl = this.getCoverBySubject(subj);
+      if (customizerBlock) customizerBlock.style.display = "block";
+      this.selectThumbnailOption("subject");
+    }
+
+    // CATATAN: Judul materi pembelajaran TIDAK diubah otomatis dari nama file,
+    // sesuai permintaan user agar guru tetap mengisinya secara manual.
   },
 
   clearSelectedVideoFile: function () {
     this.pendingVideoFile = null;
+    this.pendingVideoDuration = "10:00";
+    this.selectedThumbnailUrl = null;
+    this.extractedFrames = null;
+
     const input = document.getElementById("inputVideoLocalFile");
     if (input) input.value = "";
-    const display = document.getElementById("fileSelectedDisplay");
-    if (display) display.style.display = "none";
-    const dropzoneTitle = document.getElementById("dropzoneTitleText");
-    if (dropzoneTitle) dropzoneTitle.textContent = "Tarik & Lepas File Video di Sini atau Klik untuk Memilih";
-    const progressWrapper = document.getElementById("videoUploadProgressWrapper");
-    if (progressWrapper) progressWrapper.style.display = "none";
+    const customThumbInput = document.getElementById("inputCustomThumbnailFile");
+    if (customThumbInput) customThumbInput.value = "";
+
+    const dropzone = document.getElementById("videoFileDropzone");
+    const previewCard = document.getElementById("fileSelectedDisplay");
+    const customizerBlock = document.getElementById("thumbnailCustomizerBlock");
+
+    if (dropzone) dropzone.style.display = "block";
+    if (previewCard) previewCard.style.display = "none";
+    if (customizerBlock) customizerBlock.style.display = "none";
+
+    this.resetUploadProgress();
+  },
+
+  // Sinkronisasi Progress Bar Unggah (Atas di Card 1, Bawah di Atas Tombol Submit, dan Label Tombol)
+  setUploadProgress: function (percent, statusText, subText) {
+    const pct = Math.min(100, Math.max(0, Math.round(percent)));
+
+    // 1. Sinkronisasi Indikator Atas (Card 1)
+    const topWrapper = document.getElementById("videoUploadProgressWrapper");
+    const topBar = document.getElementById("uploadProgressBar");
+    const topPct = document.getElementById("uploadProgressPercentText");
+    const topStatus = document.getElementById("uploadProgressStatusText");
+
+    if (topWrapper) topWrapper.style.display = "block";
+    if (topBar) topBar.style.width = pct + "%";
+    if (topPct) topPct.textContent = pct + "%";
+    if (topStatus && statusText) topStatus.textContent = statusText;
+
+    // 2. Sinkronisasi Indikator Bawah (Tepat di Atas Tombol Submit)
+    const btmWrapper = document.getElementById("bottomUploadProgressWrapper");
+    const btmBar = document.getElementById("bottomUploadProgressBar");
+    const btmPct = document.getElementById("bottomUploadProgressPercentText");
+    const btmStatus = document.getElementById("bottomUploadProgressStatusText");
+    const btmSub = document.getElementById("bottomUploadSubText");
+
+    if (btmWrapper) btmWrapper.style.display = "block";
+    if (btmBar) btmBar.style.width = pct + "%";
+    if (btmPct) btmPct.textContent = pct + "%";
+    if (btmStatus && statusText) btmStatus.textContent = statusText;
+    if (btmSub && subText) btmSub.textContent = subText;
+
+    // 3. Transformasi Tombol Submit Langsung di Titik Fokus Guru
+    const submitBtn = document.getElementById("btnSubmitSimpleVideo");
+    const btnText = document.getElementById("btnSubmitText");
+    const btnIcon = document.getElementById("btnSubmitIcon");
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add("btn-uploading");
+    }
+    if (btnIcon) {
+      btnIcon.innerHTML = `<svg class="spin-animation" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>`;
+    }
+    if (btnText) {
+      if (pct < 100) {
+        btnText.textContent = `Mengunggah Video... ${pct}%`;
+      } else {
+        btnText.textContent = `Memproses & Menyimpan Data...`;
+      }
+    }
+  },
+
+  resetUploadProgress: function () {
+    const topWrapper = document.getElementById("videoUploadProgressWrapper");
+    const btmWrapper = document.getElementById("bottomUploadProgressWrapper");
+    if (topWrapper) topWrapper.style.display = "none";
+    if (btmWrapper) btmWrapper.style.display = "none";
+
+    const submitBtn = document.getElementById("btnSubmitSimpleVideo");
+    const btnText = document.getElementById("btnSubmitText");
+    const btnIcon = document.getElementById("btnSubmitIcon");
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("btn-uploading");
+    }
+    if (btnIcon) {
+      btnIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
+    }
+    if (btnText) {
+      const modeInput = document.getElementById("teacherFormMode");
+      const isEdit = modeInput && modeInput.value === "edit";
+      btnText.textContent = isEdit ? "Simpan Perubahan Materi" : "Simpan & Tayangkan Materi ke Siswa";
+    }
   },
 
   // Pemilihan Jenjang Kelas Cepat
@@ -551,7 +879,7 @@ const App = {
       this.selectGradeBtn("7");
       this.switchUploadSource("youtube");
       this.handleYoutubeUrlInput("");
-      this.pendingVideoFile = null;
+      this.clearSelectedVideoFile();
     } else {
       // Mode Edit
       const videos = RepoStorage.getVideos();
@@ -576,6 +904,9 @@ const App = {
 
       const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
       if (chaptersInput) chaptersInput.value = chapText;
+
+      this.selectedThumbnailUrl = v.thumbnail || null;
+      this.pendingVideoDuration = v.duration || "10:00";
 
       if (v.sourceType === "local") {
         this.switchUploadSource("file");
@@ -710,6 +1041,9 @@ const App = {
 
     try {
       if (mode === "create") {
+        const chosenDuration = this.pendingVideoDuration || "10:00";
+        const chosenThumbnail = this.selectedThumbnailUrl || defaultCover;
+
         let videoPayload = {
           title,
           grade,
@@ -717,12 +1051,12 @@ const App = {
           category: this.mapCategoryBySubject(subject),
           teacher: teacher.name,
           teacherNip: teacher.nip || "",
-          duration: "15:00",
+          duration: chosenDuration,
           description: notes || `Materi pembelajaran mandiri mata pelajaran ${subject} Kelas ${grade}. Silakan dipelajari siswa secara berulang.`,
           learningOutcome: outcome || "",
           pdfContent: notes || "",
           quizUrl: quizUrl || "",
-          thumbnail: defaultCover,
+          thumbnail: chosenThumbnail,
           publishedAt: new Date().toISOString(),
           chapters: this.parseChaptersInput(chaptersRaw)
         };
@@ -730,19 +1064,16 @@ const App = {
         if (this.currentUploadSource === "file") {
           if (!this.pendingVideoFile) {
             this.showToast("Silakan pilih berkas video MP4/WebM dari komputer Anda terlebih dahulu.", "danger");
-            if (submitBtn) submitBtn.disabled = false;
+            this.resetUploadProgress();
             return;
           }
 
-          const progressWrapper = document.getElementById("videoUploadProgressWrapper");
-          const progressBar = document.getElementById("uploadProgressBar");
-          const progressPercent = document.getElementById("uploadProgressPercentText");
-          const progressStatus = document.getElementById("uploadProgressStatusText");
-
-          if (progressWrapper) progressWrapper.style.display = "block";
-          if (progressBar) progressBar.style.width = "10%";
-          if (progressPercent) progressPercent.textContent = "10%";
-          if (progressStatus) progressStatus.textContent = "Menghubungkan ke Channel YouTube Sekolah...";
+          const fileSizeMB = (this.pendingVideoFile.size / (1024 * 1024)).toFixed(1);
+          this.setUploadProgress(
+            5,
+            "Menghubungkan ke Channel YouTube Sekolah...",
+            `Mempersiapkan unggahan berkas (${fileSizeMB} MB, durasi ${chosenDuration}) ke kanal resmi sekolah...`
+          );
 
           let uploadedToYouTube = false;
           try {
@@ -753,18 +1084,24 @@ const App = {
                 description: videoPayload.description
               },
               (percent) => {
-                if (progressBar) progressBar.style.width = `${percent}%`;
-                if (progressPercent) progressPercent.textContent = `${percent}%`;
-                if (progressStatus) progressStatus.textContent = `Mengunggah ke YouTube Channel Sekolah... ${percent}%`;
+                this.setUploadProgress(
+                  percent,
+                  `Sedang Mengunggah ke YouTube Channel Sekolah... ${percent}%`,
+                  `Mengirim data video (${fileSizeMB} MB) • Mohon jangan menutup halaman`
+                );
               }
             );
 
             if (ytVideoId) {
               uploadedToYouTube = true;
-              if (progressStatus) progressStatus.textContent = "Unggah selesai! Menyimpan data materi...";
+              this.setUploadProgress(
+                100,
+                "Unggah video berhasil! Menyimpan data materi...",
+                "Video berhasil masuk ke channel resmi sekolah. Menyinkronkan ke katalog siswa..."
+              );
               videoPayload.sourceType = "youtube";
               videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl("https://youtu.be/" + ytVideoId);
-              videoPayload.thumbnail = `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
+              videoPayload.thumbnail = chosenThumbnail || `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
             }
           } catch (uploadErr) {
             console.warn("[YOUTUBE UPLOAD] Direct upload ke YouTube tidak dapat dilanjutkan, beralih ke lokal:", uploadErr);
@@ -772,11 +1109,14 @@ const App = {
           }
 
           if (!uploadedToYouTube) {
+            this.setUploadProgress(90, "Menyimpan ke media penyimpanan lokal...", "Membuat thumbnail materi pembelajaran...");
             videoPayload.sourceType = "local";
             videoPayload.embedUrl = "";
-            const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
-            if (snapshot) {
-              videoPayload.thumbnail = snapshot;
+            if (!this.selectedThumbnailUrl) {
+              const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
+              if (snapshot) {
+                videoPayload.thumbnail = snapshot;
+              }
             }
           }
         } else {
@@ -832,6 +1172,13 @@ const App = {
           }
         }
 
+        if (this.selectedThumbnailUrl) {
+          updatedData.thumbnail = this.selectedThumbnailUrl;
+        }
+        if (this.pendingVideoDuration) {
+          updatedData.duration = this.pendingVideoDuration;
+        }
+
         await RepoStorage.updateVideo(editId, updatedData);
         this.showToast("Perubahan materi berhasil diperbarui!", "success");
       }
@@ -845,11 +1192,7 @@ const App = {
       console.error("Gagal memproses materi:", err);
       this.showToast("Terjadi kendala saat menyimpan video. Silakan coba kembali.", "danger");
     } finally {
-      const progressWrapper = document.getElementById("videoUploadProgressWrapper");
-      if (progressWrapper) progressWrapper.style.display = "none";
-      if (submitBtn) {
-        submitBtn.disabled = false;
-      }
+      this.resetUploadProgress();
     }
   },
 
