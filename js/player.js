@@ -74,6 +74,19 @@ const VideoPlayer = {
     if (subjectGradeElem) subjectGradeElem.textContent = `${video.subject} • Kelas ${video.grade}`;
     if (descElem) descElem.textContent = video.description || "";
 
+    // Cek Ketersediaan Kuis / Latihan Soal Mandiri
+    const quizCard = document.getElementById("modalQuizCard");
+    const quizLink = document.getElementById("btnModalQuizLink");
+    const quizUrl = (video.quizUrl || "").trim();
+    if (quizCard && quizLink) {
+      if (quizUrl) {
+        quizCard.style.display = "flex";
+        quizLink.href = quizUrl;
+      } else {
+        quizCard.style.display = "none";
+      }
+    }
+
     // Cek Ketersediaan Bab & Rangkuman (Opsional)
     const chapters = Array.isArray(video.chapters) ? video.chapters : [];
     const hasChapters = chapters.length > 0;
@@ -91,32 +104,41 @@ const VideoPlayer = {
     if (boxOutcome) boxOutcome.style.display = hasOutcome ? "block" : "none";
     if (boxSummary) boxSummary.style.display = hasSummary ? "block" : "none";
 
-    // Atur Tampilan Sidebar Adaptif
+    // Atur Tampilan Sidebar Adaptif (100% Opsional Sesuai Pengisian Guru)
     const sidebar = document.getElementById("theatreSidebar");
     const contentGrid = document.querySelector(".theatre-content-grid");
+    const tabNav = document.getElementById("theatreTabNav");
     const btnChapters = document.getElementById("btnTabChapters");
     const btnNotes = document.getElementById("btnTabTeacherNotes");
 
     if (!hasChapters && !hasNotes) {
-      // Tidak ada bab maupun rangkuman: Tampilkan pemutar video lebar penuh
+      // Guru TIDAK mengisi Bab dan TIDAK mengisi Rangkuman:
+      // Menu samping TIDAK MUNCUL SAMA SEKALI, pemutar video tampil lebar penuh (Cinema Mode)
       if (sidebar) sidebar.style.display = "none";
       if (contentGrid) contentGrid.classList.add("no-sidebar");
     } else {
+      // Ada salah satu atau kedua bahan pendamping:
       if (sidebar) sidebar.style.display = "flex";
       if (contentGrid) contentGrid.classList.remove("no-sidebar");
 
-      if (hasChapters && !hasNotes) {
+      if (hasChapters && hasNotes) {
+        // Keduanya diisi oleh guru: Tampilkan kedua tab navigasi
+        if (tabNav) tabNav.style.display = "flex";
+        if (btnChapters) btnChapters.style.display = "flex";
+        if (btnNotes) btnNotes.style.display = "flex";
+        this.switchTab("tabChapters");
+      } else if (hasChapters && !hasNotes) {
+        // Hanya bab yang diisi: Tampilkan header tab bab tunggal
+        if (tabNav) tabNav.style.display = "flex";
         if (btnChapters) btnChapters.style.display = "flex";
         if (btnNotes) btnNotes.style.display = "none";
         this.switchTab("tabChapters");
-      } else if (!hasChapters && hasNotes) {
+      } else {
+        // Hanya rangkuman yang diisi: Tampilkan header tab rangkuman tunggal
+        if (tabNav) tabNav.style.display = "flex";
         if (btnChapters) btnChapters.style.display = "none";
         if (btnNotes) btnNotes.style.display = "flex";
         this.switchTab("tabTeacherNotes");
-      } else {
-        if (btnChapters) btnChapters.style.display = "flex";
-        if (btnNotes) btnNotes.style.display = "flex";
-        this.switchTab("tabChapters");
       }
     }
 
@@ -260,7 +282,7 @@ const VideoPlayer = {
         onclick="VideoPlayer.jumpToChapter(${ch.seconds}, ${idx})"
         title="Ulangi penjelasan dari menit ${ch.time}">
         <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-          <span style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--color-ink-subtle);">#${idx + 1}</span>
+          <span style="font-family: var(--font-sans); font-size: 0.8125rem; color: var(--color-ink-subtle);">#${idx + 1}</span>
           <span style="font-weight: 500; font-size: 0.875rem; color: var(--color-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${ch.title}
           </span>

@@ -168,6 +168,24 @@ const INITIAL_VIDEO_DATA = [
       { time: "07:45", title: "Perbedaan Sanksi Norma Kesopanan & Hukum", seconds: 465 },
       { time: "11:10", title: "Penerapan Tata Tertib di SMPN 7 Tangsel", seconds: 670 }
     ]
+  },
+  {
+    id: "smpn7-inf-07-02",
+    title: "Pemrograman Visual Scratch: Pengenalan Gerak Sprite",
+    grade: "7",
+    subject: "Informatika / TIK",
+    category: "Informatika",
+    teacher: "Budi Santoso, S.Kom.",
+    teacherNip: "19840915 200902 1 003",
+    duration: "08:45",
+    embedUrl: "https://www.youtube-nocookie.com/embed/P91EUTrTPx0?enablejsapi=1&rel=0&modestbranding=1",
+    thumbnail: "assets/cover-informatika.svg",
+    sourceType: "youtube",
+    publishedAt: "2026-10-29T10:00:00.000Z",
+    description: "Praktik pengantar pemrograman visual blok Scratch untuk siswa kelas 7 SMPN 7 Tangsel. Fokus pada pemahaman event bendera hijau dan kontrol gerak dasar.",
+    learningOutcome: "",
+    pdfContent: "",
+    chapters: []
   }
 ];
 

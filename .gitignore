@@ -1,4 +1,6 @@
 .taste-skill/
 node_modules/
+uploads/*
+!uploads/.gitkeep
 .DS_Store
 Thumbs.db

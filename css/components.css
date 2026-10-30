@@ -75,7 +75,7 @@
 }
 
 .nav-text-link {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-ink-muted);
   text-decoration: none;
@@ -219,7 +219,7 @@ kbd.key-hint {
 }
 
 .hero-title {
-  font-size: clamp(2.25rem, 4vw, 3rem);
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
   font-weight: 800;
   color: var(--color-ink);
   line-height: 1.2;
@@ -234,7 +234,7 @@ kbd.key-hint {
 }
 
 .hero-desc {
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.65;
   color: var(--color-ink-muted);
   margin-bottom: var(--space-xl);
@@ -334,7 +334,7 @@ kbd.key-hint {
 }
 
 .preview-caption h3 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--color-ink);
   margin-bottom: 2px;
 }
@@ -371,7 +371,7 @@ kbd.key-hint {
   width: 100%;
   padding: 14px 140px 14px 44px;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 1rem;
   background-color: var(--color-surface-1);
   border: 1px solid var(--color-hairline-strong);
   border-radius: var(--radius-md);
@@ -466,7 +466,7 @@ kbd.key-hint {
 }
 
 .section-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -535,7 +535,7 @@ kbd.key-hint {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: var(--radius-xs);
@@ -647,7 +647,7 @@ kbd.key-hint {
 }
 
 .card-title {
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.35;
   color: var(--color-ink);
@@ -787,7 +787,6 @@ kbd.key-hint {
   justify-content: center;
   padding: var(--space-lg);
   overflow-y: auto;
-  backdrop-filter: blur(3px);
 }
 
 .modal-backdrop.active {
@@ -827,7 +826,7 @@ kbd.key-hint {
 }
 
 .theatre-header-title h2 {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-ink);
   white-space: nowrap;
@@ -858,6 +857,14 @@ kbd.key-hint {
   flex: 1;
   overflow: hidden;
   height: calc(94vh - 65px);
+}
+
+.theatre-content-grid.no-sidebar {
+  grid-template-columns: 1fr;
+}
+
+.theatre-content-grid.no-sidebar .theatre-main-view {
+  border-right: none;
 }
 
 [data-ui] .theatre-main-view,
@@ -961,7 +968,7 @@ kbd.key-hint {
 }
 
 .cp-box h4 {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--color-primary);
   display: flex;
   align-items: center;
@@ -978,7 +985,7 @@ kbd.key-hint {
 
 /* Modul Cetak PDF Card telah dihapus per permintaan pengguna */
 .card-meta-date {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-ink-subtle);
   font-weight: 500;
   display: inline-flex;
@@ -1092,7 +1099,7 @@ kbd.key-hint {
 
 .reading-badge {
   display: inline-block;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -1197,6 +1204,33 @@ kbd.key-hint {
   color: var(--color-ink-subtle);
 }
 
+.server-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+}
+
+.sync-dot.offline {
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+}
+
 [data-ui] .teacher-table-wrap,
 .teacher-table-wrap {
   overflow-x: auto;
@@ -1230,7 +1264,7 @@ kbd.key-hint {
 }
 
 .table-badge-source {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   padding: 3px 8px;
   border-radius: var(--radius-xs);
@@ -1291,7 +1325,7 @@ kbd.key-hint {
 }
 
 .login-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-ink);
   margin-bottom: 6px;
@@ -1325,7 +1359,7 @@ kbd.key-hint {
 }
 
 .login-demo-text {
-  font-size: 0.775rem;
+  font-size: 0.8125rem;
   color: var(--color-ink-subtle);
   margin-bottom: var(--space-sm);
   line-height: 1.4;
@@ -1365,7 +1399,7 @@ kbd.key-hint {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .teacher-profile-name {
@@ -1532,7 +1566,7 @@ kbd.key-hint {
 }
 
 .faq-hero-lead {
-  font-size: 1.125rem;
+  font-size: 1rem;
   line-height: 1.65;
   color: var(--color-ink-muted);
   margin: 0;
@@ -1575,7 +1609,7 @@ kbd.key-hint {
 }
 
 .faq-band-question {
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-ink);
   line-height: 1.35;
@@ -1587,7 +1621,7 @@ kbd.key-hint {
 }
 
 .faq-band-answer-col p {
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--color-ink-muted);
   margin: 0;
@@ -1650,7 +1684,7 @@ kbd.key-hint {
 }
 
 .footer-address {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: #cbd5e1;
   line-height: 1.6;
   max-width: 48ch;
@@ -1659,14 +1693,14 @@ kbd.key-hint {
 
 .footer-heading-label {
   display: inline-block;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: #f59e0b;
   margin-bottom: 6px;
 }
 
 .footer-pkm-desc {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: #cbd5e1;
   line-height: 1.6;
   margin-bottom: var(--space-sm);
@@ -1690,7 +1724,7 @@ kbd.key-hint {
 }
 
 .footer-monument-typo {
-  font-size: clamp(1.5rem, 4.2vw, 3.25rem);
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
   font-weight: 800;
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.15);
@@ -1806,6 +1840,539 @@ kbd.key-hint {
 [data-theme="dark"] .toast.danger {
   background-color: #991b1b;
   color: #ffffff;
+}
+
+/* -------------------------------------------------------------
+   10. UNIFIED COMMAND FILTER BAR (BEBAS SLOP & ELEGAN)
+   ------------------------------------------------------------- */
+.unified-filter-card {
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin-bottom: var(--space-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.filter-primary-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.filter-search-box {
+  flex: 1;
+  min-width: 280px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--color-ink-subtle);
+  pointer-events: none;
+}
+
+.filter-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 85px 0 42px;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.filter-search-input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-1);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.filter-search-actions {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-clear-filter {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  background-color: transparent;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xs);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.btn-clear-filter:hover {
+  background-color: var(--color-surface-3);
+  color: var(--color-ink);
+}
+
+.segmented-grade-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-surface-2);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-hairline);
+}
+
+.segmented-track-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink-subtle);
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.seg-btn {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  white-space: nowrap;
+}
+
+.seg-btn:hover {
+  color: var(--color-ink);
+}
+
+.seg-btn.active {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.filter-subject-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-hairline);
+  scrollbar-width: none;
+}
+
+.filter-subject-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.sub-tab-btn {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all var(--duration-fast);
+}
+
+.sub-tab-btn:hover {
+  background-color: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.sub-tab-btn.active {
+  background-color: var(--color-surface-2);
+  border-color: var(--color-hairline);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.sub-tab-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-3);
+  color: var(--color-ink-subtle);
+}
+
+.sub-tab-btn.active .sub-tab-count {
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+
+/* -------------------------------------------------------------
+   TEACHER PORTAL: SUBVIEWS, FORM STEP CARDS, & PREVIEW
+   ------------------------------------------------------------- */
+.teacher-subview {
+  width: 100%;
+}
+
+.teacher-table-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.teacher-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.teacher-section-sub {
+  font-size: 0.8125rem;
+  color: var(--color-ink-subtle);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.teacher-table-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.teacher-table-search-row {
+  margin-bottom: var(--space-md);
+}
+
+.teacher-table-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 360px;
+}
+
+.teacher-table-search-box svg {
+  position: absolute;
+  left: 12px;
+  color: var(--color-ink-subtle);
+  pointer-events: none;
+}
+
+.teacher-table-search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.teacher-table-search-input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-1);
+}
+
+/* Form Top Navigation */
+.teacher-form-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+}
+
+.teacher-form-header {
+  margin-bottom: var(--space-xl);
+}
+
+.teacher-form-heading {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 6px;
+  letter-spacing: -0.015em;
+}
+
+.teacher-form-subheading {
+  font-size: 0.875rem;
+  color: var(--color-ink-subtle);
+  margin: 0;
+}
+
+.teacher-3step-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.form-step-card {
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.step-card-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-lg);
+  letter-spacing: -0.01em;
+}
+
+.step-card-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: 4px;
+}
+
+.step-card-header-flex .step-card-title {
+  margin-bottom: 0;
+}
+
+.badge-optional {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-2);
+  color: var(--color-ink-subtle);
+  border: 1px solid var(--color-hairline);
+}
+
+.step-card-sub {
+  font-size: 0.8125rem;
+  color: var(--color-ink-subtle);
+  margin: 0 0 var(--space-lg);
+}
+
+.form-label-req {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.text-req {
+  color: var(--color-danger);
+}
+
+.form-input-text,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+
+.form-input-text:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.grade-segmented-group {
+  display: flex;
+  gap: 6px;
+}
+
+.grade-seg-btn {
+  flex: 1;
+  padding: 10px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  text-align: center;
+}
+
+.grade-seg-btn:hover {
+  background-color: var(--color-surface-3);
+  color: var(--color-ink);
+}
+
+.grade-seg-btn.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+/* YouTube Live Preview Card */
+.youtube-preview-card {
+  display: flex;
+  gap: var(--space-md);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-sm);
+  align-items: center;
+}
+
+.yt-preview-thumb-wrap {
+  position: relative;
+  width: 140px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.yt-preview-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.yt-preview-duration {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.yt-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.yt-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-success);
+  margin-bottom: 4px;
+}
+
+.yt-preview-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+  line-height: 1.35;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yt-preview-meta {
+  font-size: 0.75rem;
+  color: var(--color-ink-subtle);
+}
+
+.teacher-form-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: 0.9375rem;
+}
+
+/* Theatre Modal: Practice Quiz Banner */
+.theatre-quiz-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.theatre-quiz-icon-col {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.theatre-quiz-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.theatre-quiz-tag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.theatre-quiz-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 /* -------------------------------------------------------------

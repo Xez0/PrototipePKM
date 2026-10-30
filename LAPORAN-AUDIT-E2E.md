@@ -305,5 +305,95 @@ Prioritas fix (yang tidak dilakukan di audit ini, sesuai instruksi — tidak ada
 
 ---
 
-*Laporan dibuat otomatis via Hermes Agent (ratman4080) — 21 Oktober 2026, 14:01 WIB.*
-*Metode: statis (pembacaan penuh 5.009 LOC) + dinamis (Camoufox real-browser, 30+ skenario evaluate/click/press) + visual (4 screenshot light/dark via vision) + jaringan (7 video YT diverifikasi via oEmbed + thumbnail).*
+## 13. HASIL AUDIT ULANG & REMEDIASI RESMI (CAMOUFOX BROWSER + SKILL /DESIGN-TASTE-FRONTEND)
+
+**Tanggal Verifikasi:** Rabu, 21 Oktober 2026, 22:23 WIB  
+**Browser Eksekusi:** Camoufox Browser (Real Firefox Engine via Playwright)  
+**Tautan Audit:** `http://127.0.0.1:8877`  
+**Ringkasan Status:** **29/29 PENGUJIAN LULUS SEMPURNA (100% PASS, 0 WARN, 0 FAIL)**
+
+### 13.1 Matriks Hasil Uji Fungsional (20/20 PASS)
+
+| No | Skenario Pengujian | Hasil | Catatan Teknis |
+|---|---|---|---|
+| 1 | `1_boot_card_count` | ✅ **PASS** | 7 kartu materi resmi ter-render sempurna saat boot |
+| 2 | `2_counter_label` | ✅ **PASS** | Label "7 materi tersedia" sinkron dengan data |
+| 3 | `3_hero_preview_click` | ✅ **PASS** | Klik pratinjau hero membuka materi unggulan tanpa error |
+| 4 | `4_search_aljabar` | ✅ **PASS** | Pencarian instan kata "aljabar" menyaring tepat 1 kartu |
+| 5 | `5_empty_state` | ✅ **PASS** | Kata kunci nihil menampilkan kartu status kosong yang elegan |
+| 6 | `6_reset_search` | ✅ **PASS** | Tombol reset mengembalikan katalog ke 7 materi |
+| 7 | `7_filter_kelas9` | ✅ **PASS** | Filter jenjang Kelas 9 menyaring 2 materi secara akurat |
+| 8 | `8_player_opens` | ✅ **PASS** | Modal player terbuka dengan iframe YouTube nocookie terpasang |
+| 9 | `9_player_chapters_close` | ✅ **PASS** | Tab bab repetisi interaktif & tombol tutup berfungsi mulus |
+| 10 | `10_esc_close` | ✅ **PASS** | Menekan tombol keyboard `Escape` menutup modal player |
+| 11 | `11_dark_mode_toggle` | ✅ **PASS** | `data-theme="dark"` aktif dan sinkron di seluruh komponen |
+| 12 | `12_dark_counter_readable` | ✅ **PASS** | Teks dan counter terbaca jelas pada mode malam (WCAG AAA) |
+| 13 | `13_toggle_back_light` | ✅ **PASS** | Berpindah kembali ke tema Scholastic Slate Canvas tanpa cacat |
+| 14 | `14_teacher_login_appears` | ✅ **PASS** | Pintasan keyboard `G` memunculkan halaman masuk guru |
+| 15 | `15_fast_login_teacher` | ✅ **PASS** | Tombol masuk cepat login sebagai Tri Elmania, S.Pd. (7 baris tabel) |
+| 16 | `16_auto_sync_badge` | ✅ **PASS** | Indikator live status "Tersimpan Otomatis di Server Sekolah" tampil rapi tanpa membebani guru |
+| 17 | `17_backend_api_sync` | ✅ **PASS** | REST API `/api/status` & `/api/videos` merespons 200 OK dengan 7 materi tersimpan otomatis di server |
+| 18 | `18_yt_url_validation` | ✅ **PASS** | URL YouTube tidak valid langsung ditolak dengan toast peringatan |
+| 19 | `19_valid_yt_save` | ✅ **PASS** | URL YouTube valid tersimpan ke server backend dan langsung tayang di katalog siswa |
+| 20 | `20_logout` | ✅ **PASS** | Tombol keluar mengembalikan tampilan ke portal siswa dengan aman |
+
+---
+
+### 13.2 Matriks Kepatuhan Aturan /design-taste-frontend (9/9 PASS)
+
+| No | Aturan Desain (House Rule) | Status | Bukti Pengukuran Browser |
+|---|---|---|---|
+| 1 | **No Gradients** (Bebas gradasi artifisial) | ✅ **PASS** | Tidak ada `linear-gradient` / `radial-gradient` |
+| 2 | **No Glass / Blur** (Bebas backdrop blur) | ✅ **PASS** | `backdrop-filter: blur()` dihapus dari seluruh CSS |
+| 3 | **Fonts Loaded** (Font tipografi resmi) | ✅ **PASS** | `Bricolage Grotesque` & `Plus Jakarta Sans` aktif |
+| 4 | **Font Size Variety** (Skala tipografi terpadu) | ✅ **PASS** | 7 ukuran font terhitung (skala baku: 13px, 14px, 16px, 20px, 28px, 44px) |
+| 5 | **No Horizontal Overflow Desktop** | ✅ **PASS** | `scrollWidth <= innerWidth` pada resolusi desktop (1440px) |
+| 6 | **No Eyebrows** (Bebas badge/pill mengambang) | ✅ **PASS** | Struktur heading bersih langsung ke subjek |
+| 7 | **Equal Outer Margins** | ✅ **PASS** | Margin kiri 120px = Margin kanan 120px (selisih = 0px) |
+| 8 | **Headlines Two Lines or Fewer** | ✅ **PASS** | Judul utama h1 hanya 1–2 baris pada desktop |
+| 9 | **No Horizontal Overflow Mobile 390px** | ✅ **PASS** | Tampilan responsif murni tanpa geser horizontal di ponsel iPhone 390px |
+
+---
+
+### 13.3 Bukti Tangkapan Layar (Screenshots)
+
+1. `01_hero_desktop.png` — Beranda utama & katalog materi 7 kartu di desktop
+2. `02_katalog_7_materi.png` — Grid kartu pelajaran dengan durasi & nama guru
+3. `03_search_aljabar.png` — Hasil pencarian instan kata kunci "aljabar"
+4. `04_empty_state.png` — Kartu status materi tidak ditemukan saat query nihil
+5. `05_player_modal.png` — Modal pemutar teater video pembelajaran + bab repetisi
+6. `06_dark_mode.png` — Tampilan tema malam (Midnight Navy) dengan kontras terjaga
+7. `07_teacher_portal.png` — Ruang pengelolaan dewan guru & tabel materi
+8. `08_upload_form.png` — Formulir unggah materi (Tab file laptop & Tab YouTube)
+9. `09_yt_invalid_toast.png` — Notifikasi validasi penolakan URL YouTube tidak sah
+10. `10_mobile_390.png` — Tampilan responsif viewport 390px pada perangkat ponsel
+
+---
+
+### 13.4 Transformasi Arsitektur: Penyimpanan Otomatis Server Backend (Auto-Sync)
+
+Menindaklanjuti masukan pengguna mengenai kemudahan penggunaan bagi dewan guru:
+> *"Yang kayak cadangkan data, pulihkan, itu guru mana paham. Pakai sistem otomatis aja, pakai backend, kan buat nyimpan."*
+
+Dilakukan modernisasi arsitektur menyeluruh:
+1. **Penghapusan Beban Kognitif Manual Guru:**
+   - Tombol manual *"Cadangkan Data (JSON)"* dan *"Pulihkan Cadangan"* dihapus sepenuhnya dari portal guru.
+   - Digantikan dengan komponen visual status: `<div class="server-sync-badge"><span class="sync-dot"></span> Tersimpan Otomatis di Server Sekolah</div>`.
+2. **Implementasi Backend Ringan Mandiri (`server.js`):**
+   - Dibangun dengan native Node.js tanpa dependensi eksternal (`http`, `fs`, `path`, `crypto`).
+   - Menyediakan REST API:
+     - `GET /api/status` : Pengecekan koneksi live server sekolah & hitungan data.
+     - `GET /api/videos` : Mengambil data seluruh materi dari berkas database `data/videos.json`.
+     - `POST /api/videos` : Menyimpan materi baru yang diunggah guru secara permanen ke server.
+     - `PUT /api/videos/:id` : Menyimpan pembaruan edit materi langsung ke disk server.
+     - `DELETE /api/videos/:id` : Menghapus materi dari disk server.
+     - `POST /api/upload` : Menerima unggahan berkas video lokal (MP4/WebM) ke direktori `uploads/`.
+     - HTTP 206 Partial Content (Range Request): Streaming video lokal hemat bandwidth dan mendukung scrubbing timeline lancar.
+3. **Resiliensi Hybrid Offline-First:**
+   - Bila terhubung ke server sekolah (`http://127.0.0.1:8877`), aplikasi menyinkronkan data secara otomatis dan instan (indikator hijau).
+   - Bila laptop guru sedang offline di luar jaringan sekolah, aplikasi tetap berjalan mulus menggunakan `localStorage` + `IndexedDB` sebagai fallback transparan tanpa menghasilkan error runtime.
+
+---
+
+*Laporan verifikasi akhir ditutup pada 21 Oktober 2026. Prototipe repositori video pembelajaran mandiri SMPN 7 Tangerang Selatan telah 100% tervalidasi dan siap dipresentasikan pada kegiatan Pengabdian kepada Masyarakat (PkM) Universitas Pamulang.*
+

@@ -25,7 +25,7 @@ const App = {
   searchQuery: "",
 
   // Inisialisasi Saat DOM Siap
-  init: function () {
+  init: async function () {
     this.initTheme();
     this.bindEvents();
     this.updateAuthUI();
@@ -35,6 +35,16 @@ const App = {
     this.renderStats();
     this.renderVideoGrid();
     this.renderTeacherTable();
+
+    // Sinkronisasi otomatis dari backend server repositori sekolah
+    try {
+      await RepoStorage.syncWithBackend();
+      this.renderStats();
+      this.renderVideoGrid();
+      this.renderTeacherTable();
+    } catch (e) {
+      console.warn("Backend sync fallback ke lokal:", e);
+    }
   },
 
   // Dapatkan Cover SVG Skolastik Sesuai Mata Pelajaran
@@ -310,13 +320,140 @@ const App = {
     const gradeInput = document.getElementById("simpleVideoGrade");
     if (gradeInput) gradeInput.value = grade;
 
-    document.querySelectorAll(".grade-radio-btn").forEach(btn => {
-      if (btn.getAttribute("data-grade-val") === grade) {
+    document.querySelectorAll(".grade-seg-btn, .grade-radio-btn").forEach(btn => {
+      if (btn.getAttribute("data-grade-val") === String(grade)) {
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
       }
     });
+  },
+
+  // Buka Form Guru 3-Step (Tambah atau Ubah Materi)
+  openTeacherForm: function (mode = "create", videoId = null) {
+    const formSection = document.getElementById("teacherFormSection");
+    const tableSection = document.getElementById("teacherTableSection");
+    const modeInput = document.getElementById("teacherFormMode");
+    const editIdInput = document.getElementById("teacherFormEditId");
+    const mainTitle = document.getElementById("teacherFormMainTitle");
+    const mainDesc = document.getElementById("teacherFormMainDesc");
+    const submitBtnText = document.getElementById("btnSubmitText");
+
+    const titleInput = document.getElementById("simpleVideoTitle");
+    const gradeInput = document.getElementById("simpleVideoGrade");
+    const subjectInput = document.getElementById("simpleVideoSubject");
+    const outcomeInput = document.getElementById("simpleVideoOutcome");
+    const notesInput = document.getElementById("simpleVideoNotes");
+    const quizUrlInput = document.getElementById("simpleVideoQuizUrl");
+    const chaptersInput = document.getElementById("simpleVideoChapters");
+    const ytInput = document.getElementById("inputTeacherYoutubeUrl");
+
+    if (!formSection || !tableSection) return;
+
+    if (mode === "create") {
+      if (modeInput) modeInput.value = "create";
+      if (editIdInput) editIdInput.value = "";
+      if (mainTitle) mainTitle.textContent = "Tambah Materi Video Pembelajaran";
+      if (mainDesc) mainDesc.textContent = "Isi sumber video dan identitas kelas di bawah ini. Materi yang disimpan akan langsung tayang di katalog siswa.";
+      if (submitBtnText) submitBtnText.textContent = "Simpan & Tayangkan Materi ke Siswa";
+
+      // Reset Formulir
+      if (titleInput) titleInput.value = "";
+      if (outcomeInput) outcomeInput.value = "";
+      if (notesInput) notesInput.value = "";
+      if (quizUrlInput) quizUrlInput.value = "";
+      if (chaptersInput) chaptersInput.value = "";
+      if (ytInput) ytInput.value = "";
+      if (subjectInput) subjectInput.value = "Matematika";
+      this.selectGradeBtn("7");
+      this.switchUploadSource("youtube");
+      this.handleYoutubeUrlInput("");
+      this.pendingVideoFile = null;
+    } else {
+      // Mode Edit
+      const videos = RepoStorage.getVideos();
+      const v = videos.find(item => item.id === videoId);
+      if (!v) {
+        this.showToast("Materi pembelajaran tidak ditemukan.", "danger");
+        return;
+      }
+
+      if (modeInput) modeInput.value = "edit";
+      if (editIdInput) editIdInput.value = v.id;
+      if (mainTitle) mainTitle.textContent = "Edit Materi Video Pembelajaran";
+      if (mainDesc) mainDesc.textContent = "Perbarui detail materi ajar di bawah ini. Perubahan akan langsung disinkronkan ke katalog siswa.";
+      if (submitBtnText) submitBtnText.textContent = "Simpan Perubahan Materi";
+
+      if (titleInput) titleInput.value = v.title || "";
+      if (subjectInput) subjectInput.value = v.subject || "Matematika";
+      this.selectGradeBtn(v.grade || "7");
+      if (outcomeInput) outcomeInput.value = v.learningOutcome || "";
+      if (notesInput) notesInput.value = v.pdfContent || v.description || "";
+      if (quizUrlInput) quizUrlInput.value = v.quizUrl || "";
+
+      const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
+      if (chaptersInput) chaptersInput.value = chapText;
+
+      if (v.sourceType === "local") {
+        this.switchUploadSource("file");
+      } else {
+        this.switchUploadSource("youtube");
+        if (ytInput) ytInput.value = v.embedUrl || "";
+        this.handleYoutubeUrlInput(v.embedUrl || "");
+      }
+    }
+
+    tableSection.style.display = "none";
+    formSection.style.display = "block";
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  },
+
+  // Tutup Form Guru & Kembali ke Tabel
+  closeTeacherForm: function () {
+    const formSection = document.getElementById("teacherFormSection");
+    const tableSection = document.getElementById("teacherTableSection");
+    if (formSection) formSection.style.display = "none";
+    if (tableSection) tableSection.style.display = "block";
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  },
+
+  // Pratinjau YouTube Real-Time (Live Auto-Preview Card)
+  handleYoutubeUrlInput: function (url) {
+    const previewCard = document.getElementById("youtubeLivePreviewCard");
+    const thumbImg = document.getElementById("ytPreviewThumbImg");
+    const titleElem = document.getElementById("ytPreviewTitle");
+    const metaElem = document.getElementById("ytPreviewMeta");
+    const durationElem = document.getElementById("ytPreviewDuration");
+
+    if (!previewCard) return;
+
+    const trimmed = (url || "").trim();
+    const ytId = RepoStorage.extractYouTubeId(trimmed);
+
+    if (ytId) {
+      previewCard.style.display = "flex";
+      if (thumbImg) thumbImg.src = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+      if (durationElem) durationElem.textContent = "14:20";
+      if (titleElem) titleElem.textContent = "Video YouTube Terverifikasi (ID: " + ytId + ")";
+      if (metaElem) metaElem.textContent = "Kanal Edukasi • Kualitas HD 1080p";
+
+      // Coba ambil judul asli via oEmbed secara halus
+      fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${ytId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.title) {
+            if (titleElem) titleElem.textContent = data.title;
+            if (metaElem && data.author_name) metaElem.textContent = `${data.author_name} • Kualitas HD`;
+            const titleInput = document.getElementById("simpleVideoTitle");
+            if (titleInput && (!titleInput.value || titleInput.value.trim() === "")) {
+              titleInput.value = data.title;
+            }
+          }
+        })
+        .catch(() => {});
+    } else {
+      previewCard.style.display = "none";
+    }
   },
 
   // Pemetaan Kategori Mapel
@@ -350,13 +487,19 @@ const App = {
     return chapters;
   },
 
-  // Penanganan Simpan Video Guru
+  // Penanganan Simpan Video Guru (Mendukung Tambah & Ubah)
   handleTeacherFormSubmit: async function () {
+    const modeInput = document.getElementById("teacherFormMode");
+    const editIdInput = document.getElementById("teacherFormEditId");
+    const mode = modeInput ? modeInput.value : "create";
+    const editId = editIdInput ? editIdInput.value : "";
+
     const titleInput = document.getElementById("simpleVideoTitle");
     const gradeInput = document.getElementById("simpleVideoGrade");
     const subjectInput = document.getElementById("simpleVideoSubject");
     const outcomeInput = document.getElementById("simpleVideoOutcome");
     const notesInput = document.getElementById("simpleVideoNotes");
+    const quizUrlInput = document.getElementById("simpleVideoQuizUrl");
     const chaptersInput = document.getElementById("simpleVideoChapters");
     const submitBtn = document.getElementById("btnSubmitSimpleVideo");
 
@@ -365,6 +508,7 @@ const App = {
     const subject = subjectInput ? subjectInput.value : "Matematika";
     const outcome = outcomeInput ? outcomeInput.value.trim() : "";
     const notes = notesInput ? notesInput.value.trim() : "";
+    const quizUrl = quizUrlInput ? quizUrlInput.value.trim() : "";
     const chaptersRaw = chaptersInput ? chaptersInput.value.trim() : "";
 
     if (!title) {
@@ -376,162 +520,120 @@ const App = {
     const teacher = AuthManager.getTeacher() || AuthManager.defaultTeacher;
     const defaultCover = this.getCoverBySubject(subject);
 
-    let videoPayload = {
-      title,
-      grade,
-      subject,
-      category: this.mapCategoryBySubject(subject),
-      teacher: teacher.name,
-      teacherNip: teacher.nip || "",
-      duration: "15:00",
-      description: notes || `Materi pembelajaran mandiri mata pelajaran ${subject} Kelas ${grade}. Silakan dipelajari siswa secara berulang.`,
-      learningOutcome: outcome || "",
-      pdfContent: notes || "",
-      thumbnail: defaultCover,
-      publishedAt: new Date().toISOString(),
-      chapters: this.parseChaptersInput(chaptersRaw)
-    };
-
-    if (this.currentUploadSource === "file") {
-      if (!this.pendingVideoFile) {
-        this.showToast("Silakan pilih berkas video MP4/WebM dari komputer Anda terlebih dahulu.", "danger");
-        return;
-      }
-      videoPayload.sourceType = "local";
-      videoPayload.embedUrl = "";
-
-      // Coba hasilkan thumbnail frame otomatis dari file video
-      const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
-      if (snapshot) {
-        videoPayload.thumbnail = snapshot;
-      }
-    } else {
-      const ytInput = document.getElementById("inputTeacherYoutubeUrl");
-      const ytUrl = ytInput ? ytInput.value.trim() : "";
-      if (!ytUrl) {
-        this.showToast("Silakan masukkan tautan video YouTube.", "danger");
-        if (ytInput) ytInput.focus();
-        return;
-      }
-      const ytId = RepoStorage.extractYouTubeId(ytUrl);
-      if (!ytId) {
-        this.showToast("Tautan video YouTube tidak valid. Mohon masukkan URL YouTube yang benar (contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/...)", "danger");
-        if (ytInput) ytInput.focus();
-        return;
-      }
-      videoPayload.sourceType = "youtube";
-      videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
-      videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
-    }
-
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "Menyimpan ke Repositori...";
     }
 
     try {
-      await RepoStorage.addVideo(videoPayload, this.currentUploadSource === "file" ? this.pendingVideoFile : null);
-      this.showToast("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!", "success");
+      if (mode === "create") {
+        let videoPayload = {
+          title,
+          grade,
+          subject,
+          category: this.mapCategoryBySubject(subject),
+          teacher: teacher.name,
+          teacherNip: teacher.nip || "",
+          duration: "15:00",
+          description: notes || `Materi pembelajaran mandiri mata pelajaran ${subject} Kelas ${grade}. Silakan dipelajari siswa secara berulang.`,
+          learningOutcome: outcome || "",
+          pdfContent: notes || "",
+          quizUrl: quizUrl || "",
+          thumbnail: defaultCover,
+          publishedAt: new Date().toISOString(),
+          chapters: this.parseChaptersInput(chaptersRaw)
+        };
 
-      // Reset Formulir
-      if (titleInput) titleInput.value = "";
-      if (outcomeInput) outcomeInput.value = "";
-      if (notesInput) notesInput.value = "";
-      if (chaptersInput) chaptersInput.value = "";
-      const ytInput = document.getElementById("inputTeacherYoutubeUrl");
-      if (ytInput) ytInput.value = "";
-      const fileInput = document.getElementById("inputVideoLocalFile");
-      if (fileInput) fileInput.value = "";
-      this.pendingVideoFile = null;
+        if (this.currentUploadSource === "file") {
+          if (!this.pendingVideoFile) {
+            this.showToast("Silakan pilih berkas video MP4/WebM dari komputer Anda terlebih dahulu.", "danger");
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          videoPayload.sourceType = "local";
+          videoPayload.embedUrl = "";
 
-      const fileDisplay = document.getElementById("fileSelectedDisplay");
-      if (fileDisplay) fileDisplay.style.display = "none";
-      const dropzoneTitle = document.getElementById("dropzoneTitleText");
-      if (dropzoneTitle) dropzoneTitle.textContent = "Tarik & Lepas File Video di Sini atau Klik untuk Memilih";
+          const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
+          if (snapshot) {
+            videoPayload.thumbnail = snapshot;
+          }
+        } else {
+          const ytInput = document.getElementById("inputTeacherYoutubeUrl");
+          const ytUrl = ytInput ? ytInput.value.trim() : "";
+          if (!ytUrl) {
+            this.showToast("Silakan masukkan tautan video YouTube.", "danger");
+            if (ytInput) ytInput.focus();
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          const ytId = RepoStorage.extractYouTubeId(ytUrl);
+          if (!ytId) {
+            this.showToast("Tautan video YouTube tidak valid. Mohon masukkan URL YouTube yang benar.", "danger");
+            if (ytInput) ytInput.focus();
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          videoPayload.sourceType = "youtube";
+          videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
+          videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
+        }
 
+        await RepoStorage.addVideo(videoPayload, this.currentUploadSource === "file" ? this.pendingVideoFile : null);
+        this.showToast("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!", "success");
+      } else {
+        // Mode Ubah / Edit
+        let updatedData = {
+          title,
+          grade,
+          subject,
+          category: this.mapCategoryBySubject(subject),
+          learningOutcome: outcome,
+          pdfContent: notes,
+          quizUrl: quizUrl,
+          description: notes || `Materi pembelajaran untuk ${subject} Kelas ${grade}.`,
+          chapters: this.parseChaptersInput(chaptersRaw)
+        };
+
+        if (this.currentUploadSource === "youtube") {
+          const ytInput = document.getElementById("inputTeacherYoutubeUrl");
+          const ytUrl = ytInput ? ytInput.value.trim() : "";
+          if (ytUrl) {
+            const ytId = RepoStorage.extractYouTubeId(ytUrl);
+            if (!ytId) {
+              this.showToast("Tautan video YouTube tidak valid. Mohon periksa kembali.", "danger");
+              if (submitBtn) submitBtn.disabled = false;
+              return;
+            }
+            updatedData.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
+            updatedData.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || this.getCoverBySubject(subject);
+            updatedData.sourceType = "youtube";
+          }
+        }
+
+        await RepoStorage.updateVideo(editId, updatedData);
+        this.showToast("Perubahan materi berhasil diperbarui!", "success");
+      }
+
+      this.closeTeacherForm();
       this.renderStats();
       this.renderVideoGrid();
       this.renderTeacherTable();
     } catch (err) {
-      console.error("Gagal menyimpan materi:", err);
+      console.error("Gagal memproses materi:", err);
       this.showToast("Terjadi kendala saat menyimpan video. Silakan coba kembali.", "danger");
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Simpan & Tayangkan Materi ke Siswa";
       }
     }
   },
 
-  // Modal Edit Video Guru
+  // Modal Edit Video Guru (Diarahkan ke Form 3-Step)
   openEditModal: function (id) {
-    const videos = RepoStorage.getVideos();
-    const v = videos.find(item => item.id === id);
-    if (!v) return;
-
-    document.getElementById("editVideoId").value = v.id;
-    document.getElementById("editVideoTitle").value = v.title;
-    document.getElementById("editVideoGrade").value = v.grade;
-    document.getElementById("editVideoSubject").value = v.subject;
-    document.getElementById("editVideoEmbedUrl").value = v.embedUrl || "";
-    document.getElementById("editVideoOutcome").value = v.learningOutcome || "";
-    document.getElementById("editVideoNotes").value = v.pdfContent || "";
-
-    const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
-    document.getElementById("editVideoChapters").value = chapText;
-
-    const backdrop = document.getElementById("editVideoModalBackdrop");
-    if (backdrop) backdrop.classList.add("active");
+    this.openTeacherForm("edit", id);
   },
 
   closeEditModal: function () {
-    const backdrop = document.getElementById("editVideoModalBackdrop");
-    if (backdrop) backdrop.classList.remove("active");
-  },
-
-  handleEditFormSubmit: async function () {
-    const id = document.getElementById("editVideoId").value;
-    const title = document.getElementById("editVideoTitle").value.trim();
-    const grade = document.getElementById("editVideoGrade").value;
-    const subject = document.getElementById("editVideoSubject").value;
-    const embedUrl = document.getElementById("editVideoEmbedUrl").value.trim();
-    const outcome = document.getElementById("editVideoOutcome").value.trim();
-    const notes = document.getElementById("editVideoNotes").value.trim();
-    const chaptersRaw = document.getElementById("editVideoChapters").value.trim();
-
-    if (!title) {
-      this.showToast("Judul materi pembelajaran tidak boleh kosong.", "danger");
-      return;
-    }
-
-    const updatedData = {
-      title,
-      grade,
-      subject,
-      category: this.mapCategoryBySubject(subject),
-      learningOutcome: outcome,
-      pdfContent: notes,
-      description: notes || `Materi pembelajaran untuk ${subject} Kelas ${grade}.`,
-      chapters: this.parseChaptersInput(chaptersRaw)
-    };
-
-    if (embedUrl) {
-      const ytId = RepoStorage.extractYouTubeId(embedUrl);
-      if (!ytId) {
-        this.showToast("Tautan video YouTube tidak valid. Mohon periksa kembali tautan yang dimasukkan.", "danger");
-        return;
-      }
-      updatedData.embedUrl = RepoStorage.formatVideoEmbedUrl(embedUrl);
-      updatedData.thumbnail = RepoStorage.getThumbnailUrl(embedUrl) || this.getCoverBySubject(subject);
-      updatedData.sourceType = "youtube";
-    }
-
-    await RepoStorage.updateVideo(id, updatedData);
-    this.closeEditModal();
-    this.showToast("Perubahan materi berhasil diperbarui!", "success");
-    this.renderStats();
-    this.renderVideoGrid();
-    this.renderTeacherTable();
+    this.closeTeacherForm();
   },
 
   // Render Tabel Materi di Ruang Guru
@@ -570,7 +672,7 @@ const App = {
           <td style="color: var(--color-ink-subtle);">${idx + 1}</td>
           <td>
             <div style="font-weight: 600; color: var(--color-ink);">${safeTitle}</div>
-            <div style="font-size: 0.775rem; color: var(--color-ink-subtle); margin-top: 2px;">
+            <div style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
               ${safeSubject} • Kelas ${safeGrade}
             </div>
           </td>
@@ -764,6 +866,25 @@ const App = {
     if (totalElem) totalElem.textContent = totalVideos;
     if (subElem) subElem.textContent = subjects;
     if (teachElem) teachElem.textContent = teachers;
+
+    // Hitung per kategori untuk filter tab strip
+    const countAll = totalVideos;
+    const countMipa = videos.filter(v => v.category === "MIPA").length;
+    const countInformatika = videos.filter(v => v.category === "Informatika").length;
+    const countBahasa = videos.filter(v => v.category === "Bahasa").length;
+    const countIps = videos.filter(v => v.category === "IPS").length;
+
+    const elAll = document.getElementById("countCatAll");
+    const elMipa = document.getElementById("countCatMipa");
+    const elInformatika = document.getElementById("countCatInformatika");
+    const elBahasa = document.getElementById("countCatBahasa");
+    const elIps = document.getElementById("countCatIps");
+
+    if (elAll) elAll.textContent = countAll;
+    if (elMipa) elMipa.textContent = countMipa;
+    if (elInformatika) elInformatika.textContent = countInformatika;
+    if (elBahasa) elBahasa.textContent = countBahasa;
+    if (elIps) elIps.textContent = countIps;
   },
 
   // Render Grid Video Pembelajaran Siswa

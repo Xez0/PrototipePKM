@@ -173,6 +173,46 @@ window.AuthManager = AuthManager;
 // 3. REPO STORAGE (METADATA VIDEO & FITUR BELAJAR SISWA)
 // ==========================================================================
 const RepoStorage = {
+  isServerOnline: false,
+
+  // Cek Status & Sinkronisasi Data Otomatis dari Backend Server
+  syncWithBackend: async function () {
+    try {
+      const res = await fetch("/api/videos", { method: "GET", cache: "no-store" });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          this.isServerOnline = true;
+          this.saveVideos(json.data);
+          this.updateSyncUI("online");
+          return json.data;
+        }
+      }
+    } catch (e) {
+      // Backend offline atau dibuka via file://
+      this.isServerOnline = false;
+      this.updateSyncUI("offline");
+    }
+    return this.getVideos();
+  },
+
+  updateSyncUI: function (status) {
+    const badge = document.getElementById("serverSyncBadge");
+    const dot = document.getElementById("syncDotIndicator");
+    const text = document.getElementById("syncStatusText");
+    if (!badge || !dot || !text) return;
+
+    if (status === "online") {
+      dot.className = "sync-dot online";
+      text.textContent = "Tersimpan Otomatis di Server Sekolah";
+      badge.title = "Data materi terhubung aktif dan tersimpan permanen di server sekolah";
+    } else {
+      dot.className = "sync-dot offline";
+      text.textContent = "Mode Mandiri (Tersimpan Lokal)";
+      badge.title = "Server sedang offline atau diakses langsung, data tersimpan di peramban ini";
+    }
+  },
+
   // Inisialisasi Data Video
   getVideos: function () {
     const raw = localStorage.getItem(STORAGE_KEYS.VIDEOS);
@@ -212,10 +252,9 @@ const RepoStorage = {
 
   // Tambah Video Baru (Mendukung File Lokal & Tautan YouTube)
   addVideo: async function (newVideo, videoFile = null) {
-    const videos = this.getVideos();
     const videoId = "smpn7-" + Date.now().toString(36);
 
-    const videoWithId = {
+    let videoWithId = {
       ...newVideo,
       id: videoId,
       publishedAt: newVideo.publishedAt || new Date().toISOString()
@@ -226,12 +265,47 @@ const RepoStorage = {
       videoWithId.sourceType = "local";
       videoWithId.fileName = videoFile.name || "video-materi.mp4";
       videoWithId.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
-      // Simpan file binary di IndexedDB
+      
+      // 1. Simpan di IndexedDB browser lokal untuk pemutaran offline seketika
       await VideoDB.saveVideoFile(videoId, videoFile);
+
+      // 2. Jika server backend online, unggah ke server /api/upload
+      if (this.isServerOnline) {
+        try {
+          const formData = new FormData();
+          formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData
+          });
+          if (uploadRes.ok) {
+            const uploadJson = await uploadRes.json();
+            if (uploadJson.success && uploadJson.url) {
+              videoWithId.embedUrl = uploadJson.url;
+            }
+          }
+        } catch (err) {
+          console.warn("[SYNC] Gagal upload berkas ke server, fallback ke IndexedDB:", err);
+        }
+      }
     } else {
       videoWithId.sourceType = "youtube";
     }
 
+    // Simpan ke Backend jika server online
+    if (this.isServerOnline) {
+      try {
+        await fetch("/api/videos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(videoWithId)
+        });
+      } catch (err) {
+        console.warn("[SYNC] Gagal POST ke /api/videos, fallback lokal:", err);
+      }
+    }
+
+    const videos = this.getVideos();
     videos.unshift(videoWithId);
     this.saveVideos(videos);
     return videoWithId;
@@ -250,24 +324,62 @@ const RepoStorage = {
       mergedData.fileName = videoFile.name || "video-materi.mp4";
       mergedData.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
       await VideoDB.saveVideoFile(id, videoFile);
+
+      if (this.isServerOnline) {
+        try {
+          const formData = new FormData();
+          formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
+          const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+          if (uploadRes.ok) {
+            const uploadJson = await uploadRes.json();
+            if (uploadJson.success && uploadJson.url) {
+              mergedData.embedUrl = uploadJson.url;
+            }
+          }
+        } catch (err) {
+          console.warn("[SYNC] Upload edit file gagal:", err);
+        }
+      }
     }
 
-    videos[index] = {
+    const finalVideo = {
       ...videos[index],
       ...mergedData,
       id,
       updatedAt: new Date().toISOString()
     };
+
+    if (this.isServerOnline) {
+      try {
+        await fetch(`/api/videos/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(finalVideo)
+        });
+      } catch (err) {
+        console.warn("[SYNC] Gagal PUT ke /api/videos, fallback lokal:", err);
+      }
+    }
+
+    videos[index] = finalVideo;
     this.saveVideos(videos);
     return true;
   },
 
-  // Hapus Video (Hapus dari LocalStorage dan IndexedDB)
+  // Hapus Video (Hapus dari Backend, LocalStorage, dan IndexedDB)
   deleteVideo: async function (id) {
     let videos = this.getVideos();
     const target = videos.find(v => v.id === id);
     if (target && target.sourceType === "local") {
       await VideoDB.deleteVideoFile(id);
+    }
+
+    if (this.isServerOnline) {
+      try {
+        await fetch(`/api/videos/${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch (err) {
+        console.warn("[SYNC] Gagal DELETE /api/videos:", err);
+      }
     }
 
     videos = videos.filter(v => v.id !== id);
@@ -276,7 +388,12 @@ const RepoStorage = {
   },
 
   // Reset Kembali ke Data Standar SMPN 7
-  resetToDefault: function () {
+  resetToDefault: async function () {
+    if (this.isServerOnline) {
+      try {
+        await fetch("/api/reset", { method: "POST" });
+      } catch (e) {}
+    }
     localStorage.setItem(STORAGE_KEYS.VIDEOS, JSON.stringify(INITIAL_VIDEO_DATA));
     return INITIAL_VIDEO_DATA;
   },

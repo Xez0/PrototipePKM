@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Tambah Materi Video Pembelajaran - Portal Dewan Guru SMPN 7 Tangerang Selatan</title>
+  
+  <!-- Google Fonts: Bricolage Grotesque & Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS v3 with Plugins -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Tailwind Config verbatim from Design System -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#ffdbc7",
+            "secondary": "#904d00",
+            "background": "#f7f9fb",
+            "on-secondary-fixed": "#2f1500",
+            "surface": "#f7f9fb",
+            "on-secondary-fixed-variant": "#6e3900",
+            "on-error": "#ffffff",
+            "primary-fixed-dim": "#b0c6ff",
+            "inverse-on-surface": "#eff1f3",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#d8dadc",
+            "outline": "#757780",
+            "surface-tint": "#485d91",
+            "surface-variant": "#e0e3e5",
+            "on-tertiary-container": "#c7855a",
+            "on-tertiary-fixed": "#311300",
+            "surface-container-low": "#f2f4f6",
+            "on-background": "#191c1e",
+            "tertiary": "#2d1100",
+            "primary-container": "#122b5c",
+            "on-tertiary": "#ffffff",
+            "inverse-primary": "#b0c6ff",
+            "secondary-fixed": "#ffdcc3",
+            "on-secondary-container": "#663500",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#4c2100",
+            "secondary-container": "#fe932c",
+            "primary-fixed": "#d9e2ff",
+            "error-container": "#ffdad6",
+            "surface-container": "#eceef0",
+            "on-primary-fixed": "#001945",
+            "error": "#ba1a1a",
+            "outline-variant": "#c5c6d0",
+            "surface-container-highest": "#e0e3e5",
+            "surface-container-high": "#e6e8ea",
+            "on-surface-variant": "#44464f",
+            "on-tertiary-fixed-variant": "#6c3a15",
+            "surface-bright": "#f7f9fb",
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#191c1e",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#ffb77d",
+            "primary": "#00163f",
+            "tertiary-fixed-dim": "#ffb688",
+            "inverse-surface": "#2d3133",
+            "on-primary-container": "#7e94cb",
+            "on-primary-fixed-variant": "#2f4577"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "title": ["Plus Jakarta Sans", "sans-serif"],
+            "display": ["Bricolage Grotesque", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-[#0F172A] font-body-md antialiased min-h-screen flex flex-col selection:bg-[#122B5C] selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- 1. SHARED COMPONENT: TopNavBar (SMPN 7)    -->
+  <!-- ========================================== -->
+  <header class="bg-white border-b border-[#E2E8F0] shadow-sm sticky top-0 z-40">
+    <div class="w-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between h-16">
+      
+      <!-- Brand Logo / Product Name (SMPN 7 Otentik) -->
+      <a href="index.html#portal-guru" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+        <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" class="w-10 h-10 object-contain"/>
+        <div class="flex flex-col">
+          <span class="font-display font-bold text-lg text-[#0A0F1D] tracking-tight leading-tight">SMPN 7 Tangerang Selatan</span>
+          <span class="text-xs text-[#64748B] font-medium leading-tight">Portal Resmi Manajemen Pembelajaran • PkM UNPAM</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a class="text-[#64748B] hover:text-[#122B5C] transition-colors" href="index.html#beranda">Beranda</a>
+        <a class="text-[#64748B] hover:text-[#122B5C] transition-colors" href="index.html#katalog">Katalog Siswa</a>
+        <a class="text-[#122B5C] font-bold border-b-2 border-[#122B5C] pb-1" href="index.html#portal-guru">Portal Guru</a>
+        <a class="text-[#64748B] hover:text-[#122B5C] transition-colors" href="index.html#edukasi-pkm">Prinsip Mandiri</a>
+      </nav>
+
+      <!-- Right Trailing Actions & Teacher Profile -->
+      <div class="flex items-center gap-3">
+        <a href="index.html#katalog" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#E2E8F0] text-xs font-semibold text-[#475569] hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-sm">visibility</span>
+          <span>Lihat Sisi Siswa</span>
+        </a>
+
+        <div class="h-6 w-px bg-[#E2E8F0] mx-1 hidden sm:block"></div>
+
+        <!-- Teacher Identity Pill -->
+        <div class="flex items-center gap-2.5 pl-1">
+          <div class="w-8 h-8 rounded-full bg-[#122B5C] text-white flex items-center justify-center font-bold text-xs" id="teacherInitials">
+            TE
+          </div>
+          <div class="hidden sm:flex flex-col text-left">
+            <span class="text-xs font-bold text-[#0F172A] leading-tight" id="teacherName">Tri Elmania, S.Pd.</span>
+            <span class="text-[11px] text-[#64748B] leading-tight">Dewan Guru SMPN 7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 3. MAIN WORKFLOW CANVAS (Max-Width 820px)  -->
+  <!-- ========================================== -->
+  <main class="flex-1 w-full max-w-[820px] mx-auto px-4 py-8">
+    
+    <!-- Top Sub-header Bar -->
+    <div class="mb-6 flex justify-between items-center flex-wrap gap-3">
+      <a class="inline-flex items-center gap-2 h-10 px-4 rounded-md border border-[#E2E8F0] text-[#334155] text-sm font-medium hover:bg-slate-100 transition-colors shadow-sm bg-white" href="index.html#portal-guru">
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        <span>Kembali ke Daftar Materi</span>
+      </a>
+
+      <div class="bg-emerald-50 border border-emerald-200 text-[#15803D] text-sm font-medium px-3.5 py-1.5 rounded-full flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#15803D]"></span>
+        <span>Tersimpan Otomatis di Server Sekolah</span>
+      </div>
+    </div>
+
+    <!-- Page Title Block -->
+    <div class="mb-6">
+      <h1 class="text-[28px] leading-tight font-bold text-[#0A0F1D] tracking-tight" id="pageTitleText">
+        Tambah Materi Video Pembelajaran
+      </h1>
+      <p class="text-base text-[#64748B] mt-1.5 leading-relaxed" id="pageSubText">
+        Isi sumber video dan identitas kelas di bawah ini. Materi yang disimpan akan langsung tayang di katalog siswa.
+      </p>
+    </div>
+
+    <!-- Form 3-Step dari Google Stitch -->
+    <form class="space-y-5" id="stitchTeacherForm" onsubmit="event.preventDefault(); handleSubmit();">
+      <input type="hidden" id="formMode" value="create"/>
+      <input type="hidden" id="editVideoId" value=""/>
+
+      <!-- ========================================== -->
+      <!-- Section Sheet 1 — Sumber Video (Wajib)      -->
+      <!-- ========================================== -->
+      <div class="bg-white border border-[#E2E8F0] rounded-lg p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-[#0F172A] mb-4">
+          1. Sumber Video Pembelajaran
+        </h2>
+
+        <!-- Segmented 2-tab switcher -->
+        <div class="h-12 bg-[#F1F5F9] p-1 rounded-md grid grid-cols-2 gap-1 mb-4">
+          <button id="tabBtnYoutube" class="bg-[#122B5C] text-white font-medium text-sm rounded shadow-sm flex items-center justify-center gap-2 transition-all" type="button" onclick="switchSourceTab('youtube')">
+            <span class="material-symbols-outlined text-lg">link</span>
+            <span>Tautan Video YouTube</span>
+          </button>
+          <button id="tabBtnFile" class="text-[#475569] font-medium text-sm rounded flex items-center justify-center gap-2 hover:text-[#0F172A] transition-colors" type="button" onclick="switchSourceTab('file')">
+            <span class="material-symbols-outlined text-lg">laptop</span>
+            <span>Unggah File Video dari Komputer</span>
+          </button>
+        </div>
+
+        <!-- Video Link Input (YouTube Mode) -->
+        <div id="youtubeInputSection">
+          <label class="text-sm font-semibold text-[#1E293B] mb-2 block" for="youtube-url">
+            Alamat / Tautan Video YouTube <span class="text-red-500">*</span>
+          </label>
+          <input 
+            class="h-12 px-4 border border-[#CBD5E1] rounded-md w-full text-sm text-[#0F172A] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none" 
+            id="youtube-url" 
+            type="text" 
+            placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+            oninput="handleYoutubeInput(this.value)"
+          />
+        </div>
+
+        <!-- Video File Dropzone (File Mode) -->
+        <div id="fileInputSection" style="display: none;">
+          <label class="text-sm font-semibold text-[#1E293B] mb-2 block">
+            Pilih Berkas Video Komputer (MP4 / WebM) <span class="text-red-500">*</span>
+          </label>
+          <div 
+            class="border-2 border-dashed border-[#CBD5E1] rounded-lg p-6 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+            onclick="document.getElementById('localVideoFileInput').click()"
+          >
+            <span class="material-symbols-outlined text-4xl text-[#122B5C] mb-2">cloud_upload</span>
+            <div class="text-sm font-semibold text-[#0F172A]" id="dropzoneLabel">Klik atau Tarik File Video ke Sini</div>
+            <div class="text-xs text-[#64748B] mt-1">Format didukung: MP4, WebM, MKV</div>
+            <input type="file" id="localVideoFileInput" accept="video/*" class="hidden" onchange="handleFileSelected(this)"/>
+          </div>
+          <div id="fileSelectedBar" class="mt-3 bg-slate-50 border border-[#E2E8F0] rounded p-2.5 flex items-center justify-between text-xs" style="display: none;">
+            <span class="font-semibold text-[#0F172A]" id="selectedFileNameTxt">-</span>
+            <span class="text-[#64748B]" id="selectedFileSizeTxt">0 MB</span>
+          </div>
+        </div>
+
+        <!-- Clean Auto-Preview Box -->
+        <div class="mt-4 bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg p-3.5 flex flex-col sm:flex-row items-center gap-4" id="previewBox">
+          <div class="relative w-full sm:w-[160px] h-[90px] aspect-video bg-neutral-900 rounded-md overflow-hidden flex-shrink-0 shadow-inner group">
+            <img 
+              id="previewImg"
+              alt="Pratinjau Video" 
+              class="w-full h-full object-cover" 
+              src="assets/cover-matematika.svg"
+            />
+            <div class="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[11px] font-bold px-1.5 py-0.5 rounded" id="previewDurationBadge">
+              14:20
+            </div>
+          </div>
+          <div class="flex-1 text-left w-full">
+            <div class="text-emerald-700 font-semibold text-xs flex items-center gap-1.5 mb-1" id="previewStatusBadge">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              <span>Video YouTube valid &amp; siap diputar tanpa iklan</span>
+            </div>
+            <h3 class="font-bold text-sm text-[#0F172A] line-clamp-1 mb-0.5" id="previewTitleTxt">
+              Masukkan tautan YouTube di atas untuk pratinjau otomatis
+            </h3>
+            <p class="text-xs text-[#64748B]" id="previewMetaTxt">
+              Kanal Edukasi SMPN 7 Tangsel • Kualitas HD 1080p
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- Section Sheet 2 — Identitas Materi (Wajib)  -->
+      <!-- ========================================== -->
+      <div class="bg-white border border-[#E2E8F0] rounded-lg p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-[#0F172A] mb-4">
+          2. Identitas Kelas &amp; Mata Pelajaran
+        </h2>
+
+        <!-- Judul Materi -->
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-[#1E293B] mb-2 block" for="material-title">
+            Judul Materi Pembelajaran <span class="text-red-500">*</span>
+          </label>
+          <input 
+            class="h-12 px-4 border border-[#CBD5E1] rounded-md w-full text-sm font-medium text-[#0F172A] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none" 
+            id="material-title" 
+            type="text" 
+            placeholder="Contoh: Konsep Dasar Aljabar: Variabel, Koefisien, &amp; Suku Sejenis"
+            required
+          />
+        </div>
+
+        <!-- 2 Column: Jenjang Kelas & Mata Pelajaran -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label class="text-sm font-semibold text-[#1E293B] mb-2 block">
+              Jenjang Kelas <span class="text-red-500">*</span>
+            </label>
+            <div class="h-12 bg-[#F1F5F9] p-1 rounded-md grid grid-cols-3 gap-1" id="gradeSegmented">
+              <button class="bg-[#122B5C] text-white font-semibold text-sm rounded flex items-center justify-center shadow-xs transition-all" type="button" data-grade="7" onclick="selectGrade('7')">
+                Kelas 7
+              </button>
+              <button class="text-[#475569] font-medium text-sm rounded flex items-center justify-center hover:bg-white/60 transition-all" type="button" data-grade="8" onclick="selectGrade('8')">
+                Kelas 8
+              </button>
+              <button class="text-[#475569] font-medium text-sm rounded flex items-center justify-center hover:bg-white/60 transition-all" type="button" data-grade="9" onclick="selectGrade('9')">
+                Kelas 9
+              </button>
+            </div>
+            <input type="hidden" id="selectedGradeInput" value="7"/>
+          </div>
+
+          <div>
+            <label class="text-sm font-semibold text-[#1E293B] mb-2 block" for="subject-select">
+              Mata Pelajaran <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <select 
+                class="h-12 px-4 border border-[#CBD5E1] rounded-md w-full text-sm text-[#0F172A] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none appearance-none" 
+                id="subject-select"
+                required
+              >
+                <option value="Matematika" selected>Matematika (Guru Pengampu: Tri Elmania, S.Pd.)</option>
+                <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
+                <option value="Informatika">Informatika / TIK</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                <option value="Ilmu Pengetahuan Sosial (IPS)">Ilmu Pengetahuan Sosial (IPS)</option>
+                <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
+                <option value="Seni Budaya">Seni Budaya</option>
+                <option value="Pendidikan Jasmani (PJOK)">Pendidikan Jasmani (PJOK)</option>
+              </select>
+              <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                <span class="material-symbols-outlined text-lg">expand_more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- Section Sheet 3 — Bahan Pendamping Belajar Siswa (Opsional)     -->
+      <!-- ============================================================== -->
+      <div class="bg-white border border-[#E2E8F0] rounded-lg p-6 mb-6 shadow-sm">
+        <div class="flex justify-between items-center mb-1 flex-wrap gap-2">
+          <h2 class="text-lg font-semibold text-[#0F172A]">
+            3. Bahan Pendamping Belajar
+          </h2>
+          <span class="bg-[#F1F5F9] text-[#64748B] text-xs font-medium px-3 py-1 rounded-full border border-[#E2E8F0]">
+            Opsional — Boleh Dikosongkan
+          </span>
+        </div>
+        <p class="text-sm text-[#64748B] mb-5">
+          Kosongkan bagian ini jika Bapak/Ibu hanya ingin menayangkan video saja.
+        </p>
+
+        <!-- Field A: Capaian Pembelajaran -->
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-[#1E293B] mb-1.5 block" for="competency-target">
+            Capaian Pembelajaran / Target Kompetensi (Opsional)
+          </label>
+          <input 
+            class="h-12 px-4 border border-[#CBD5E1] rounded-md w-full text-sm text-[#0F172A] placeholder:text-[#94A3B8] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none" 
+            id="competency-target" 
+            placeholder="Contoh: Memahami operasi hitung suku sejenis" 
+            type="text"
+          />
+        </div>
+
+        <!-- Field B: Ringkasan Guru -->
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-[#1E293B] mb-1.5 block" for="teacher-summary">
+            Ringkasan / Catatan Pokok Guru untuk Siswa (Opsional)
+          </label>
+          <textarea 
+            class="p-3 border border-[#CBD5E1] rounded-md w-full text-sm text-[#0F172A] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none leading-relaxed" 
+            id="teacher-summary" 
+            rows="3"
+            placeholder="1. Variabel adalah lambang pengganti suatu bilangan yang belum diketahui nilainya (contoh: x, y).&#10;2. Suku sejenis adalah suku yang memiliki variabel dan pangkat variabel yang sama persis."
+          ></textarea>
+        </div>
+
+        <!-- Field C: Tautan Latihan Soal -->
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-[#1E293B] mb-1.5 block" for="form-link">
+            Tautan Latihan Soal Google Form / Quizizz (Opsional)
+          </label>
+          <input 
+            class="h-12 px-4 border border-[#CBD5E1] rounded-md w-full text-sm text-[#0F172A] bg-white focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none" 
+            id="form-link" 
+            placeholder="Contoh: https://forms.gle/... (Tombol latihan akan muncul di bawah video siswa)" 
+            type="text"
+          />
+        </div>
+
+        <!-- Field D: Menit Penting -->
+        <div>
+          <label class="text-sm font-semibold text-[#1E293B] mb-1.5 block" for="video-chapters">
+            Daftar Menit Penting / Bab Video (Opsional)
+          </label>
+          <textarea 
+            class="font-mono text-xs p-3 border border-[#CBD5E1] rounded-md w-full bg-[#F8FAFC] text-[#334155] focus:border-[#122B5C] focus:ring-1 focus:ring-[#122B5C] focus:outline-none" 
+            id="video-chapters" 
+            rows="3"
+            placeholder="00:00 Pengantar Variabel &amp; Koefisien&#10;05:15 Contoh Soal Suku Sejenis di Papan Tulis&#10;11:30 Tips Cepat Menyelesaikan Aljabar"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- Bottom Action Bar                          -->
+      <!-- ========================================== -->
+      <div class="flex justify-between items-center pt-2 pb-12">
+        <a 
+          href="index.html#portal-guru" 
+          class="inline-flex items-center justify-center h-12 px-6 border border-[#CBD5E1] text-[#475569] font-medium text-sm rounded-md hover:bg-slate-100 transition-colors bg-white"
+        >
+          Batal
+        </a>
+
+        <button 
+          id="btnSubmitVideo"
+          class="bg-[#122B5C] hover:bg-[#0c1f44] text-white font-semibold text-sm h-12 px-7 rounded-md shadow-sm transition-colors flex items-center gap-2 cursor-pointer" 
+          type="submit"
+        >
+          <span class="material-symbols-outlined text-lg">publish</span>
+          <span id="btnSubmitLabel">Simpan &amp; Tayangkan Materi ke Siswa</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 5. SHARED COMPONENT: Footer (SMPN 7)       -->
+  <!-- ========================================== -->
+  <footer class="bg-white border-t border-[#E2E8F0] mt-auto">
+    <div class="w-full max-w-7xl mx-auto px-4 md:px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#64748B]">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo-smpn7.svg" alt="Logo SMPN 7 Tangsel" class="w-7 h-7 object-contain opacity-80"/>
+        <p class="text-center md:text-left">
+          © 2026 SMP Negeri 7 Tangerang Selatan. Hak Cipta Dilindungi. Repositori Video Pembelajaran Mandiri • PkM UNPAM.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 md:gap-6">
+        <a class="hover:text-[#122B5C] transition-colors" href="index.html#katalog">Katalog Siswa</a>
+        <a class="hover:text-[#122B5C] transition-colors" href="index.html#portal-guru">Portal Dewan Guru</a>
+        <a class="hover:text-[#122B5C] transition-colors" href="index.html#edukasi-pkm">Prinsip Belajar Mandiri</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interaktivitas Penuh & Sinkronisasi Backend -->
+  <script src="js/storage.js"></script>
+  <script>
+    let currentSource = "youtube";
+    let pendingFile = null;
+
+    // Inisialisasi
+    document.addEventListener("DOMContentLoaded", async function() {
+      // Sinkronisasi data server
+      try {
+        await RepoStorage.syncWithBackend();
+      } catch(e) {}
+
+      // Cek apakah mode Edit
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get("id");
+      if (editId) {
+        loadEditData(editId);
+      } else {
+        // Default preview demo
+        document.getElementById("youtube-url").value = "https://www.youtube.com/watch?v=P91EUTrTPx0";
+        handleYoutubeInput("https://www.youtube.com/watch?v=P91EUTrTPx0");
+        document.getElementById("material-title").value = "Konsep Dasar Aljabar: Variabel, Koefisien, & Suku Sejenis";
+        document.getElementById("competency-target").value = "Memahami operasi hitung suku sejenis";
+        document.getElementById("form-link").value = "https://forms.gle/aljabar7-smpn7tangsel";
+      }
+    });
+
+    function switchSourceTab(type) {
+      currentSource = type;
+      const btnYt = document.getElementById("tabBtnYoutube");
+      const btnFile = document.getElementById("tabBtnFile");
+      const secYt = document.getElementById("youtubeInputSection");
+      const secFile = document.getElementById("fileInputSection");
+
+      if (type === "youtube") {
+        btnYt.className = "bg-[#122B5C] text-white font-medium text-sm rounded shadow-sm flex items-center justify-center gap-2 transition-all";
+        btnFile.className = "text-[#475569] font-medium text-sm rounded flex items-center justify-center gap-2 hover:text-[#0F172A] transition-colors";
+        secYt.style.display = "block";
+        secFile.style.display = "none";
+      } else {
+        btnFile.className = "bg-[#122B5C] text-white font-medium text-sm rounded shadow-sm flex items-center justify-center gap-2 transition-all";
+        btnYt.className = "text-[#475569] font-medium text-sm rounded flex items-center justify-center gap-2 hover:text-[#0F172A] transition-colors";
+        secYt.style.display = "none";
+        secFile.style.display = "block";
+      }
+    }
+
+    function selectGrade(grade) {
+      document.getElementById("selectedGradeInput").value = grade;
+      const buttons = document.querySelectorAll("#gradeSegmented button");
+      buttons.forEach(btn => {
+        if (btn.getAttribute("data-grade") === String(grade)) {
+          btn.className = "bg-[#122B5C] text-white font-semibold text-sm rounded flex items-center justify-center shadow-xs transition-all";
+        } else {
+          btn.className = "text-[#475569] font-medium text-sm rounded flex items-center justify-center hover:bg-white/60 transition-all";
+        }
+      });
+    }
+
+    function handleYoutubeInput(url) {
+      const trimmed = (url || "").trim();
+      const ytId = RepoStorage.extractYouTubeId(trimmed);
+      const img = document.getElementById("previewImg");
+      const title = document.getElementById("previewTitleTxt");
+      const meta = document.getElementById("previewMetaTxt");
+      const badge = document.getElementById("previewStatusBadge");
+
+      if (ytId) {
+        img.src = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+        badge.innerHTML = `<span class="material-symbols-outlined text-sm">check_circle</span><span>Video YouTube valid & siap diputar tanpa iklan</span>`;
+        badge.className = "text-emerald-700 font-semibold text-xs flex items-center gap-1.5 mb-1";
+        title.textContent = "Video YouTube Terverifikasi (ID: " + ytId + ")";
+        meta.textContent = "Kanal Edukasi SMPN 7 Tangsel • Kualitas HD 1080p";
+
+        // oEmbed auto-title
+        fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${ytId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.title) {
+              title.textContent = data.title;
+              if (data.author_name) meta.textContent = `${data.author_name} • Kualitas HD 1080p`;
+              const titleInp = document.getElementById("material-title");
+              if (!titleInp.value || titleInp.value.trim() === "") {
+                titleInp.value = data.title;
+              }
+            }
+          })
+          .catch(() => {});
+      } else {
+        img.src = "assets/cover-matematika.svg";
+        title.textContent = "Masukkan tautan YouTube di atas untuk pratinjau otomatis";
+        meta.textContent = "Kanal Edukasi SMPN 7 Tangsel • Kualitas HD 1080p";
+      }
+    }
+
+    function handleFileSelected(input) {
+      if (input.files && input.files[0]) {
+        pendingFile = input.files[0];
+        document.getElementById("fileSelectedBar").style.display = "flex";
+        document.getElementById("selectedFileNameTxt").textContent = pendingFile.name;
+        document.getElementById("selectedFileSizeTxt").textContent = (pendingFile.size / (1024 * 1024)).toFixed(1) + " MB";
+        document.getElementById("dropzoneLabel").textContent = "Berkas Video Siap Diunggah";
+      }
+    }
+
+    function loadEditData(id) {
+      const videos = RepoStorage.getVideos();
+      const v = videos.find(item => item.id === id);
+      if (!v) return;
+
+      document.getElementById("formMode").value = "edit";
+      document.getElementById("editVideoId").value = v.id;
+      document.getElementById("pageTitleText").textContent = "Edit Materi Video Pembelajaran";
+      document.getElementById("pageSubText").textContent = "Perbarui detail materi ajar di bawah ini. Perubahan akan langsung disinkronkan ke katalog siswa.";
+      document.getElementById("btnSubmitLabel").textContent = "Simpan Perubahan Materi";
+
+      document.getElementById("material-title").value = v.title || "";
+      document.getElementById("subject-select").value = v.subject || "Matematika";
+      selectGrade(v.grade || "7");
+      document.getElementById("competency-target").value = v.learningOutcome || "";
+      document.getElementById("teacher-summary").value = v.pdfContent || v.description || "";
+      document.getElementById("form-link").value = v.quizUrl || "";
+
+      const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
+      document.getElementById("video-chapters").value = chapText;
+
+      if (v.sourceType === "local") {
+        switchSourceTab("file");
+      } else {
+        switchSourceTab("youtube");
+        document.getElementById("youtube-url").value = v.embedUrl || "";
+        handleYoutubeInput(v.embedUrl || "");
+      }
+    }
+
+    function parseChapters(rawText) {
+      if (!rawText || !rawText.trim()) return [];
+      const lines = rawText.split("\n");
+      const chapters = [];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const match = trimmed.match(/^(\d{1,2}:\d{2})\s+(.+)$/);
+        if (match) {
+          const parts = match[1].split(":");
+          const secs = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+          chapters.push({ time: match[1], title: match[2].trim(), seconds: secs });
+        } else {
+          chapters.push({ time: "00:00", title: trimmed, seconds: 0 });
+        }
+      }
+      return chapters;
+    }
+
+    async function handleSubmit() {
+      const mode = document.getElementById("formMode").value;
+      const editId = document.getElementById("editVideoId").value;
+      const title = document.getElementById("material-title").value.trim();
+      const grade = document.getElementById("selectedGradeInput").value;
+      const subject = document.getElementById("subject-select").value;
+      const outcome = document.getElementById("competency-target").value.trim();
+      const summary = document.getElementById("teacher-summary").value.trim();
+      const quizUrl = document.getElementById("form-link").value.trim();
+      const chaptersRaw = document.getElementById("video-chapters").value.trim();
+      const ytUrl = document.getElementById("youtube-url").value.trim();
+
+      if (!title) {
+        alert("Judul materi pembelajaran harus diisi.");
+        return;
+      }
+
+      const btn = document.getElementById("btnSubmitVideo");
+      btn.disabled = true;
+
+      try {
+        if (mode === "create") {
+          let payload = {
+            title,
+            grade,
+            subject,
+            category: subject.includes("Matematika") || subject.includes("IPA") ? "MIPA" : (subject.includes("Informatika") ? "Informatika" : (subject.includes("Bahasa") ? "Bahasa" : "IPS")),
+            teacher: "Tri Elmania, S.Pd.",
+            teacherNip: "19800512 200604 2 018",
+            duration: "14:20",
+            description: summary || `Materi pembelajaran untuk ${subject} Kelas ${grade}.`,
+            learningOutcome: outcome,
+            pdfContent: summary,
+            quizUrl: quizUrl,
+            chapters: parseChapters(chaptersRaw),
+            thumbnail: "assets/cover-matematika.svg"
+          };
+
+          if (currentSource === "file") {
+            if (!pendingFile) {
+              alert("Silakan pilih file video dari komputer terlebih dahulu.");
+              btn.disabled = false;
+              return;
+            }
+            payload.sourceType = "local";
+            payload.embedUrl = "";
+          } else {
+            if (!ytUrl) {
+              alert("Silakan masukkan tautan video YouTube.");
+              btn.disabled = false;
+              return;
+            }
+            payload.sourceType = "youtube";
+            payload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
+            payload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl);
+          }
+
+          await RepoStorage.addVideo(payload, pendingFile);
+          alert("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!");
+        } else {
+          // Update
+          let updated = {
+            title,
+            grade,
+            subject,
+            learningOutcome: outcome,
+            pdfContent: summary,
+            quizUrl: quizUrl,
+            description: summary,
+            chapters: parseChapters(chaptersRaw)
+          };
+          if (currentSource === "youtube" && ytUrl) {
+            updated.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
+            updated.thumbnail = RepoStorage.getThumbnailUrl(ytUrl);
+            updated.sourceType = "youtube";
+          }
+          await RepoStorage.updateVideo(editId, updated);
+          alert("Perubahan materi berhasil diperbarui!");
+        }
+
+        window.location.href = "index.html#portal-guru";
+      } catch (err) {
+        console.error("Gagal menyimpan:", err);
+        alert("Terjadi kendala saat menyimpan. Silakan coba kembali.");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,19 @@
+{
+  "name": "prototipe-pkm-smpn7",
+  "version": "2.0.0",
+  "description": "Repositori Video Pembelajaran Mandiri UPTD SMP Negeri 7 Tangerang Selatan - Program PkM Universitas Pamulang",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js 8877",
+    "dev": "node server.js 8877"
+  },
+  "keywords": [
+    "smpn7-tangsel",
+    "video-pembelajaran",
+    "kurikulum-merdeka",
+    "unpam",
+    "pkm"
+  ],
+  "author": "Tim Pengabdian kepada Masyarakat (PkM) Universitas Pamulang",
+  "license": "ISC"
+}
