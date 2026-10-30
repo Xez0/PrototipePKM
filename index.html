@@ -121,10 +121,10 @@
             </div>
           </div>
 
-          <!-- KARTU PRATINJAU INTERAKTIF (LINEAR FRAMED PANEL) -->
-          <div class="hero-card-preview">
-            <div class="preview-screen" onclick="App.openFeaturedHero()" style="cursor: pointer;">
-              <img src="assets/cover-matematika.svg" alt="Sampul Materi Bentuk Aljabar" style="width: 100%; height: 100%; object-fit: cover;">
+          <!-- KARTU PRATINJAU INTERAKTIF (ROTASI MATERI UNGGULAN OTOMATIS) -->
+          <div class="hero-card-preview" id="heroCardPreview">
+            <div class="preview-screen" id="heroPreviewScreen" onclick="App.openFeaturedHero()" style="cursor: pointer;" title="Klik untuk memutar materi ini">
+              <img id="heroPreviewImg" src="assets/cover-matematika.svg" alt="Sampul Materi Unggulan" style="width: 100%; height: 100%; object-fit: cover;">
               <div class="preview-play-btn" title="Putar Video Materi">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="6 4 20 12 6 20 6 4"/>
@@ -132,11 +132,14 @@
               </div>
             </div>
             <div class="preview-caption">
-              <div>
-                <h3>Konsep Dasar Aljabar</h3>
-                <p>Matematika Kelas 7 • Tri Elmania, S.Pd.</p>
+              <div class="preview-caption-text" onclick="App.openFeaturedHero()" style="cursor: pointer;">
+                <h3 id="heroPreviewTitle">Konsep Dasar Aljabar</h3>
+                <p id="heroPreviewSub">Matematika Kelas 7 • Tri Elmania, S.Pd.</p>
               </div>
-              <span class="chip-count">Materi Pilihan Guru</span>
+              <div class="hero-preview-meta-right">
+                <span class="chip-count" id="heroPreviewBadge">Materi Pilihan</span>
+                <div class="hero-preview-dots" id="heroPreviewDots"></div>
+              </div>
             </div>
           </div>
         </div>

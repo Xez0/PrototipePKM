@@ -23,6 +23,9 @@ const App = {
   activeGradeFilter: "all",
   activeCategoryFilter: "all",
   searchQuery: "",
+  featuredRotationTimer: null,
+  featuredIndex: 0,
+  featuredVideosList: [],
 
   // Inisialisasi Saat DOM Siap
   init: async function () {
@@ -35,6 +38,7 @@ const App = {
     this.renderStats();
     this.renderVideoGrid();
     this.renderTeacherTable();
+    this.initFeaturedRotation();
 
     // Sinkronisasi otomatis dari backend server repositori sekolah
     try {
@@ -42,6 +46,7 @@ const App = {
       this.renderStats();
       this.renderVideoGrid();
       this.renderTeacherTable();
+      this.initFeaturedRotation();
     } catch (e) {
       console.warn("Backend sync fallback ke lokal:", e);
     }
@@ -617,6 +622,7 @@ const App = {
       this.renderStats();
       this.renderVideoGrid();
       this.renderTeacherTable();
+      this.initFeaturedRotation();
     } catch (err) {
       console.error("Gagal memproses materi:", err);
       this.showToast("Terjadi kendala saat menyimpan video. Silakan coba kembali.", "danger");
@@ -708,6 +714,7 @@ const App = {
       this.renderStats();
       this.renderVideoGrid();
       this.renderTeacherTable();
+      this.initFeaturedRotation();
     }
   },
 
@@ -1025,14 +1032,103 @@ const App = {
     this.renderVideoGrid();
   },
 
-  openFeaturedHero: function () {
+  // -------------------------------------------------------------
+  // ROTASI MATERI UNGGULAN OTOMATIS (HERO SPOTLIGHT CAROUSEL)
+  // -------------------------------------------------------------
+  initFeaturedRotation: function () {
     const videos = RepoStorage.getVideos();
-    // Buka materi aljabar kelas 7 atau video pertama sebagai materi unggulan
-    const featured = videos.find(v => v.id === "smpn7-mat-07-01") || videos[0];
-    if (featured) {
-      this.openVideoById(featured.id);
+    if (!videos || videos.length === 0) return;
+    this.featuredVideosList = videos;
+    if (this.featuredIndex >= this.featuredVideosList.length) {
+      this.featuredIndex = 0;
+    }
+    this.renderFeaturedCard(this.featuredIndex);
+
+    // Otomatis rotasi tiap 5.5 detik
+    this.startFeaturedRotation();
+
+    // Jeda saat kursor melayang (hover) agar siswa nyaman membaca/klik
+    const card = document.getElementById("heroCardPreview");
+    if (card && !card.dataset.rotationBound) {
+      card.dataset.rotationBound = "true";
+      card.addEventListener("mouseenter", () => this.stopFeaturedRotation());
+      card.addEventListener("mouseleave", () => this.startFeaturedRotation());
+    }
+  },
+
+  startFeaturedRotation: function () {
+    this.stopFeaturedRotation();
+    if (!this.featuredVideosList || this.featuredVideosList.length <= 1) return;
+    this.featuredRotationTimer = setInterval(() => {
+      this.featuredIndex = (this.featuredIndex + 1) % this.featuredVideosList.length;
+      this.renderFeaturedCard(this.featuredIndex);
+    }, 5500);
+  },
+
+  stopFeaturedRotation: function () {
+    if (this.featuredRotationTimer) {
+      clearInterval(this.featuredRotationTimer);
+      this.featuredRotationTimer = null;
+    }
+  },
+
+  renderFeaturedCard: function (index) {
+    if (!this.featuredVideosList || this.featuredVideosList.length === 0) return;
+    const v = this.featuredVideosList[index];
+    if (!v) return;
+
+    const img = document.getElementById("heroPreviewImg");
+    const title = document.getElementById("heroPreviewTitle");
+    const sub = document.getElementById("heroPreviewSub");
+    const screen = document.getElementById("heroPreviewScreen");
+    const dotsContainer = document.getElementById("heroPreviewDots");
+
+    // Transisi halus cross-fade
+    if (screen) {
+      screen.classList.add("fade-out");
+      setTimeout(() => {
+        if (img) {
+          img.src = v.thumbnail || this.getCoverBySubject(v.subject);
+          img.alt = `Materi Unggulan: ${v.title}`;
+        }
+        if (title) title.textContent = v.title;
+        if (sub) sub.textContent = `${v.subject} Kelas ${v.grade} • ${v.teacher}`;
+        screen.classList.remove("fade-out");
+      }, 250);
     } else {
-      this.showToast("Materi unggulan belum tersedia.", "normal");
+      if (img) img.src = v.thumbnail || this.getCoverBySubject(v.subject);
+      if (title) title.textContent = v.title;
+      if (sub) sub.textContent = `${v.subject} Kelas ${v.grade} • ${v.teacher}`;
+    }
+
+    // Render indikator titik navigasi interaktif
+    if (dotsContainer) {
+      dotsContainer.innerHTML = this.featuredVideosList.map((item, i) => `
+        <button type="button" class="hero-dot ${i === index ? 'active' : ''}" 
+                onclick="event.stopPropagation(); App.setFeaturedIndex(${i})" 
+                title="Lihat ${escapeHtml(item.title)} (${escapeHtml(item.subject)})"
+                aria-label="Lihat materi ${escapeHtml(item.title)}"></button>
+      `).join("");
+    }
+  },
+
+  setFeaturedIndex: function (i) {
+    this.featuredIndex = i;
+    this.renderFeaturedCard(i);
+    this.startFeaturedRotation();
+  },
+
+  openFeaturedHero: function () {
+    if (this.featuredVideosList && this.featuredVideosList[this.featuredIndex]) {
+      this.openVideoById(this.featuredVideosList[this.featuredIndex].id);
+    } else {
+      const videos = RepoStorage.getVideos();
+      const featured = videos.find(v => v.id === "smpn7-mat-07-01") || (videos && videos[0]);
+      if (featured) {
+        this.openVideoById(featured.id);
+      } else {
+        this.showToast("Materi belum tersedia.", "normal");
+      }
     }
   },
 
