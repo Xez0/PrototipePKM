@@ -203,25 +203,31 @@ const VideoPlayer = {
           : "Pemutar Video Mandiri";
       }
     } else if (this.currentMode === "youtube" && v.embedUrl) {
-      let embedSrc = v.embedUrl;
-      if (!embedSrc.includes("enablejsapi=1")) {
+      const ytId = RepoStorage.extractYouTubeId(v.embedUrl);
+      let embedSrc = "";
+      if (ytId) {
+        embedSrc = `https://www.youtube.com/embed/${ytId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(window.location.origin)}`;
+      } else {
+        embedSrc = v.embedUrl.replace("youtube-nocookie.com", "youtube.com");
         const sep = embedSrc.includes("?") ? "&" : "?";
-        embedSrc = `${embedSrc}${sep}enablejsapi=1&rel=0&modestbranding=1`;
+        embedSrc = `${embedSrc}${sep}playsinline=1`;
       }
 
       playerContainer.innerHTML = `
         <iframe 
           id="activeVideoIframe"
           src="${embedSrc}" 
-          title="${v.title}" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          title="${escapeHtml(v.title)}" 
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen>
         </iframe>
       `;
 
       const modeLabel = document.getElementById("playerModeLabel");
       if (modeLabel) {
-        modeLabel.textContent = "Mode YouTube (Bebas Iklan)";
+        modeLabel.textContent = "Mode YouTube";
       }
     }
   },

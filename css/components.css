@@ -942,6 +942,8 @@ kbd.key-hint {
   aspect-ratio: 16 / 9;
   background-color: #000000;
   position: relative;
+  pointer-events: auto !important;
+  touch-action: manipulation;
 }
 
 .video-player-container iframe,
@@ -950,6 +952,7 @@ kbd.key-hint {
   height: 100%;
   border: none;
   display: block;
+  pointer-events: auto !important;
 }
 
 [data-ui] .player-mode-bar,

@@ -663,7 +663,7 @@ const RepoStorage = {
   formatVideoEmbedUrl: function (url) {
     const videoId = this.extractYouTubeId(url);
     if (videoId) {
-      return `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`;
+      return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1`;
     }
     return url;
   },

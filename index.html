@@ -997,25 +997,6 @@
       <div class="theatre-content-grid">
         <!-- KOLOM KIRI: VIDEO DAN DETAIL -->
         <div class="theatre-main-view">
-          <!-- Player Switcher Bar -->
-          <div class="player-mode-bar">
-            <div class="player-mode-tag">
-              <span id="playerModeLabel">Mode YouTube (Online)</span>
-            </div>
-            <div class="player-controls-right">
-              <button class="btn btn-secondary btn-sm" onclick="VideoPlayer.togglePlayerMode()" style="padding: 2px 8px; font-size: 0.8125rem;">
-                Ganti Sumber Pemutar
-              </button>
-              <label for="playbackSpeedSelect" style="font-size: 0.8125rem; color: var(--color-ink-subtle);">Kecepatan:</label>
-              <select id="playbackSpeedSelect" class="speed-select" onchange="VideoPlayer.setPlaybackSpeed(this.value)">
-                <option value="0.75">0.75x</option>
-                <option value="1.0" selected>1.0x (Normal)</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.5">1.5x</option>
-              </select>
-            </div>
-          </div>
-
           <div class="video-player-container" id="modalPlayerContainer">
             <!-- Iframe embed atau Video HTML5 disuntikkan secara dinamis -->
           </div>
