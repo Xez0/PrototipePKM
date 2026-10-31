@@ -15,21 +15,14 @@
     max-width: 60ch;
   }
 
-  .theatre-content-grid {
+  /* YouTube Watch View Tablet Adjustments */
+  .watch-layout {
     grid-template-columns: 1fr;
-    height: auto;
-    max-height: 85vh;
-    overflow-y: auto;
+    gap: var(--space-xl);
   }
 
-  [data-ui] .theatre-main-view,
-  .theatre-main-view {
-    border-right: none;
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .theatre-sidebar {
-    height: 380px;
+  .watch-sidebar-col {
+    position: static;
   }
 
   .faq-grid {
@@ -794,142 +787,67 @@
     justify-content: flex-start;
   }
 
-  /* Theatre Modal Mobile Reflow */
-  .modal-backdrop {
-    padding: var(--space-xs);
+  /* YouTube Watch View Mobile Reflow */
+  #viewWatch {
+    padding-top: var(--space-xs);
   }
 
-  .theatre-modal {
-    width: 100%;
-    max-width: 100%;
-    max-height: 96vh;
-    border-radius: var(--radius-lg);
+  .watch-page-container {
+    padding: 0 var(--space-sm);
   }
 
-  .theatre-header {
-    padding: 10px 14px;
-    gap: 8px;
-  }
-
-  .theatre-header-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .theatre-header-title .badge {
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-size: 0.75rem;
-    padding: 3px 8px;
-  }
-
-  .theatre-header-title h2 {
-    font-size: 0.9375rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-    flex: 1;
-  }
-
-  /* Player Mode Bar Mobile Clean Stack */
-  .player-mode-bar {
-    display: flex;
+  .watch-top-bar {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 8px;
-    padding: 8px 12px;
+    margin-bottom: var(--space-sm);
   }
 
-  .player-mode-tag {
+  .btn-watch-back {
+    padding: 6px 14px;
     font-size: 0.8125rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    min-height: 40px;
   }
 
-  .player-controls-right {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 8px;
-    flex-wrap: wrap;
+  .watch-player-frame {
+    border-radius: var(--radius-md);
   }
 
-  .player-controls-right .btn {
-    flex: 1 1 auto;
-    text-align: center;
-    justify-content: center;
-    white-space: nowrap;
-    min-height: 36px;
+  .watch-video-title {
+    font-size: 1.25rem;
   }
 
-  .player-controls-right label {
-    white-space: nowrap;
-    font-size: 0.75rem;
-  }
-
-  .player-controls-right .speed-select {
-    padding: 4px 6px;
-    font-size: 0.75rem;
-    min-height: 36px;
-    max-width: 110px;
-  }
-
-  .theatre-content-grid {
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-    max-height: calc(96vh - 56px) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .theatre-main-view {
-    overflow-y: visible !important;
-    height: auto !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .theatre-sidebar {
-    overflow-y: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  .theatre-quiz-banner {
+  .watch-channel-bar {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .watch-actions-group {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-watch-action {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.8125rem;
+    min-height: 40px;
+    padding: 6px 12px;
+  }
+
+  .watch-description-box {
+    padding: var(--space-md);
+  }
+
+  .watch-related-card {
+    grid-template-columns: 110px 1fr;
     gap: 10px;
   }
 
-  .theatre-quiz-banner .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .theatre-meta-bar {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .theatre-tab-btn {
-    padding: 10px 8px;
-    font-size: 0.75rem;
-    min-height: 44px;
-  }
-
-  .theatre-details-box {
-    padding: var(--space-sm);
+  .watch-related-thumb {
+    width: 110px;
   }
 
   .thumbnail-selector-layout {

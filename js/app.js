@@ -280,20 +280,38 @@ const App = {
 
   // Sinkronisasi Hash URL dengan Tampilan View
   handleHashChange: function () {
-    const hash = window.location.hash.replace("#", "").toLowerCase();
-    if (hash === "portal-guru") {
+    const rawHash = window.location.hash.replace("#", "");
+    const lowerHash = rawHash.toLowerCase();
+
+    // Rute Nonton Video (YouTube-Style Watch Page)
+    if (lowerHash.startsWith("tonton") || lowerHash.startsWith("watch")) {
+      let videoId = null;
+      const match = rawHash.match(/[?&]v=([^&]+)/) || rawHash.match(/=(.+)/);
+      if (match) videoId = match[1];
+
+      const videos = RepoStorage.getVideos();
+      const target = videoId ? videos.find(v => v.id === videoId) : videos[0];
+      if (target) {
+        VideoPlayer.openPlayer(target, false);
+      } else {
+        this.navigateTo("student", "katalog");
+      }
+      return;
+    }
+
+    if (lowerHash === "portal-guru") {
       if (this.currentView !== "teacher") this.navigateTo("teacher");
-    } else if (hash === "login-guru" || hash === "masuk-guru") {
+    } else if (lowerHash === "login-guru" || lowerHash === "masuk-guru") {
       if (this.currentView !== "login") this.navigateTo("login");
-    } else if (hash === "katalog" || hash === "edukasi-pkm" || hash === "beranda" || hash === "prinsip") {
-      this.navigateTo("student", hash);
-    } else if (hash === "" || hash === "student") {
+    } else if (lowerHash === "katalog" || lowerHash === "edukasi-pkm" || lowerHash === "beranda" || lowerHash === "prinsip") {
+      this.navigateTo("student", lowerHash);
+    } else if (lowerHash === "" || lowerHash === "student") {
       if (this.currentView !== "student") this.navigateTo("student");
     }
   },
 
-  // Navigasi Terpadu Antar Halaman (Siswa / Login / Ruang Guru)
-  navigateTo: function (viewName, targetSectionId = null) {
+  // Navigasi Terpadu Antar Halaman (Siswa / Login / Ruang Guru / Nonton Video)
+  navigateTo: function (viewName, targetSectionId = null, updateHash = true) {
     if (viewName === "teacher" && !AuthManager.isLoggedIn()) {
       this.showToast("Silakan masuk terlebih dahulu dengan akun dewan guru.", "normal");
       this.navigateTo("login");
@@ -303,25 +321,44 @@ const App = {
     const viewStudent = document.getElementById("viewStudent");
     const viewLogin = document.getElementById("viewLogin");
     const viewTeacherPortal = document.getElementById("viewTeacherPortal");
+    const viewWatch = document.getElementById("viewWatch");
 
     if (!viewStudent || !viewLogin || !viewTeacherPortal) return;
+
+    // Hentikan video jika berpindah dari halaman nonton ke halaman lain
+    if (this.currentView === "watch" && viewName !== "watch") {
+      if (window.VideoPlayer && typeof VideoPlayer.stopPlayback === "function") {
+        VideoPlayer.stopPlayback();
+      }
+    }
 
     viewStudent.classList.add("hidden");
     viewLogin.classList.add("hidden");
     viewTeacherPortal.classList.add("hidden");
+    if (viewWatch) viewWatch.classList.add("hidden");
 
-    if (viewName === "login") {
+    if (viewName === "watch") {
+      if (viewWatch) viewWatch.classList.remove("hidden");
+      this.currentView = "watch";
+      if (updateHash && targetSectionId) {
+        const nextHash = `#tonton?v=${targetSectionId}`;
+        if (window.location.hash !== nextHash) {
+          window.history.pushState(null, "", nextHash);
+        }
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (viewName === "login") {
       viewLogin.classList.remove("hidden");
       this.currentView = "login";
       if (window.location.hash !== "#login-guru") {
-        window.history.replaceState(null, "", "#login-guru");
+        window.history.pushState(null, "", "#login-guru");
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (viewName === "teacher") {
       viewTeacherPortal.classList.remove("hidden");
       this.currentView = "teacher";
       if (window.location.hash !== "#portal-guru") {
-        window.history.replaceState(null, "", "#portal-guru");
+        window.history.pushState(null, "", "#portal-guru");
       }
       this.renderTeacherProfile();
       this.renderTeacherTable();
@@ -331,7 +368,7 @@ const App = {
       this.currentView = "student";
       if (targetSectionId) {
         if (window.location.hash !== `#${targetSectionId}`) {
-          window.history.replaceState(null, "", `#${targetSectionId}`);
+          window.history.pushState(null, "", `#${targetSectionId}`);
         }
         const targetElem = document.getElementById(targetSectionId);
         if (targetElem) {
@@ -341,7 +378,7 @@ const App = {
         }
       } else {
         if (window.location.hash && window.location.hash !== "#beranda") {
-          window.history.replaceState(null, "", "#beranda");
+          window.history.pushState(null, "", "#beranda");
         }
         window.scrollTo({ top: 0, behavior: "smooth" });
       }

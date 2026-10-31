@@ -1,8 +1,9 @@
 /* ==========================================================================
-   KONTROL PEMUTAR VIDEO BEBAS DISTRAKSI (THEATRE MODE)
+   KONTROL HALAMAN TONTON VIDEO (YOUTUBE-STYLE WATCH VIEW)
    UPTD SMP NEGERI 7 KOTA TANGERANG SELATAN
-   Pemutar Ganda (YouTube Edukatif & File Video Lokal IndexedDB), 
-   Lompatan Bab Repetisi Manual, & Rangkuman Materi Skolastik Bersih
+   Pemutar YouTube Edukatif & File Video Lokal Bebas Distraksi,
+   Bab Pembelajaran, Capaian Pembelajaran, Rangkuman Dewan Guru,
+   & Rekomendasi Materi Terkait (Sidebar)
    ========================================================================== */
 
 const VideoPlayer = {
@@ -11,154 +12,151 @@ const VideoPlayer = {
   activeChapterIndex: 0,
   activeBlobUrl: null,
 
-  // Inisialisasi Event Listener Tab Modal
   init: function () {
-    const tabBtns = document.querySelectorAll(".theatre-tab-btn");
-    tabBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const targetTab = btn.getAttribute("data-tab");
-        this.switchTab(targetTab);
-      });
-    });
+    // Siap digunakan
   },
 
-  // Beralih Antar Tab Sidebar (Bab vs Rangkuman)
-  switchTab: function (tabId) {
-    document.querySelectorAll(".theatre-tab-btn").forEach(b => {
-      if (b.getAttribute("data-tab") === tabId) {
-        b.classList.add("active");
-      } else {
-        b.classList.remove("active");
-      }
-    });
+  // Buka Halaman Tonton Video (YouTube-Style Watch View)
+  openPlayer: function (videoOrId, updateHash = true) {
+    let video = videoOrId;
+    if (typeof videoOrId === "string") {
+      const all = RepoStorage.getVideos();
+      video = all.find(v => v.id === videoOrId);
+    }
 
-    document.querySelectorAll(".theatre-tab-pane").forEach(pane => {
-      if (pane.id === tabId) {
-        pane.classList.add("active");
-      } else {
-        pane.classList.remove("active");
-      }
-    });
-  },
-
-  // Buka Pemutar Video Fokus
-  openPlayer: function (video, forceMode = null) {
+    if (!video) return;
     this.currentVideo = video;
     this.activeChapterIndex = 0;
 
-    // Tentukan mode pemutar otomatis berdasarkan sumber video
-    if (forceMode) {
-      this.currentMode = forceMode;
-    } else if (video.sourceType === "local" || !video.embedUrl) {
+    // Tentukan mode pemutar otomatis
+    if (video.sourceType === "local" || !video.embedUrl) {
       this.currentMode = "html5";
     } else {
       this.currentMode = "youtube";
     }
 
-    const modal = document.getElementById("theatreModal");
-    const backdrop = document.getElementById("theatreModalBackdrop");
-    if (!modal || !backdrop) return;
+    // Navigasi ke View Watch di Router Aplikasi
+    if (window.App && typeof App.navigateTo === "function") {
+      App.navigateTo("watch", video.id, updateHash);
+    }
 
-    // Set Judul & Metadata Skolastik
-    const titleElem = document.getElementById("modalVideoTitle");
-    const teacherElem = document.getElementById("modalTeacherName");
-    const nipElem = document.getElementById("modalTeacherNip");
-    const subjectGradeElem = document.getElementById("modalSubjectGrade");
-    const descElem = document.getElementById("modalDescription");
-    const outcomeElem = document.getElementById("modalLearningOutcome");
-    const summaryElem = document.getElementById("modalTeacherSummary");
+    // Set Breadcrumbs & Badges
+    const crumbSubject = document.getElementById("watchBreadcrumbSubject");
+    const crumbTitle = document.getElementById("watchBreadcrumbTitle");
+    const subjectBadge = document.getElementById("watchSubjectBadge");
+    const gradeBadge = document.getElementById("watchGradeBadge");
+    const sourceBadge = document.getElementById("watchSourceBadge");
+
+    if (crumbSubject) crumbSubject.textContent = video.subject;
+    if (crumbTitle) crumbTitle.textContent = video.title;
+    if (subjectBadge) subjectBadge.textContent = video.subject;
+    if (gradeBadge) gradeBadge.textContent = `Kelas ${video.grade}`;
+    if (sourceBadge) {
+      sourceBadge.textContent = video.sourceType === "local" ? "Berkas Laptop" : "YouTube Resmi";
+    }
+
+    // Set Judul & Profil Guru
+    const titleElem = document.getElementById("watchVideoTitle");
+    const teacherNameElem = document.getElementById("watchTeacherName");
+    const teacherNipElem = document.getElementById("watchTeacherNip");
+    const teacherAvatarElem = document.getElementById("watchTeacherAvatar");
 
     if (titleElem) titleElem.textContent = video.title;
-    if (teacherElem) teacherElem.textContent = video.teacher;
-    if (nipElem) nipElem.textContent = video.teacherNip ? `NIP. ${video.teacherNip}` : "Dewan Guru SMPN 7 Tangsel";
-    if (subjectGradeElem) subjectGradeElem.textContent = `${video.subject} • Kelas ${video.grade}`;
-    if (descElem) descElem.textContent = video.description || "";
+    if (teacherNameElem) teacherNameElem.textContent = video.teacher;
+    if (teacherNipElem) {
+      teacherNipElem.textContent = video.teacherNip
+        ? `NIP. ${video.teacherNip} • Dewan Guru SMPN 7`
+        : "Dewan Guru SMPN 7 Tangsel";
+    }
+    if (teacherAvatarElem) {
+      const initials = (video.teacher || "Guru")
+        .replace(/[^a-zA-Z]/g, "")
+        .slice(0, 2)
+        .toUpperCase() || "G";
+      teacherAvatarElem.textContent = initials;
+    }
 
-    // Cek Ketersediaan Kuis / Latihan Soal Mandiri
-    const quizCard = document.getElementById("modalQuizCard");
-    const quizLink = document.getElementById("btnModalQuizLink");
+    // Set Info Waktu & Deskripsi
+    const publishDateElem = document.getElementById("watchPublishDate");
+    const durationElem = document.getElementById("watchDurationText");
+    const descElem = document.getElementById("watchDescriptionText");
+
+    if (publishDateElem) {
+      publishDateElem.textContent = `Ditayangkan: ${RepoStorage.formatDate(video.publishedAt)}`;
+    }
+    if (durationElem) {
+      durationElem.textContent = `Durasi: ${video.duration || '15:00'}`;
+    }
+    if (descElem) {
+      descElem.textContent = video.description || "Materi pembelajaran mandiri SMP Negeri 7 Kota Tangerang Selatan.";
+    }
+
+    // Cek Kuis / Asesmen Mandiri
+    const quizBtn = document.getElementById("btnWatchQuiz");
     const quizUrl = (video.quizUrl || "").trim();
-    if (quizCard && quizLink) {
+    if (quizBtn) {
       if (quizUrl) {
-        quizCard.style.display = "flex";
-        quizLink.href = quizUrl;
+        quizBtn.style.display = "inline-flex";
+        quizBtn.href = quizUrl;
       } else {
-        quizCard.style.display = "none";
+        quizBtn.style.display = "none";
       }
     }
 
-    // Cek Ketersediaan Bab & Rangkuman (Opsional)
-    const chapters = Array.isArray(video.chapters) ? video.chapters : [];
-    const hasChapters = chapters.length > 0;
+    // Cek Capaian Pembelajaran (CP)
+    const outcomeSec = document.getElementById("watchOutcomeSection");
+    const outcomeText = document.getElementById("watchOutcomeText");
     const outcome = (video.learningOutcome || "").trim();
-    const summary = (video.pdfContent || "").trim();
-    const hasOutcome = outcome.length > 0;
-    const hasSummary = summary.length > 0;
-    const hasNotes = hasOutcome || hasSummary;
-
-    if (outcomeElem) outcomeElem.textContent = outcome;
-    if (summaryElem) summaryElem.textContent = summary;
-
-    const boxOutcome = document.getElementById("boxLearningOutcomeWrap");
-    const boxSummary = document.getElementById("boxTeacherSummaryWrap");
-    if (boxOutcome) boxOutcome.style.display = hasOutcome ? "block" : "none";
-    if (boxSummary) boxSummary.style.display = hasSummary ? "block" : "none";
-
-    // Atur Tampilan Sidebar Adaptif (100% Opsional Sesuai Pengisian Guru)
-    const sidebar = document.getElementById("theatreSidebar");
-    const contentGrid = document.querySelector(".theatre-content-grid");
-    const tabNav = document.getElementById("theatreTabNav");
-    const btnChapters = document.getElementById("btnTabChapters");
-    const btnNotes = document.getElementById("btnTabTeacherNotes");
-
-    if (!hasChapters && !hasNotes) {
-      // Guru TIDAK mengisi Bab dan TIDAK mengisi Rangkuman:
-      // Menu samping TIDAK MUNCUL SAMA SEKALI, pemutar video tampil lebar penuh (Cinema Mode)
-      if (sidebar) sidebar.style.display = "none";
-      if (contentGrid) contentGrid.classList.add("no-sidebar");
-    } else {
-      // Ada salah satu atau kedua bahan pendamping:
-      if (sidebar) sidebar.style.display = "flex";
-      if (contentGrid) contentGrid.classList.remove("no-sidebar");
-
-      if (hasChapters && hasNotes) {
-        // Keduanya diisi oleh guru: Tampilkan kedua tab navigasi
-        if (tabNav) tabNav.style.display = "flex";
-        if (btnChapters) btnChapters.style.display = "flex";
-        if (btnNotes) btnNotes.style.display = "flex";
-        this.switchTab("tabChapters");
-      } else if (hasChapters && !hasNotes) {
-        // Hanya bab yang diisi: Tampilkan header tab bab tunggal
-        if (tabNav) tabNav.style.display = "flex";
-        if (btnChapters) btnChapters.style.display = "flex";
-        if (btnNotes) btnNotes.style.display = "none";
-        this.switchTab("tabChapters");
+    if (outcomeSec && outcomeText) {
+      if (outcome) {
+        outcomeText.textContent = outcome;
+        outcomeSec.style.display = "block";
       } else {
-        // Hanya rangkuman yang diisi: Tampilkan header tab rangkuman tunggal
-        if (tabNav) tabNav.style.display = "flex";
-        if (btnChapters) btnChapters.style.display = "none";
-        if (btnNotes) btnNotes.style.display = "flex";
-        this.switchTab("tabTeacherNotes");
+        outcomeSec.style.display = "none";
       }
     }
 
-    // Render Pemutar Video
-    this.renderActivePlayer();
+    // Cek Rangkuman Guru
+    const summarySec = document.getElementById("watchSummarySection");
+    const summaryText = document.getElementById("watchSummaryText");
+    const summary = (video.pdfContent || "").trim();
+    if (summarySec && summaryText) {
+      if (summary) {
+        summaryText.textContent = summary;
+        summarySec.style.display = "block";
+      } else {
+        summarySec.style.display = "none";
+      }
+    }
 
-    // Render Daftar Bab
-    this.renderChapters(chapters);
+    // Cek Bab Video
+    const chapters = Array.isArray(video.chapters) ? video.chapters : [];
+    const chaptersSec = document.getElementById("watchChaptersSection");
+    if (chaptersSec) {
+      if (chapters.length > 0) {
+        chaptersSec.style.display = "block";
+        this.renderChapters(chapters);
+      } else {
+        chaptersSec.style.display = "none";
+      }
+    }
 
     // Set Status Selesai Belajar
     this.updateCompletionButton();
 
-    // Buka Modal
-    backdrop.classList.add("active");
-    document.body.style.overflow = "hidden";
+    // Render Pemutar Video
+    this.renderActivePlayer();
+
+    // Render Materi Terkait Lainnya (Sidebar)
+    this.renderRelatedVideos(video.id);
+
+    // Scroll mulus ke atas
+    window.scrollTo({ top: 0, behavior: "smooth" });
   },
 
-  // Render Pemutar Video (File Komputer vs YouTube)
+  // Render Pemutar Video Aktif (YouTube Iframe vs File HTML5)
   renderActivePlayer: async function () {
-    const playerContainer = document.getElementById("modalPlayerContainer");
+    const playerContainer = document.getElementById("watchPlayerContainer");
     if (!playerContainer || !this.currentVideo) return;
 
     const v = this.currentVideo;
@@ -189,19 +187,12 @@ const VideoPlayer = {
           controls 
           autoplay 
           playsinline
-          style="width: 100%; height: 100%; max-height: 520px; background: #000; border-radius: var(--radius-md);"
+          style="width: 100%; height: 100%; background: #000;"
           poster="${v.thumbnail || App.getCoverBySubject(v.subject)}">
           <source src="${videoSrc}">
           Browser Anda tidak mendukung pemutar video HTML5.
         </video>
       `;
-
-      const modeLabel = document.getElementById("playerModeLabel");
-      if (modeLabel) {
-        modeLabel.textContent = v.sourceType === "local" 
-          ? `Berkas Komputer (${v.fileName || 'Video Lokal'})` 
-          : "Pemutar Video Mandiri";
-      }
     } else if (this.currentMode === "youtube" && v.embedUrl) {
       const ytId = RepoStorage.extractYouTubeId(v.embedUrl);
       let embedSrc = "";
@@ -224,81 +215,90 @@ const VideoPlayer = {
           allowfullscreen>
         </iframe>
       `;
-
-      const modeLabel = document.getElementById("playerModeLabel");
-      if (modeLabel) {
-        modeLabel.textContent = "Mode YouTube";
-      }
     }
   },
 
-  // Beralih Antara Mode YouTube dan HTML5
-  togglePlayerMode: function () {
-    if (!this.currentVideo) return;
-    if (this.currentVideo.sourceType === "local") {
-      App.showToast("Materi ini adalah berkas video komputer lokal.");
-      return;
-    }
-    this.currentMode = this.currentMode === "youtube" ? "html5" : "youtube";
-    this.renderActivePlayer();
-    App.showToast(`Beralih ke ${this.currentMode === "youtube" ? "Mode YouTube" : "Mode Pemutar Mandiri"}`);
-  },
-
-  // Tutup Modal & Hentikan Pemutaran
-  closePlayer: function () {
-    if (this.activeBlobUrl) {
-      URL.revokeObjectURL(this.activeBlobUrl);
-      this.activeBlobUrl = null;
-    }
-
-    const iframe = document.getElementById("activeVideoIframe");
-    if (iframe && iframe.contentWindow) {
-      try {
-        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
-        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "stopVideo", args: [] }), "*");
-      } catch (e) {}
-    }
-
-    const video = document.getElementById("activeHtml5Video");
-    if (video) {
-      video.pause();
-    }
-
-    const backdrop = document.getElementById("theatreModalBackdrop");
-    const playerContainer = document.getElementById("modalPlayerContainer");
-    if (backdrop) backdrop.classList.remove("active");
-    if (playerContainer) playerContainer.innerHTML = "";
-    document.body.style.overflow = "auto";
-    this.currentVideo = null;
-  },
-
-  // Render Daftar Bab Repetisi Manual
-  renderChapters: function (chapters) {
-    const listElem = document.getElementById("chapterListContainer");
+  // Render Daftar Rekomendasi Materi Terkait (Sidebar YouTube)
+  renderRelatedVideos: function (currentVideoId) {
+    const listElem = document.getElementById("watchRelatedList");
     if (!listElem) return;
 
-    if (!chapters || chapters.length === 0) {
-      listElem.innerHTML = `<p style="padding: 12px; font-size: 0.8125rem; color: var(--color-ink-subtle);">Materi ini tidak memiliki pembagian bab terpisah.</p>`;
+    const allVideos = RepoStorage.getVideos();
+    const current = this.currentVideo;
+
+    // Urutkan: Mapel yang sama terlebih dahulu, lalu materi lainnya
+    const related = allVideos.filter(v => v.id !== currentVideoId).sort((a, b) => {
+      if (current) {
+        if (a.subject === current.subject && b.subject !== current.subject) return -1;
+        if (b.subject === current.subject && a.subject !== current.subject) return 1;
+      }
+      return 0;
+    });
+
+    if (related.length === 0) {
+      listElem.innerHTML = `
+        <p style="padding: 16px; font-size: 0.8125rem; color: var(--color-ink-subtle); text-align: center;">
+          Belum ada materi pembelajaran terkait lainnya.
+        </p>
+      `;
       return;
     }
+
+    listElem.innerHTML = related.map(v => {
+      const cover = v.thumbnail || App.getCoverBySubject(v.subject);
+      const safeTitle = escapeHtml(v.title);
+      const safeTeacher = escapeHtml(v.teacher);
+      const safeSubject = escapeHtml(v.subject);
+      const safeGrade = escapeHtml(v.grade);
+      const safeDur = escapeHtml(v.duration || '15:00');
+
+      return `
+        <div 
+          class="watch-related-card" 
+          onclick="VideoPlayer.openPlayer('${v.id}', true)"
+          role="button"
+          tabindex="0"
+          title="Tonton materi: ${safeTitle}"
+        >
+          <div class="watch-related-thumb">
+            <img 
+              src="${cover}" 
+              alt="${safeTitle}" 
+              loading="lazy"
+              onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');"
+            >
+            <span class="watch-related-duration">${safeDur}</span>
+          </div>
+          <div class="watch-related-info">
+            <span class="watch-related-badge">${safeSubject} • Kls ${safeGrade}</span>
+            <h4 class="watch-related-title">${safeTitle}</h4>
+            <span class="watch-related-teacher">${safeTeacher}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  },
+
+  // Render Bab Video (Timestamps)
+  renderChapters: function (chapters) {
+    const listElem = document.getElementById("watchChaptersList");
+    if (!listElem) return;
 
     listElem.innerHTML = chapters.map((ch, idx) => `
       <div 
-        class="chapter-item ${idx === this.activeChapterIndex ? 'active-chapter' : ''}" 
+        class="watch-chapter-row ${idx === this.activeChapterIndex ? 'active' : ''}" 
         onclick="VideoPlayer.jumpToChapter(${ch.seconds}, ${idx})"
         title="Ulangi penjelasan dari menit ${ch.time}">
-        <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
-          <span style="font-family: var(--font-sans); font-size: 0.8125rem; color: var(--color-ink-subtle);">#${idx + 1}</span>
-          <span style="font-weight: 500; font-size: 0.875rem; color: var(--color-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${ch.title}
-          </span>
-        </div>
-        <span class="chapter-time">${ch.time}</span>
+        <span class="watch-chapter-title">
+          <span class="watch-chapter-badge-num">#${idx + 1}</span>
+          ${escapeHtml(ch.title)}
+        </span>
+        <span class="watch-chapter-time">${escapeHtml(ch.time)}</span>
       </div>
     `).join("");
   },
 
-  // Lompat ke Menit Bab
+  // Lompat ke Bab / Menit Video
   jumpToChapter: function (seconds, index = 0) {
     if (!this.currentVideo) return;
     this.activeChapterIndex = index;
@@ -326,27 +326,10 @@ const VideoPlayer = {
     }
 
     this.renderChapters(this.currentVideo.chapters || []);
-    const ch = (this.currentVideo.chapters && this.currentVideo.chapters[index]) ? this.currentVideo.chapters[index].title : "Bab";
-    App.showToast(`Lompat ke bab: ${ch}`);
-  },
-
-  // Pengatur Kecepatan Putar
-  setPlaybackSpeed: function (speed) {
-    const numSpeed = parseFloat(speed);
-    if (this.currentMode === "youtube") {
-      const iframe = document.getElementById("activeVideoIframe");
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage(JSON.stringify({
-          event: "command",
-          func: "setPlaybackRate",
-          args: [numSpeed]
-        }), "*");
-      }
-    } else {
-      const video = document.getElementById("activeHtml5Video");
-      if (video) video.playbackRate = numSpeed;
-    }
-    App.showToast(`Kecepatan putar: ${speed}x`);
+    const ch = (this.currentVideo.chapters && this.currentVideo.chapters[index])
+      ? this.currentVideo.chapters[index].title
+      : "Bab";
+    App.showToast(`Lompat ke menit: ${ch}`);
   },
 
   // Tandai Selesai / Belum Selesai
@@ -359,30 +342,66 @@ const VideoPlayer = {
     App.showToast(isDone ? "Materi ditandai telah dipelajari." : "Tanda belajar dibatalkan.");
   },
 
+  // Update Tampilan Tombol Selesai
   updateCompletionButton: function () {
     if (!this.currentVideo) return;
-    const btn = document.getElementById("btnToggleComplete");
+    const btn = document.getElementById("btnWatchComplete");
+    const txt = document.getElementById("txtWatchComplete");
     if (!btn) return;
 
     const isDone = RepoStorage.isCompleted(this.currentVideo.id);
     if (isDone) {
-      btn.innerHTML = `
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Selesai Dipelajari
-      `;
-      btn.className = "btn btn-primary btn-sm";
+      btn.className = "btn btn-primary btn-watch-action";
       btn.style.backgroundColor = "var(--color-success)";
       btn.style.borderColor = "var(--color-success)";
+      btn.style.color = "#ffffff";
+      if (txt) txt.textContent = "Selesai Dipelajari ✓";
     } else {
-      btn.innerHTML = `
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-        Tandai Selesai
-      `;
-      btn.className = "btn btn-outline btn-sm";
+      btn.className = "btn btn-outline btn-watch-action";
       btn.style.backgroundColor = "";
       btn.style.borderColor = "";
+      btn.style.color = "";
+      if (txt) txt.textContent = "Tandai Selesai";
     }
+  },
+
+  // Hentikan Pemutaran Video
+  stopPlayback: function () {
+    if (this.activeBlobUrl) {
+      URL.revokeObjectURL(this.activeBlobUrl);
+      this.activeBlobUrl = null;
+    }
+
+    const iframe = document.getElementById("activeVideoIframe");
+    if (iframe && iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*");
+        iframe.contentWindow.postMessage(JSON.stringify({ event: "command", func: "stopVideo", args: [] }), "*");
+      } catch (e) {}
+    }
+
+    const video = document.getElementById("activeHtml5Video");
+    if (video) {
+      try { video.pause(); } catch (e) {}
+    }
+
+    const playerContainer = document.getElementById("watchPlayerContainer");
+    if (playerContainer) playerContainer.innerHTML = "";
+    this.currentVideo = null;
+  },
+
+  // Kembali ke Katalog Bahan Ajar
+  backToCatalog: function () {
+    this.stopPlayback();
+    if (window.App && typeof App.navigateTo === "function") {
+      App.navigateTo("student", "katalog");
+    }
+  },
+
+  // Kompatibilitas Tutup Player
+  closePlayer: function () {
+    this.backToCatalog();
   }
 };
-window.VideoPlayer = VideoPlayer;
 
+window.VideoPlayer = VideoPlayer;

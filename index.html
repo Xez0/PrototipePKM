@@ -895,6 +895,121 @@
       </div>
     </div>
   </div>
+
+  <!-- ==================== VIEW 4: HALAMAN TONTON MATERI (YOUTUBE-STYLE WATCH VIEW) ==================== -->
+  <div id="viewWatch" class="app-view hidden">
+    <div class="watch-page-container">
+      <!-- TOP NAVIGATION BAR / BACK TO CATALOG -->
+      <div class="watch-top-bar">
+        <button type="button" class="btn-watch-back" onclick="VideoPlayer.backToCatalog()" aria-label="Kembali ke Katalog Bahan Ajar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Kembali ke Katalog Bahan Ajar</span>
+        </button>
+        <div class="watch-breadcrumb">
+          <span class="watch-crumb-subject" id="watchBreadcrumbSubject">Mata Pelajaran</span>
+          <span class="watch-crumb-sep">/</span>
+          <span class="watch-crumb-title" id="watchBreadcrumbTitle">Judul Materi</span>
+        </div>
+      </div>
+
+      <!-- MAIN 2-COLUMN YOUTUBE LAYOUT -->
+      <div class="watch-layout">
+        <!-- KOLOM KIRI (UTAMA): PEMUTAR VIDEO + INFO LENGKAP -->
+        <div class="watch-main-col">
+          <!-- 16:9 VIDEO PLAYER CONTAINER -->
+          <div class="watch-player-frame">
+            <div class="watch-player-box" id="watchPlayerContainer">
+              <!-- Video iframe / HTML5 player disuntikkan secara dinamis -->
+            </div>
+          </div>
+
+          <!-- VIDEO TITLE & BADGES -->
+          <div class="watch-video-header">
+            <div class="watch-badge-row">
+              <span class="badge badge-primary" id="watchSubjectBadge">Matematika</span>
+              <span class="badge badge-grade" id="watchGradeBadge">Kelas 7</span>
+              <span class="badge badge-source" id="watchSourceBadge">YouTube Resmi</span>
+            </div>
+            <h1 class="watch-video-title" id="watchVideoTitle">Judul Video Pembelajaran</h1>
+          </div>
+
+          <!-- CHANNEL / GURU BAR & ACTION BUTTONS -->
+          <div class="watch-channel-bar">
+            <div class="watch-teacher-profile">
+              <div class="watch-teacher-avatar" id="watchTeacherAvatar">TE</div>
+              <div class="watch-teacher-info">
+                <div class="watch-teacher-name" id="watchTeacherName">Tri Elmania, S.Pd.</div>
+                <div class="watch-teacher-nip" id="watchTeacherNip">NIP. 19800512 200604 2 018 • Dewan Guru SMPN 7</div>
+              </div>
+            </div>
+
+            <div class="watch-actions-group">
+              <button type="button" class="btn btn-outline btn-watch-action" id="btnWatchComplete" onclick="VideoPlayer.toggleCompletion()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                <span id="txtWatchComplete">Tandai Selesai</span>
+              </button>
+              <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-watch-action" id="btnWatchQuiz" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Buka Latihan Soal ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- YOUTUBE-STYLE DESCRIPTION & READING SHEET BOX -->
+          <div class="watch-description-box" id="watchDescBox">
+            <div class="watch-desc-header-row">
+              <span class="watch-desc-meta" id="watchPublishDate">Ditayangkan: 31 Okt 2026</span>
+              <span class="watch-desc-meta">•</span>
+              <span class="watch-desc-meta" id="watchDurationText">Durasi: 15 Menit</span>
+            </div>
+
+            <p class="watch-desc-text" id="watchDescriptionText">Deskripsi materi pembelajaran.</p>
+
+            <!-- Capaian Pembelajaran Box -->
+            <div class="watch-reading-section" id="watchOutcomeSection" style="display: none;">
+              <div class="watch-section-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Target Capaian Pembelajaran (CP)
+              </div>
+              <p class="watch-section-content" id="watchOutcomeText"></p>
+            </div>
+
+            <!-- Rangkuman Pokok Materi -->
+            <div class="watch-reading-section" id="watchSummarySection" style="display: none;">
+              <div class="watch-section-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Rangkuman Pokok Dewan Guru
+              </div>
+              <div class="watch-section-content pre-line" id="watchSummaryText"></div>
+            </div>
+
+            <!-- Daftar Bab Repetisi / Timestamps -->
+            <div class="watch-reading-section" id="watchChaptersSection" style="display: none;">
+              <div class="watch-section-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Bab Pembelajaran (Klik menit untuk mengulang materi)
+              </div>
+              <div class="watch-chapters-list" id="watchChaptersList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KOLOM KANAN: MATERI TERKAIT LAINNYA -->
+        <aside class="watch-sidebar-col" aria-label="Materi Terkait">
+          <div class="watch-sidebar-header">
+            <h2 class="watch-sidebar-title">Materi Terkait Lainnya</h2>
+            <span class="watch-sidebar-subtitle">Bahan ajar mandiri SMPN 7 Tangsel</span>
+          </div>
+          <div class="watch-related-list" id="watchRelatedList">
+            <!-- Rendered dynamically -->
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
 </main>
 
   <!-- ==================== MODAL EDIT MATERI PEMBELAJARAN (GURU) ==================== -->
@@ -976,124 +1091,6 @@
     </div>
   </div>
 
-  <!-- ==================== THEATRE MODAL (PEMUTAR VIDEO FOKUS) ==================== -->
-  <div class="modal-backdrop" id="theatreModalBackdrop" data-ui="dialog" onclick="if (event.target === this) VideoPlayer.closePlayer()">
-    <div class="theatre-modal" id="theatreModal" data-ui="dialog" role="dialog" aria-modal="true" aria-labelledby="modalVideoTitle">
-      <!-- HEADER THEATRE -->
-      <div class="theatre-header">
-        <div class="theatre-header-title">
-          <span class="brand-badge-tag" id="modalSubjectGrade">Matematika</span>
-          <h2 id="modalVideoTitle">Judul Video Pembelajaran</h2>
-        </div>
-        <button class="btn-close-modal" onclick="VideoPlayer.closePlayer()" aria-label="Tutup pemutar video (ESC)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      <!-- KONTEN THEATRE (GRID 2 KOLOM) -->
-      <div class="theatre-content-grid">
-        <!-- KOLOM KIRI: VIDEO DAN DETAIL -->
-        <div class="theatre-main-view">
-          <div class="video-player-container" id="modalPlayerContainer">
-            <!-- Iframe embed atau Video HTML5 disuntikkan secara dinamis -->
-          </div>
-
-          <div class="video-details-box">
-            <div class="theatre-meta-bar">
-              <div class="theatre-teacher-info">
-                <span class="theatre-teacher-name" id="modalTeacherName">Nama Guru</span>
-                <span class="theatre-teacher-nip" id="modalTeacherNip">NIP Guru</span>
-              </div>
-              <button class="btn btn-outline btn-sm" id="btnToggleComplete" onclick="VideoPlayer.toggleCompletion()">
-                Tandai Selesai
-              </button>
-            </div>
-
-            <p id="modalDescription" style="font-size: 1rem; line-height: 1.6; color: var(--color-ink-muted); margin-bottom: var(--space-xs);">
-              Deskripsi materi pembelajaran ajar.
-            </p>
-
-            <!-- KARTU LATIHAN SOAL / KUIS MANDIRI (OPSIONAL DARI GURU) -->
-            <div class="theatre-quiz-banner" id="modalQuizCard" style="display: none;">
-              <div class="theatre-quiz-icon-col">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <div class="theatre-quiz-info">
-                <div class="theatre-quiz-tag">Latihan Soal &amp; Asesmen Mandiri</div>
-                <div class="theatre-quiz-title" id="modalQuizTitle">Uji Pemahaman Materi Mandiri (Google Form / Quizizz)</div>
-              </div>
-              <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" id="btnModalQuizLink">
-                Buka Latihan Soal ↗
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- KOLOM KANAN: BAB REPETISI & RANGKUMAN RESMI GURU -->
-        <div class="theatre-sidebar" id="theatreSidebar">
-          <div class="theatre-tab-nav" id="theatreTabNav">
-            <button class="theatre-tab-btn active" id="btnTabChapters" data-tab="tabChapters">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-              </svg>
-              Daftar Bab
-            </button>
-            <button class="theatre-tab-btn" id="btnTabTeacherNotes" data-tab="tabTeacherNotes">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-              Rangkuman Materi
-            </button>
-          </div>
-
-          <!-- TAB 1: DAFTAR BAB REPETISI -->
-          <div class="theatre-tab-pane active" id="tabChapters">
-            <p style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-bottom: 8px;">
-              Pilih bagian materi di bawah untuk mengulang penjelasan konsep:
-            </p>
-            <div class="chapter-list" id="chapterListContainer">
-              <!-- Diisi dinamis -->
-            </div>
-          </div>
-
-          <!-- TAB 2: RANGKUMAN GURU & CP (BERSIH & TERSTRUKTUR) -->
-          <div class="theatre-tab-pane" id="tabTeacherNotes">
-            <div class="scholastic-reading-sheet">
-              <div id="boxLearningOutcomeWrap" class="reading-card">
-                <span class="reading-badge">Target Capaian Pembelajaran</span>
-                <p id="modalLearningOutcome" class="reading-text">Capaian pembelajaran materi.</p>
-              </div>
-
-              <div id="boxTeacherSummaryWrap" class="reading-card" style="margin-top: var(--space-sm);">
-                <span class="reading-badge">Rangkuman Konsep dari Dewan Guru</span>
-                <div id="modalTeacherSummary" class="reading-text pre-line">
-                  Rangkuman materi pembelajaran dari guru pengampu.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
@@ -1147,9 +1144,9 @@
   <script src="js/supabase.js"></script>
 
   <!-- Core App Scripts -->
-  <script src="js/data.js?v=20261031_v4"></script>
-  <script src="js/storage.js?v=20261031_v4"></script>
-  <script src="js/player.js?v=20261031_v4"></script>
-  <script src="js/app.js?v=20261031_v4"></script>
+  <script src="js/data.js?v=20261031_v5"></script>
+  <script src="js/storage.js?v=20261031_v5"></script>
+  <script src="js/player.js?v=20261031_v5"></script>
+  <script src="js/app.js?v=20261031_v5"></script>
 </body>
 </html>

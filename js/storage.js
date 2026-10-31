@@ -300,6 +300,13 @@ const RepoStorage = {
     }
   },
 
+  // Ambil Satu Video Berdasarkan ID
+  getVideoById: function (id) {
+    if (!id) return null;
+    const list = this.getVideos();
+    return list.find(v => v.id === id) || null;
+  },
+
   // Simpan Seluruh Array Video
   saveVideos: function (videos) {
     try {
