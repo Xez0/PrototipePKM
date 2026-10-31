@@ -111,13 +111,13 @@ window.VideoDB = VideoDB;
 // 2. AUTHENTICATION MANAGER (KHUSUS DEWAN GURU SMPN 7)
 // ==========================================================================
 const AuthManager = {
-  // Akun Demo Faktual untuk Peninjau & Dewan Guru SMPN 7 Tangsel
+  // Akun Demo untuk Peninjau & Dewan Guru SMPN 7 Tangsel
   defaultTeacher: {
-    name: "Tri Elmania, S.Pd.",
-    nip: "19800512 200604 2 018",
-    email: "tri.elmania@smpn7tangsel.sch.id",
-    subject: "Matematika",
-    role: "Guru Mata Pelajaran Matematika"
+    name: "Hadi",
+    nip: "",
+    email: "hadi@smpn7tangsel.sch.id",
+    subject: "Informatika",
+    role: "Dewan Guru SMPN 7 Tangsel"
   },
 
   isLoggedIn: function () {
@@ -137,19 +137,23 @@ const AuthManager = {
 
   login: function (identifier, password) {
     // Validasi ramah untuk keperluan prototipe sekolah:
-    // Boleh menggunakan NIP sekolah, email guru, atau password demo 'guru123' / '123456'
+    // Boleh menggunakan nama akun 'hadi', email guru, atau password apa saja
     const id = (identifier || "").trim().toLowerCase();
     const pass = (password || "").trim();
 
     if (!id) {
-      return { success: false, message: "NIP atau Email Guru harus diisi." };
+      return { success: false, message: "Nama Akun atau Email Guru harus diisi." };
     }
 
     let teacherData = { ...this.defaultTeacher };
-    if (id.includes("@")) {
+    if (id === "hadi" || id.includes("hadi")) {
+      teacherData.name = "Hadi";
+      teacherData.email = "hadi@smpn7tangsel.sch.id";
+    } else if (id.includes("@")) {
       teacherData.email = id;
-    } else if (id.replace(/\s+/g, "").length >= 8) {
-      teacherData.nip = identifier;
+      teacherData.name = id.split("@")[0].charAt(0).toUpperCase() + id.split("@")[0].slice(1);
+    } else {
+      teacherData.name = identifier;
     }
 
     sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));

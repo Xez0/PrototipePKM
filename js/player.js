@@ -56,9 +56,7 @@ const VideoPlayer = {
     if (titleElem) titleElem.textContent = video.title;
     if (teacherNameElem) teacherNameElem.textContent = video.teacher;
     if (teacherNipElem) {
-      teacherNipElem.textContent = video.teacherNip
-        ? `NIP. ${video.teacherNip} • Dewan Guru SMPN 7`
-        : "Dewan Guru SMPN 7 Tangsel";
+      teacherNipElem.textContent = "Dewan Guru SMPN 7 Kota Tangerang Selatan";
     }
     if (teacherAvatarElem) {
       const initials = (video.teacher || "Guru")

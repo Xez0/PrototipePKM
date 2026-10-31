@@ -431,9 +431,9 @@ const App = {
     const avatarElem = document.getElementById("teacherAvatarText");
 
     if (greetingElem) greetingElem.textContent = teacher.name;
-    if (nipElem) nipElem.textContent = `NIP. ${teacher.nip} • Dewan Guru SMPN 7`;
+    if (nipElem) nipElem.textContent = "Dewan Guru SMPN 7 Kota Tangerang Selatan";
     if (avatarElem) {
-      const initials = teacher.name.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "G";
+      const initials = (teacher.name || "Hadi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "HD";
       avatarElem.textContent = initials;
     }
   },
@@ -451,7 +451,7 @@ const App = {
       this.showToast(`Selamat datang, ${res.teacher.name}!`, "success");
       this.navigateTo("teacher");
     } else {
-      this.showToast(res.message || "Gagal masuk. Periksa kembali NIP/email Anda.", "danger");
+      this.showToast(res.message || "Gagal masuk. Periksa kembali nama akun/email Anda.", "danger");
     }
   },
 

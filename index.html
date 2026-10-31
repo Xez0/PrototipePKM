@@ -347,11 +347,11 @@
 
           <form id="teacherLoginForm" class="login-form" onsubmit="event.preventDefault(); App.handleLoginSubmit();">
             <div class="form-group">
-              <label for="loginNip">NIP atau Email Guru</label>
+              <label for="loginNip">Akun atau Email Guru</label>
               <input 
                 type="text" 
                 id="loginNip" 
-                placeholder="Contoh: 19750812 ... atau guru@smpn7.sch.id"
+                placeholder="Contoh: Hadi atau guru@smpn7.sch.id"
                 autocomplete="username"
                 required
               >
@@ -379,7 +379,7 @@
               Bapak/Ibu dewan guru atau penguji dapat langsung mencoba portal tanpa perlu mengetik kata sandi:
             </p>
             <button type="button" class="btn btn-secondary btn-sm" id="btnFastDemoLogin" onclick="App.handleFastLogin()" style="width: 100%; justify-content: center;">
-              Masuk Langsung (Akun Demo Guru)
+              Masuk Langsung (Akun Demo: Hadi)
             </button>
           </div>
 
@@ -400,10 +400,10 @@
         <!-- TOP BANNER RUANG GURU -->
         <div class="teacher-top-banner">
           <div class="teacher-profile-badge">
-            <div class="teacher-profile-avatar" id="teacherAvatarText">TE</div>
+            <div class="teacher-profile-avatar" id="teacherAvatarText">HD</div>
             <div>
-              <div class="teacher-profile-name" id="teacherDisplayGreeting">Tri Elmania, S.Pd.</div>
-              <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19800512 200604 2 018 • Dewan Guru SMPN 7 Tangsel</div>
+              <div class="teacher-profile-name" id="teacherDisplayGreeting">Hadi</div>
+              <div class="teacher-profile-nip" id="teacherDisplayNip">Dewan Guru SMPN 7 Tangsel</div>
             </div>
           </div>
 
@@ -890,12 +890,19 @@
       <!-- TOP NAVIGATION BAR / BACK TO CATALOG -->
       <div class="watch-top-bar">
         <button type="button" class="btn-watch-back" onclick="VideoPlayer.backToCatalog()" aria-label="Kembali ke Katalog Bahan Ajar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>Kembali ke Katalog Bahan Ajar</span>
+          <span class="btn-watch-back-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </span>
+          <span class="btn-watch-back-text">Kembali ke Katalog Bahan Ajar</span>
         </button>
+
+        <div class="watch-top-chip" title="Repositori Bahan Ajar Digital UPTD SMP Negeri 7 Kota Tangerang Selatan">
+          <span class="watch-top-chip-dot"></span>
+          <span>Repositori Digital SMPN 7</span>
+        </div>
       </div>
 
       <!-- MAIN 2-COLUMN YOUTUBE LAYOUT -->
@@ -924,7 +931,7 @@
               <div class="watch-teacher-avatar" id="watchTeacherAvatar">TE</div>
               <div class="watch-teacher-info">
                 <div class="watch-teacher-name" id="watchTeacherName">Tri Elmania, S.Pd.</div>
-                <div class="watch-teacher-nip" id="watchTeacherNip">NIP. 19800512 200604 2 018 • Dewan Guru SMPN 7</div>
+                <div class="watch-teacher-nip" id="watchTeacherNip">Dewan Guru SMPN 7 Kota Tangerang Selatan</div>
               </div>
             </div>
 
