@@ -557,6 +557,33 @@ const RepoStorage = {
     return true;
   },
 
+  // Pulihkan Video yang Dihapus (Aksi Urungkan / Undo)
+  restoreVideo: async function (video) {
+    if (!video || !video.id) return false;
+    let videos = this.getVideos();
+    const exists = videos.some(v => v.id === video.id);
+    if (!exists) {
+      videos.unshift(video);
+      this.saveVideos(videos);
+      if (this.supabaseClient) {
+        try {
+          const clean = this.cleanPayloadForSupabase(video);
+          await this.supabaseClient.from("videos").insert([clean]);
+        } catch (e) {}
+      }
+      if (this.isServerOnline) {
+        try {
+          await fetch("/api/videos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(video)
+          });
+        } catch (e) {}
+      }
+    }
+    return true;
+  },
+
   // Reset Kembali ke Data Standar SMPN 7
   resetToDefault: async function () {
     if (this.supabaseClient) {

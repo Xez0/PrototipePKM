@@ -1388,14 +1388,46 @@ const App = {
   confirmDeleteVideo: async function () {
     if (!this.pendingDeleteId) return;
     const id = this.pendingDeleteId;
+    const allVideos = RepoStorage.getVideos();
+    const videoToDelete = allVideos.find(v => v.id === id);
     this.closeDeleteModal();
 
+    if (!videoToDelete) return;
+
+    // Simpan data video yang dihapus untuk dukungan Urungkan (Undo)
+    this.lastDeletedVideo = { ...videoToDelete };
+
     await RepoStorage.deleteVideo(id);
-    this.showToast("Materi pembelajaran telah dihapus dari repositori.", "success");
     this.renderStats();
     this.renderVideoGrid();
     this.renderTeacherTable();
     this.initFeaturedRotation();
+
+    this.showToast({
+      type: "danger",
+      title: "Materi Dihapus",
+      desc: `Materi "${videoToDelete.title}" telah dihapus dari repositori.`,
+      duration: 5500,
+      actionText: "Urungkan",
+      actionIcon: this.toastIcons.undo,
+      onAction: async () => {
+        if (this.lastDeletedVideo) {
+          await RepoStorage.restoreVideo(this.lastDeletedVideo);
+          const restoredTitle = this.lastDeletedVideo.title;
+          this.lastDeletedVideo = null;
+          this.renderStats();
+          this.renderVideoGrid();
+          this.renderTeacherTable();
+          this.initFeaturedRotation();
+          this.showToast({
+            type: "success",
+            title: "Penghapusan Dibatalkan",
+            desc: `Materi "${restoredTitle}" berhasil dipulihkan kembali.`,
+            duration: 3500
+          });
+        }
+      }
+    });
   },
 
   // Inisialisasi Tema
@@ -1516,27 +1548,104 @@ const App = {
     }
   },
 
-  // Notifikasi Toast Modern
-  showToast: function (message, type = "normal") {
+  // SVG Ikon Resmi Bebas Emoji untuk Notifikasi
+  toastIcons: {
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>'
+  },
+
+  // Notifikasi Toast Modern Berwaktu (Burning Fuse, Kontinu, Bebas Emoji)
+  showToast: function (optionsOrMessage, legacyType = "normal") {
     const container = document.getElementById("toastContainer");
     if (!container) return;
 
+    // Bersihkan notifikasi sebelumnya agar tampilan tetap bersih dan fokus
+    container.innerHTML = "";
+
+    let opts = {};
+    if (typeof optionsOrMessage === "string") {
+      let title = "Pemberitahuan";
+      let type = legacyType;
+      if (legacyType === "success") {
+        title = "Berhasil";
+      } else if (legacyType === "danger") {
+        title = "Peringatan";
+      } else if (legacyType === "warning") {
+        title = "Perhatian";
+      } else {
+        type = "info";
+      }
+
+      opts = {
+        title: title,
+        desc: optionsOrMessage,
+        type: type,
+        duration: 4000
+      };
+    } else {
+      opts = { ...optionsOrMessage };
+    }
+
+    const {
+      type = "info",
+      title = "Pemberitahuan",
+      desc = "",
+      duration = 4500,
+      actionText = null,
+      actionIcon = null,
+      onAction = null,
+      customIcon = null
+    } = opts;
+
+    let iconMarkup = customIcon || this.toastIcons.info;
+    if (type === "success") iconMarkup = customIcon || this.toastIcons.check;
+    if (type === "danger") iconMarkup = customIcon || this.toastIcons.trash;
+    if (type === "warning") iconMarkup = customIcon || this.toastIcons.warning;
+
     const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.className = `toast type-${type} ${type}`;
+
+    toast.innerHTML = `
+      <div class="toast-icon">${iconMarkup}</div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-desc">${desc}</div>
+      </div>
+      <div class="toast-actions">
+        ${actionText ? `<button type="button" class="toast-btn-action">${actionIcon || ""}${actionText}</button>` : ""}
+        <button type="button" class="toast-close-btn" aria-label="Tutup">${this.toastIcons.close}</button>
+      </div>
+      <div class="toast-fuse" style="animation-duration: ${duration}ms;"></div>
+    `;
 
     container.appendChild(toast);
 
-    setTimeout(() => {
-      toast.classList.add("active");
-    }, 10);
+    const closeBtn = toast.querySelector(".toast-close-btn");
+    const actionBtn = toast.querySelector(".toast-btn-action");
 
-    setTimeout(() => {
-      toast.classList.remove("active");
+    const dismiss = () => {
+      clearTimeout(timerId);
+      toast.classList.add("dismissing");
       setTimeout(() => {
         if (container.contains(toast)) container.removeChild(toast);
-      }, 200);
-    }, 3200);
+      }, 250);
+    };
+
+    // Timer kontinu tanpa jeda saat hover
+    const timerId = setTimeout(dismiss, duration);
+
+    if (closeBtn) closeBtn.addEventListener("click", dismiss);
+
+    if (actionBtn && typeof onAction === "function") {
+      actionBtn.addEventListener("click", () => {
+        clearTimeout(timerId);
+        onAction();
+      });
+    }
   },
 
   // Render Metrik Statistik
