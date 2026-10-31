@@ -2894,7 +2894,8 @@ kbd.key-hint {
 /* Toast Notification System (Timed Toast with Burning Fuse, Zero Emojis) */
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 80px;
+  bottom: auto;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -2946,7 +2947,7 @@ kbd.key-hint {
 @keyframes toastEnter {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.97);
+    transform: translateY(-16px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -2961,7 +2962,7 @@ kbd.key-hint {
   }
   to {
     opacity: 0;
-    transform: translateY(16px) scale(0.96);
+    transform: translateY(-14px) scale(0.96);
   }
 }
 
@@ -3117,7 +3118,8 @@ kbd.key-hint {
 /* Penyesuaian Responsif Tablet & Mobile */
 @media (max-width: 640px) {
   .toast-container {
-    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    top: 76px;
+    bottom: auto;
     padding: 0 12px;
     max-width: 100%;
   }
@@ -3179,7 +3181,8 @@ kbd.key-hint {
 /* Penyesuaian Layar Sangat Sempit (<= 360px) */
 @media (max-width: 360px) {
   .toast-container {
-    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    top: 74px;
+    bottom: auto;
     padding: 0 8px;
   }
 
