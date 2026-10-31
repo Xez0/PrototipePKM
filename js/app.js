@@ -433,10 +433,10 @@ const App = {
     if (greetingElem) greetingElem.textContent = teacher.name;
     if (nipElem) {
       const nipText = teacher.nip ? `NIP. ${teacher.nip} • ` : "";
-      nipElem.textContent = `${nipText}Dewan Guru SMPN 7 Tangsel`;
+      nipElem.textContent = `${nipText}Dewan Guru SMPN 7`;
     }
     if (avatarElem) {
-      const initials = (teacher.name || "Hadi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "HD";
+      const initials = (teacher.name || "Budi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "BU";
       avatarElem.textContent = initials;
     }
   },
