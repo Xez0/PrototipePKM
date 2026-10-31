@@ -9,6 +9,7 @@
 const VideoPlayer = {
   currentVideo: null,
   currentMode: "youtube", // 'youtube' atau 'html5'
+  originView: "student", // 'student' atau 'teacher'
   activeChapterIndex: 0,
   activeBlobUrl: null,
 
@@ -17,7 +18,7 @@ const VideoPlayer = {
   },
 
   // Buka Halaman Tonton Video (YouTube-Style Watch View)
-  openPlayer: function (videoOrId, updateHash = true) {
+  openPlayer: function (videoOrId, updateHash = true, originView = null) {
     let video = videoOrId;
     if (typeof videoOrId === "string") {
       const all = RepoStorage.getVideos();
@@ -27,6 +28,20 @@ const VideoPlayer = {
     if (!video) return;
     this.currentVideo = video;
     this.activeChapterIndex = 0;
+
+    // Catat halaman asal untuk navigasi kembali yang mulus (tidak membuat guru merasa logout)
+    if (originView) {
+      this.originView = originView;
+    } else if (window.App && App.currentView === "teacher") {
+      this.originView = "teacher";
+    } else if (this.originView === "teacher" && window.AuthManager && AuthManager.isLoggedIn()) {
+      // Pertahankan origin guru jika sedang menavigasi video dari sidebar rekomendasi
+      this.originView = "teacher";
+    } else if (window.AuthManager && AuthManager.isLoggedIn() && (!window.App || App.currentView !== "student")) {
+      this.originView = "teacher";
+    } else {
+      this.originView = "student";
+    }
 
     // Tentukan mode pemutar otomatis
     if (video.sourceType === "local" || !video.embedUrl) {
@@ -38,6 +53,32 @@ const VideoPlayer = {
     // Navigasi ke View Watch di Router Aplikasi
     if (window.App && typeof App.navigateTo === "function") {
       App.navigateTo("watch", video.id, updateHash);
+    }
+
+    // Perbarui Tombol Navigasi Kembali & Chip Status Sesuai Konteks
+    const backBtn = document.getElementById("btnWatchBack");
+    const backText = document.getElementById("watchBackText");
+    const chipDot = document.getElementById("watchTopChipDot");
+    const chipText = document.getElementById("watchTopChipText");
+
+    if (this.originView === "teacher") {
+      if (backText) backText.textContent = "Kembali ke Portal Guru";
+      if (backBtn) {
+        backBtn.setAttribute("aria-label", "Kembali ke Portal Guru");
+        backBtn.setAttribute("title", "Kembali ke Manajemen Materi Dewan Guru SMPN 7");
+        backBtn.classList.add("btn-watch-back-teacher");
+      }
+      if (chipText) chipText.textContent = "Mode Peninjauan Guru";
+      if (chipDot) chipDot.className = "watch-top-chip-dot mode-teacher";
+    } else {
+      if (backText) backText.textContent = "Kembali ke Katalog Bahan Ajar";
+      if (backBtn) {
+        backBtn.setAttribute("aria-label", "Kembali ke Katalog Bahan Ajar");
+        backBtn.setAttribute("title", "Kembali ke Katalog Bahan Ajar Siswa");
+        backBtn.classList.remove("btn-watch-back-teacher");
+      }
+      if (chipText) chipText.textContent = "Repositori Digital SMPN 7";
+      if (chipDot) chipDot.className = "watch-top-chip-dot";
     }
 
     // Set Badges
@@ -419,11 +460,15 @@ const VideoPlayer = {
     this.currentVideo = null;
   },
 
-  // Kembali ke Katalog Bahan Ajar
+  // Kembali ke Halaman Sebelumnya (Katalog Siswa atau Portal Guru)
   backToCatalog: function () {
     this.stopPlayback();
     if (window.App && typeof App.navigateTo === "function") {
-      App.navigateTo("student", "katalog");
+      if (this.originView === "teacher") {
+        App.navigateTo("teacher");
+      } else {
+        App.navigateTo("student", "katalog");
+      }
     }
   },
 

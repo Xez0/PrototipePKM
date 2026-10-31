@@ -890,19 +890,19 @@
     <div class="watch-page-container">
       <!-- TOP NAVIGATION BAR / BACK TO CATALOG -->
       <div class="watch-top-bar">
-        <button type="button" class="btn-watch-back" onclick="VideoPlayer.backToCatalog()" aria-label="Kembali ke Katalog Bahan Ajar">
+        <button type="button" class="btn-watch-back" id="btnWatchBack" onclick="VideoPlayer.backToCatalog()" aria-label="Kembali ke Katalog Bahan Ajar">
           <span class="btn-watch-back-icon">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
           </span>
-          <span class="btn-watch-back-text">Kembali ke Katalog Bahan Ajar</span>
+          <span class="btn-watch-back-text" id="watchBackText">Kembali ke Katalog Bahan Ajar</span>
         </button>
 
-        <div class="watch-top-chip" title="Repositori Bahan Ajar Digital UPTD SMP Negeri 7 Kota Tangerang Selatan">
-          <span class="watch-top-chip-dot"></span>
-          <span>Repositori Digital SMPN 7</span>
+        <div class="watch-top-chip" id="watchTopChip" title="Repositori Bahan Ajar Digital UPTD SMP Negeri 7 Kota Tangerang Selatan">
+          <span class="watch-top-chip-dot" id="watchTopChipDot"></span>
+          <span id="watchTopChipText">Repositori Digital SMPN 7</span>
         </div>
       </div>
 
@@ -1078,6 +1078,48 @@
           <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL KONFIRMASI HAPUS MATERI (CUSTOM DIALOG) ==================== -->
+  <div class="modal-backdrop delete-modal-backdrop" id="deleteConfirmModalBackdrop" onclick="if (event.target === this) App.closeDeleteModal()">
+    <div class="delete-modal-card" id="deleteConfirmModal" role="alertdialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalDesc">
+      <div class="delete-modal-icon-wrap">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
+      </div>
+
+      <h3 class="delete-modal-title" id="deleteModalTitle">Hapus Materi Pembelajaran?</h3>
+      
+      <p class="delete-modal-desc" id="deleteModalDesc">
+        Materi <strong id="deleteModalVideoTitle" class="delete-target-title">"..."</strong> akan dihapus permanen dari repositori digital sekolah.
+      </p>
+
+      <div class="delete-modal-warning-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Tindakan ini tidak dapat dibatalkan</span>
+      </div>
+
+      <div class="delete-modal-actions">
+        <button type="button" class="btn btn-secondary btn-delete-cancel" onclick="App.closeDeleteModal()">
+          Batal
+        </button>
+        <button type="button" class="btn btn-danger btn-delete-confirm" id="btnConfirmDeleteAction" onclick="App.confirmDeleteVideo()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Ya, Hapus Materi</span>
+        </button>
+      </div>
     </div>
   </div>
 

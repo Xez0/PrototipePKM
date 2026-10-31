@@ -1327,13 +1327,13 @@ const App = {
             <span class="teacher-num-badge">#${idx + 1}</span>
           </td>
           <td class="teacher-td-thumb">
-            <div class="teacher-thumb-wrap" onclick="App.openVideoById('${v.id}')" title="Klik untuk memutar materi" role="button" tabindex="0">
+            <div class="teacher-thumb-wrap" onclick="App.openVideoById('${v.id}', 'teacher')" title="Klik untuk memutar materi" role="button" tabindex="0">
               <img src="${cover}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');">
               <span class="teacher-thumb-duration">${safeDur}</span>
             </div>
           </td>
           <td>
-            <div class="teacher-title-text" onclick="App.openVideoById('${v.id}')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
+            <div class="teacher-title-text" onclick="App.openVideoById('${v.id}', 'teacher')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
             <div class="teacher-meta-sub">
               ${safeSubject} • Kelas ${safeGrade}
             </div>
@@ -1343,7 +1343,7 @@ const App = {
             <div class="teacher-date-full">${formattedDate}</div>
           </td>
           <td class="teacher-td-actions" style="text-align: right; white-space: nowrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${v.id}')" title="Uji putar materi">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${v.id}', 'teacher')" title="Uji putar materi">
               Tonton
             </button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="App.openEditModal('${v.id}')" title="Edit materi" style="margin-left: 4px;">
@@ -1358,16 +1358,41 @@ const App = {
     }).join("");
   },
 
-  // Hapus Materi Video dari Repositori
-  deleteVideoItem: async function (id) {
-    if (confirm("Apakah Bapak/Ibu guru yakin ingin menghapus materi pembelajaran ini?")) {
-      await RepoStorage.deleteVideo(id);
-      this.showToast("Materi pembelajaran telah dihapus dari repositori.");
-      this.renderStats();
-      this.renderVideoGrid();
-      this.renderTeacherTable();
-      this.initFeaturedRotation();
-    }
+  pendingDeleteId: null,
+
+  // Buka Modal Konfirmasi Hapus Materi (Custom Dialog Tanpa Alert Biasa)
+  deleteVideoItem: function (id) {
+    const videos = RepoStorage.getVideos();
+    const video = videos.find(v => v.id === id);
+    if (!video) return;
+
+    this.pendingDeleteId = id;
+    const titleElem = document.getElementById("deleteModalVideoTitle");
+    if (titleElem) titleElem.textContent = `"${video.title}"`;
+
+    const backdrop = document.getElementById("deleteConfirmModalBackdrop");
+    if (backdrop) backdrop.classList.add("active");
+  },
+
+  // Tutup Modal Konfirmasi Hapus
+  closeDeleteModal: function () {
+    this.pendingDeleteId = null;
+    const backdrop = document.getElementById("deleteConfirmModalBackdrop");
+    if (backdrop) backdrop.classList.remove("active");
+  },
+
+  // Eksekusi Konfirmasi Hapus Materi
+  confirmDeleteVideo: async function () {
+    if (!this.pendingDeleteId) return;
+    const id = this.pendingDeleteId;
+    this.closeDeleteModal();
+
+    await RepoStorage.deleteVideo(id);
+    this.showToast("Materi pembelajaran telah dihapus dari repositori.", "success");
+    this.renderStats();
+    this.renderVideoGrid();
+    this.renderTeacherTable();
+    this.initFeaturedRotation();
   },
 
   // Inisialisasi Tema
@@ -1784,11 +1809,12 @@ const App = {
     }
   },
 
-  openVideoById: function (id) {
+  openVideoById: function (id, origin = null) {
     const videos = RepoStorage.getVideos();
     const target = videos.find(v => v.id === id);
     if (target) {
-      VideoPlayer.openPlayer(target);
+      const sourceOrigin = origin || (this.currentView === "teacher" ? "teacher" : "student");
+      VideoPlayer.openPlayer(target, true, sourceOrigin);
     }
   },
 

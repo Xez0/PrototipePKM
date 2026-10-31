@@ -945,6 +945,16 @@
     grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
     gap: 8px;
   }
+
+  /* Custom Delete Confirmation Modal - Mobile */
+  .delete-modal-card {
+    padding: 24px 18px 20px;
+    max-width: 94%;
+  }
+
+  .delete-modal-actions {
+    gap: 8px;
+  }
 }
 
 /* COMPACT SMARTPHONES (< 480px, e.g. iPhone SE 375px & Android 360px) */
