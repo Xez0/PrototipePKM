@@ -154,7 +154,8 @@ const YouTubeUploader = {
       if (xhr.upload && onProgress) {
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 100);
+            // Skala progres pengiriman biner dari 10% hingga 88%
+            const percent = Math.min(88, Math.max(10, Math.round((e.loaded / e.total) * 78 + 10)));
             onProgress(percent);
           }
         };
@@ -164,6 +165,7 @@ const YouTubeUploader = {
         if (xhr.status === 200 || xhr.status === 201) {
           try {
             const res = JSON.parse(xhr.responseText);
+            if (onProgress) onProgress(92);
             resolve(res.id);
           } catch (e) {
             reject(new Error("Format respon YouTube tidak valid"));
@@ -765,9 +767,18 @@ const App = {
     this.resetUploadProgress();
   },
 
+  _currentUploadPct: 0,
+
   // Sinkronisasi Progress Bar Unggah (Atas di Card 1, Bawah di Atas Tombol Submit, dan Label Tombol)
   setUploadProgress: function (percent, statusText, subText) {
-    const pct = Math.min(100, Math.max(0, Math.round(percent)));
+    let pct = Math.min(100, Math.max(0, Math.round(percent)));
+
+    // Jaminan Monoton: Persentase progres TIDAK BOLEH mundur
+    if (this._currentUploadPct && pct < this._currentUploadPct && pct > 0 && pct < 100) {
+      pct = this._currentUploadPct;
+    } else {
+      this._currentUploadPct = pct;
+    }
 
     // 1. Sinkronisasi Indikator Atas (Card 1)
     const topWrapper = document.getElementById("videoUploadProgressWrapper");
@@ -815,6 +826,7 @@ const App = {
   },
 
   resetUploadProgress: function () {
+    this._currentUploadPct = 0;
     const topWrapper = document.getElementById("videoUploadProgressWrapper");
     const btmWrapper = document.getElementById("bottomUploadProgressWrapper");
     if (topWrapper) topWrapper.style.display = "none";
@@ -1087,7 +1099,6 @@ const App = {
             `Mempersiapkan unggahan berkas (${fileSizeMB} MB, durasi ${chosenDuration}) ke kanal resmi sekolah...`
           );
 
-          let uploadedToYouTube = false;
           try {
             const ytVideoId = await YouTubeUploader.uploadVideo(
               this.pendingVideoFile,
@@ -1104,32 +1115,38 @@ const App = {
               }
             );
 
-            if (ytVideoId) {
-              uploadedToYouTube = true;
-              this.setUploadProgress(
-                100,
-                "Unggah video berhasil! Menyimpan data materi...",
-                "Video berhasil masuk ke channel resmi sekolah. Menyinkronkan ke katalog siswa..."
-              );
-              videoPayload.sourceType = "youtube";
-              videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl("https://youtu.be/" + ytVideoId);
-              videoPayload.thumbnail = chosenThumbnail || `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
+            if (!ytVideoId) {
+              throw new Error("Gagal mendapatkan ID video dari YouTube.");
             }
-          } catch (uploadErr) {
-            console.warn("[YOUTUBE UPLOAD] Direct upload ke YouTube tidak dapat dilanjutkan, beralih ke lokal:", uploadErr);
-            this.showToast("Mengalihkan ke penyimpanan lokal peramban (mode mandiri)...", "info");
-          }
 
-          if (!uploadedToYouTube) {
-            this.setUploadProgress(90, "Menyimpan ke media penyimpanan lokal...", "Membuat thumbnail materi pembelajaran...");
-            videoPayload.sourceType = "local";
-            videoPayload.embedUrl = "";
-            if (!this.selectedThumbnailUrl) {
-              const snapshot = await this.generateVideoThumbnail(this.pendingVideoFile);
-              if (snapshot) {
-                videoPayload.thumbnail = snapshot;
-              }
-            }
+            this.setUploadProgress(
+              95,
+              "Video Terunggah! Menyimpan ke Database Sekolah...",
+              "Menyinkronkan data materi ke katalog siswa dan server cloud..."
+            );
+            videoPayload.sourceType = "youtube";
+            videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl("https://youtu.be/" + ytVideoId);
+            videoPayload.thumbnail = chosenThumbnail || `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
+
+            // Simpan ke database Supabase Cloud (tersinkron ke SEMUA orang secara realtime)
+            await RepoStorage.addVideo(videoPayload, null);
+
+            this.setUploadProgress(
+              100,
+              "100% Selesai! Materi Berhasil Diterbitkan",
+              "Video telah aktif di YouTube dan langsung tampil di semua perangkat siswa."
+            );
+
+            // Tampilkan 100% Selesai sejenak agar terlihat jelas sebelum form ditutup
+            await new Promise(r => setTimeout(r, 700));
+
+            this.showToast("Materi pembelajaran berhasil diunggah ke YouTube & langsung tayang di katalog siswa!", "success");
+          } catch (uploadErr) {
+            console.error("[UPLOAD ERROR]:", uploadErr);
+            this.showToast("Gagal mengunggah ke YouTube: " + (uploadErr.message || "Periksa koneksi internet."), "danger");
+            this.resetUploadProgress();
+            if (submitBtn) submitBtn.disabled = false;
+            return;
           }
         } else {
           const ytInput = document.getElementById("inputTeacherYoutubeUrl");
@@ -1150,10 +1167,10 @@ const App = {
           videoPayload.sourceType = "youtube";
           videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
           videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
-        }
 
-        await RepoStorage.addVideo(videoPayload, this.currentUploadSource === "file" ? this.pendingVideoFile : null);
-        this.showToast("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!", "success");
+          await RepoStorage.addVideo(videoPayload, null);
+          this.showToast("Materi pembelajaran berhasil disimpan dan langsung tayang di katalog siswa!", "success");
+        }
       } else {
         // Mode Ubah / Edit
         let updatedData = {

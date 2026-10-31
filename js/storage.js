@@ -321,6 +321,27 @@ const RepoStorage = {
     return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   },
 
+  // Sanitasi Objek agar Sesuai Skema Tabel 'videos' Supabase (Cegah error PGRST204)
+  cleanPayloadForSupabase: function (videoObj) {
+    const allowed = [
+      "id", "title", "grade", "subject", "category", "teacher", "teacherNip",
+      "duration", "embedUrl", "thumbnail", "sourceType", "publishedAt",
+      "description", "learningOutcome", "pdfContent", "chapters", "quizUrl"
+    ];
+    const clean = {};
+    for (const key of allowed) {
+      if (videoObj[key] !== undefined && videoObj[key] !== null) {
+        clean[key] = videoObj[key];
+      }
+    }
+    if (!clean.category) clean.category = "Umum";
+    if (!clean.learningOutcome) clean.learningOutcome = "";
+    if (!clean.pdfContent) clean.pdfContent = "";
+    if (!clean.quizUrl) clean.quizUrl = "";
+    if (!Array.isArray(clean.chapters)) clean.chapters = [];
+    return clean;
+  },
+
   // Tambah Video Baru (Mendukung File Lokal & Tautan YouTube)
   addVideo: async function (newVideo, videoFile = null) {
     const videoId = "smpn7-" + Date.now().toString(36);
@@ -331,8 +352,8 @@ const RepoStorage = {
       publishedAt: newVideo.publishedAt || new Date().toISOString()
     };
 
-    // Jika guru mengunggah file video langsung dari komputer
-    if (videoFile && videoFile instanceof Blob) {
+    // Jika sumber bukan youtube dan file lokal disertakan
+    if (newVideo.sourceType !== "youtube" && videoFile && videoFile instanceof Blob) {
       videoWithId.sourceType = "local";
       videoWithId.fileName = videoFile.name || "video-materi.mp4";
       videoWithId.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
@@ -363,13 +384,18 @@ const RepoStorage = {
       videoWithId.sourceType = "youtube";
     }
 
-    // Simpan ke Supabase Cloud jika client aktif
+    // Simpan ke Supabase Cloud jika client aktif (Tersinkron ke SEMUA pengguna secara realtime)
     if (this.supabaseClient) {
       try {
-        const { error } = await this.supabaseClient.from("videos").insert([videoWithId]);
-        if (error) console.warn("[SUPABASE] Gagal simpan video ke cloud:", error);
+        const cleanPayload = this.cleanPayloadForSupabase(videoWithId);
+        const { error } = await this.supabaseClient.from("videos").insert([cleanPayload]);
+        if (error) {
+          console.error("[SUPABASE CLOUD ERROR]:", error.message || error);
+        } else {
+          console.log("[SUPABASE CLOUD SUCCESS] Video tersimpan secara realtime untuk semua orang:", videoId);
+        }
       } catch (err) {
-        console.warn("[SUPABASE] Error simpan:", err);
+        console.error("[SUPABASE EXCEPTION]:", err);
       }
     }
 
@@ -430,13 +456,18 @@ const RepoStorage = {
       updatedAt: new Date().toISOString()
     };
 
-    // Perbarui di Supabase Cloud jika client aktif
+    // Perbarui di Supabase Cloud jika client aktif (Tersinkron ke SEMUA pengguna)
     if (this.supabaseClient) {
       try {
-        const { error } = await this.supabaseClient.from("videos").update(finalVideo).eq("id", id);
-        if (error) console.warn("[SUPABASE] Gagal perbarui video di cloud:", error);
+        const cleanPayload = this.cleanPayloadForSupabase(finalVideo);
+        const { error } = await this.supabaseClient.from("videos").update(cleanPayload).eq("id", id);
+        if (error) {
+          console.error("[SUPABASE] Gagal perbarui video di cloud:", error.message || error);
+        } else {
+          console.log("[SUPABASE] Berhasil memperbarui data materi di cloud untuk semua pengguna:", id);
+        }
       } catch (err) {
-        console.warn("[SUPABASE] Error update:", err);
+        console.error("[SUPABASE] Error update:", err);
       }
     }
 
