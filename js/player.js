@@ -40,20 +40,12 @@ const VideoPlayer = {
       App.navigateTo("watch", video.id, updateHash);
     }
 
-    // Set Breadcrumbs & Badges
-    const crumbSubject = document.getElementById("watchBreadcrumbSubject");
-    const crumbTitle = document.getElementById("watchBreadcrumbTitle");
+    // Set Badges
     const subjectBadge = document.getElementById("watchSubjectBadge");
     const gradeBadge = document.getElementById("watchGradeBadge");
-    const sourceBadge = document.getElementById("watchSourceBadge");
 
-    if (crumbSubject) crumbSubject.textContent = video.subject;
-    if (crumbTitle) crumbTitle.textContent = video.title;
     if (subjectBadge) subjectBadge.textContent = video.subject;
     if (gradeBadge) gradeBadge.textContent = `Kelas ${video.grade}`;
-    if (sourceBadge) {
-      sourceBadge.textContent = video.sourceType === "local" ? "Berkas Laptop" : "YouTube Resmi";
-    }
 
     // Set Judul & Profil Guru
     const titleElem = document.getElementById("watchVideoTitle");
@@ -214,7 +206,48 @@ const VideoPlayer = {
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen>
         </iframe>
+        <div class="watch-play-overlay" id="watchPlayOverlay" onclick="VideoPlayer.startPlayback()" role="button" tabindex="0" aria-label="Putar Video Materi">
+          <div class="watch-play-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#ffffff">
+              <polygon points="6 4 20 12 6 20 6 4"></polygon>
+            </svg>
+          </div>
+          <span class="watch-play-label">Putar Video Materi</span>
+        </div>
       `;
+    }
+  },
+
+  // Mulai Pemutaran Video Langsung (1-Tap di Mobile / Touch)
+  startPlayback: function () {
+    const overlay = document.getElementById("watchPlayOverlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.style.display = "none";
+    }
+
+    if (this.currentMode === "youtube") {
+      const iframe = document.getElementById("activeVideoIframe");
+      if (iframe) {
+        if (iframe.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({
+              event: "command",
+              func: "playVideo",
+              args: []
+            }), "*");
+          } catch (e) {}
+        }
+        if (!iframe.src.includes("autoplay=1")) {
+          const sep = iframe.src.includes("?") ? "&" : "?";
+          iframe.src = `${iframe.src}${sep}autoplay=1`;
+        }
+      }
+    } else {
+      const video = document.getElementById("activeHtml5Video");
+      if (video) {
+        video.play().catch(e => console.log("Video playback note:", e));
+      }
     }
   },
 
@@ -302,6 +335,12 @@ const VideoPlayer = {
   jumpToChapter: function (seconds, index = 0) {
     if (!this.currentVideo) return;
     this.activeChapterIndex = index;
+
+    const overlay = document.getElementById("watchPlayOverlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.style.display = "none";
+    }
 
     if (this.currentMode === "youtube") {
       const iframe = document.getElementById("activeVideoIframe");

@@ -1261,12 +1261,39 @@ const App = {
     this.closeTeacherForm();
   },
 
-  // Render Tabel Materi di Ruang Guru
+  // Format Waktu Relatif (Contoh: Baru saja, 5 menit lalu, 2 jam lalu, 3 hari lalu)
+  formatRelativeTime: function (dateStr) {
+    if (!dateStr) return "Baru saja";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    if (diffMs < 0) return "Baru saja";
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    const diffWeek = Math.floor(diffDay / 7);
+    const diffMonth = Math.floor(diffDay / 30);
+
+    if (diffSec < 60) return "Baru saja";
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    if (diffHour < 24) return `${diffHour} jam lalu`;
+    if (diffDay === 1) return "Kemarin";
+    if (diffDay < 7) return `${diffDay} hari lalu`;
+    if (diffWeek < 4) return `${diffWeek} minggu lalu`;
+    if (diffMonth < 12) return `${diffMonth} bulan lalu`;
+    return `${Math.floor(diffDay / 365)} tahun lalu`;
+  },
+
+  // Render Tabel Materi di Ruang Guru (Urut Terbaru, Bernomor & Waktu Relatif)
   renderTeacherTable: function (query = "") {
     const tableBody = document.getElementById("teacherVideoTableBody");
     if (!tableBody) return;
 
     let videos = RepoStorage.getVideos();
+    // Urutkan list materi yang terbaru selalu di atas
+    videos.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
+
     if (query) {
       videos = videos.filter(v =>
         v.title.toLowerCase().includes(query) ||
@@ -1278,7 +1305,7 @@ const App = {
     if (videos.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="5" style="text-align: center; padding: 24px; color: var(--color-ink-subtle);">
+          <td colspan="4" style="text-align: center; padding: 24px; color: var(--color-ink-subtle);">
             Tidak ada materi pembelajaran yang ditemukan.
           </td>
         </tr>
@@ -1287,36 +1314,34 @@ const App = {
     }
 
     tableBody.innerHTML = videos.map((v, idx) => {
-      const isLocal = v.sourceType === "local";
       const formattedDate = RepoStorage.formatDate(v.publishedAt);
+      const relativeTime = this.formatRelativeTime(v.publishedAt);
       const safeTitle = escapeHtml(v.title);
       const safeSubject = escapeHtml(v.subject);
       const safeGrade = escapeHtml(v.grade);
       return `
         <tr>
-          <td style="color: var(--color-ink-subtle);">${idx + 1}</td>
+          <td class="teacher-td-no">
+            <span class="teacher-num-badge">#${idx + 1}</span>
+          </td>
           <td>
-            <div style="font-weight: 600; color: var(--color-ink);">${safeTitle}</div>
-            <div style="font-size: 0.8125rem; color: var(--color-ink-subtle); margin-top: 2px;">
+            <div class="teacher-title-text">${safeTitle}</div>
+            <div class="teacher-meta-sub">
               ${safeSubject} • Kelas ${safeGrade}
             </div>
           </td>
-          <td style="font-size: 0.8125rem; color: var(--color-ink-muted);">
-            ${formattedDate}
+          <td class="teacher-td-date">
+            <div class="teacher-date-relative">${relativeTime}</div>
+            <div class="teacher-date-full">${formattedDate}</div>
           </td>
-          <td>
-            <span class="table-badge-source ${isLocal ? 'local' : 'youtube'}">
-              ${isLocal ? 'Berkas Laptop' : 'YouTube'}
-            </span>
-          </td>
-          <td style="text-align: right; white-space: nowrap;">
+          <td class="teacher-td-actions" style="text-align: right; white-space: nowrap;">
             <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${v.id}')" title="Uji putar materi">
               Tonton
             </button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="App.openEditModal('${v.id}')" title="Edit materi" style="margin-left: 4px;">
               Edit
             </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="App.deleteVideoItem('${v.id}')" title="Hapus materi" style="margin-left: 4px; color: var(--color-danger); border-color: rgba(235, 87, 87, 0.3);">
+            <button type="button" class="btn btn-outline btn-sm btn-delete-teacher" onclick="App.deleteVideoItem('${v.id}')" title="Hapus materi" style="margin-left: 4px;">
               Hapus
             </button>
           </td>

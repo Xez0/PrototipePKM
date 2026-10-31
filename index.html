@@ -433,12 +433,6 @@
               </div>
 
               <div class="teacher-table-actions">
-                <!-- Status Sinkronisasi Otomatis Server Sekolah -->
-                <div class="server-sync-badge" id="serverSyncBadge" title="Status penyimpanan otomatis repositori SMPN 7">
-                  <span class="sync-dot online" id="syncDotIndicator"></span>
-                  <span id="syncStatusText">Tersimpan Otomatis di Server Sekolah</span>
-                </div>
-
                 <!-- Tombol Utama Tambah Materi -->
                 <button type="button" class="btn btn-primary" onclick="App.openTeacherForm('create')">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -472,10 +466,9 @@
               <table class="teacher-table">
                 <thead>
                   <tr>
-                    <th style="width: 44px;">No</th>
+                    <th style="width: 50px;">No</th>
                     <th>Judul &amp; Pelajaran</th>
-                    <th>Tanggal Tayang</th>
-                    <th>Sumber Video</th>
+                    <th>Waktu Tayang</th>
                     <th style="text-align: right; width: 220px;">Tindakan</th>
                   </tr>
                 </thead>
@@ -500,11 +493,6 @@
               </svg>
               Kembali ke Daftar Materi
             </button>
-
-            <div class="server-sync-badge">
-              <span class="sync-dot online"></span>
-              <span>Tersimpan Otomatis di Server Sekolah</span>
-            </div>
           </div>
 
           <!-- Form Main Header -->
@@ -908,11 +896,6 @@
           </svg>
           <span>Kembali ke Katalog Bahan Ajar</span>
         </button>
-        <div class="watch-breadcrumb">
-          <span class="watch-crumb-subject" id="watchBreadcrumbSubject">Mata Pelajaran</span>
-          <span class="watch-crumb-sep">/</span>
-          <span class="watch-crumb-title" id="watchBreadcrumbTitle">Judul Materi</span>
-        </div>
       </div>
 
       <!-- MAIN 2-COLUMN YOUTUBE LAYOUT -->
@@ -931,7 +914,6 @@
             <div class="watch-badge-row">
               <span class="badge badge-primary" id="watchSubjectBadge">Matematika</span>
               <span class="badge badge-grade" id="watchGradeBadge">Kelas 7</span>
-              <span class="badge badge-source" id="watchSourceBadge">YouTube Resmi</span>
             </div>
             <h1 class="watch-video-title" id="watchVideoTitle">Judul Video Pembelajaran</h1>
           </div>
