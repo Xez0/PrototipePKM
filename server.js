@@ -339,14 +339,25 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      // Inisiasi Resumable Upload ke YouTube
+      // Dapatkan Origin browser pemanggil untuk mengaktifkan izin CORS di Google Upload Endpoint
+      let clientOrigin = payload.clientOrigin || req.headers.origin || req.headers.referer || "http://localhost:8877";
+      try {
+        if (clientOrigin.startsWith("http")) {
+          clientOrigin = new URL(clientOrigin).origin;
+        }
+      } catch (e) {
+        clientOrigin = "http://localhost:8877";
+      }
+
+      // Inisiasi Resumable Upload ke YouTube (DENGAN Origin terdaftar agar CORS browser diizinkan)
       const ytRes = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${tokenJson.access_token}`,
           "Content-Type": "application/json; charset=UTF-8",
           "X-Upload-Content-Length": String(payload.fileSize || 0),
-          "X-Upload-Content-Type": payload.fileType || "video/mp4"
+          "X-Upload-Content-Type": payload.fileType || "video/mp4",
+          "Origin": clientOrigin
         },
         body: JSON.stringify({
           snippet: {

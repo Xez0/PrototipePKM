@@ -23,7 +23,6 @@ window.escapeHtml = escapeHtml;
 const YouTubeUploader = {
   CLIENT_ID: "609447982110-6bv5uh18pordb7sh3u1q7l3jvo5ehhpb.apps.googleusercontent.com",
   SCOPES: "https://www.googleapis.com/auth/youtube.upload",
-  DEFAULT_EMAIL: "xezman88@gmail.com",
   tokenClient: null,
   accessToken: null,
   tokenExpiresAt: 0,
@@ -78,7 +77,7 @@ const YouTubeUploader = {
         }
       };
 
-      this.tokenClient.requestAccessToken({ prompt: "", hint: this.DEFAULT_EMAIL });
+      this.tokenClient.requestAccessToken({ prompt: "" });
     });
   },
 
@@ -94,7 +93,8 @@ const YouTubeUploader = {
           title: metadata.title || "Materi SMPN 7 Tangsel",
           description: metadata.description || "Video materi pembelajaran resmi SMPN 7 Tangsel.",
           fileSize: file.size,
-          fileType: file.type || "video/mp4"
+          fileType: file.type || "video/mp4",
+          clientOrigin: window.location.origin
         })
       });
 
@@ -102,7 +102,7 @@ const YouTubeUploader = {
         const initData = await initRes.json();
         if (initData.success && initData.uploadUrl) {
           uploadUrl = initData.uploadUrl;
-          console.log("[YOUTUBE API] Direct upload aktif via backend channel xezman88@gmail.com (Tanpa Popup Guru).");
+          console.log("[YOUTUBE API] Direct upload aktif via channel resmi sekolah.");
         }
       }
     } catch (e) {
@@ -616,13 +616,6 @@ const App = {
       if (tile) tile.classList.add("active");
       this.selectedThumbnailUrl = this.extractedFrames.frame3;
       if (labelElem) labelElem.textContent = "Frame Akhir Video (" + this.extractedFrames.time3 + ")";
-    } else if (optionKey === "subject") {
-      const tile = document.getElementById("tileThumbSubject");
-      if (tile) tile.classList.add("active");
-      const subjectInput = document.getElementById("simpleVideoSubject");
-      const subj = subjectInput ? subjectInput.value : "Matematika";
-      this.selectedThumbnailUrl = this.getCoverBySubject(subj);
-      if (labelElem) labelElem.textContent = "Cover Standar Mata Pelajaran (" + subj + ")";
     }
 
     if (previewImg && this.selectedThumbnailUrl) {
@@ -723,22 +716,19 @@ const App = {
       if (time2) time2.textContent = frames.time2;
       if (time3) time3.textContent = frames.time3;
 
-      // Update Cover Mapel tile
-      const subjectInput = document.getElementById("simpleVideoSubject");
-      const subj = subjectInput ? subjectInput.value : "Matematika";
-      const imgSubj = document.getElementById("imgThumbSubject");
-      if (imgSubj) imgSubj.src = this.getCoverBySubject(subj);
-
       // Default pilih Frame 2 (tengah)
       this.selectThumbnailOption("frame2");
       if (customizerBlock) customizerBlock.style.display = "block";
     } else {
-      // Fallback jika video codec tidak didukung canvas
+      // Fallback jika video codec tidak didukung canvas di peramban
       const subjectInput = document.getElementById("simpleVideoSubject");
       const subj = subjectInput ? subjectInput.value : "Matematika";
       this.selectedThumbnailUrl = this.getCoverBySubject(subj);
+      const previewImg = document.getElementById("activeThumbnailPreviewImg");
+      const labelElem = document.getElementById("activeThumbnailLabel");
+      if (previewImg) previewImg.src = this.selectedThumbnailUrl;
+      if (labelElem) labelElem.textContent = "Thumbnail Rekomendasi (" + subj + ")";
       if (customizerBlock) customizerBlock.style.display = "block";
-      this.selectThumbnailOption("subject");
     }
 
     // CATATAN: Judul materi pembelajaran TIDAK diubah otomatis dari nama file,

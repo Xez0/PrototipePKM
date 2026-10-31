@@ -77,14 +77,25 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Buat Resumable Upload Session di YouTube
+    // Dapatkan Origin browser pemanggil untuk mengaktifkan izin CORS di Google Upload Endpoint
+    let clientOrigin = payload.clientOrigin || req.headers.origin || req.headers.referer || "https://pkm-five.vercel.app";
+    try {
+      if (clientOrigin.startsWith("http")) {
+        clientOrigin = new URL(clientOrigin).origin;
+      }
+    } catch (e) {
+      clientOrigin = "https://pkm-five.vercel.app";
+    }
+
+    // Buat Resumable Upload Session di YouTube (DENGAN Origin terdaftar agar CORS browser diizinkan)
     const ytRes = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${tokenJson.access_token}`,
         "Content-Type": "application/json; charset=UTF-8",
         "X-Upload-Content-Length": String(payload.fileSize || 0),
-        "X-Upload-Content-Type": payload.fileType || "video/mp4"
+        "X-Upload-Content-Type": payload.fileType || "video/mp4",
+        "Origin": clientOrigin
       },
       body: JSON.stringify({
         snippet: {
