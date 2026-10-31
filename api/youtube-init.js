@@ -31,7 +31,14 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const payload = req.body || {};
+    let payload = req.body || {};
+    if (typeof payload === "string") {
+      try {
+        payload = JSON.parse(payload);
+      } catch (e) {
+        payload = {};
+      }
+    }
     const googleCfg = getGoogleOAuthConfig();
     const tokenPath = path.join(process.cwd(), "api", "youtube-token.json");
     let refreshToken = process.env.YOUTUBE_REFRESH_TOKEN;
