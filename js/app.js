@@ -1305,7 +1305,7 @@ const App = {
     if (videos.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="4" style="text-align: center; padding: 24px; color: var(--color-ink-subtle);">
+          <td colspan="5" style="text-align: center; padding: 28px; color: var(--color-ink-subtle);">
             Tidak ada materi pembelajaran yang ditemukan.
           </td>
         </tr>
@@ -1314,18 +1314,26 @@ const App = {
     }
 
     tableBody.innerHTML = videos.map((v, idx) => {
+      const cover = v.thumbnail || this.getCoverBySubject(v.subject);
       const formattedDate = RepoStorage.formatDate(v.publishedAt);
       const relativeTime = this.formatRelativeTime(v.publishedAt);
       const safeTitle = escapeHtml(v.title);
       const safeSubject = escapeHtml(v.subject);
       const safeGrade = escapeHtml(v.grade);
+      const safeDur = escapeHtml(v.duration || '15:00');
       return `
         <tr>
           <td class="teacher-td-no">
             <span class="teacher-num-badge">#${idx + 1}</span>
           </td>
+          <td class="teacher-td-thumb">
+            <div class="teacher-thumb-wrap" onclick="App.openVideoById('${v.id}')" title="Klik untuk memutar materi" role="button" tabindex="0">
+              <img src="${cover}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');">
+              <span class="teacher-thumb-duration">${safeDur}</span>
+            </div>
+          </td>
           <td>
-            <div class="teacher-title-text">${safeTitle}</div>
+            <div class="teacher-title-text" onclick="App.openVideoById('${v.id}')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
             <div class="teacher-meta-sub">
               ${safeSubject} • Kelas ${safeGrade}
             </div>

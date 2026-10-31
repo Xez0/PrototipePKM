@@ -204,14 +204,6 @@ const VideoPlayer = {
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen>
         </iframe>
-        <div class="watch-play-overlay" id="watchPlayOverlay" onclick="VideoPlayer.startPlayback()" role="button" tabindex="0" aria-label="Putar Video Materi">
-          <div class="watch-play-circle">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#ffffff">
-              <polygon points="6 4 20 12 6 20 6 4"></polygon>
-            </svg>
-          </div>
-          <span class="watch-play-label">Putar Video Materi</span>
-        </div>
       `;
     }
   },

@@ -458,7 +458,22 @@
     margin-bottom: 6px;
   }
 
-  .teacher-table td:nth-child(2) .teacher-title-text {
+  .teacher-table td.teacher-td-thumb {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 8px;
+    padding: 0 !important;
+  }
+
+  .teacher-table td.teacher-td-thumb .teacher-thumb-wrap {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 150px;
+    border-radius: var(--radius-sm);
+  }
+
+  .teacher-table td:nth-child(3) .teacher-title-text {
     font-size: 0.9375rem !important;
     font-weight: 700 !important;
     color: var(--color-ink);
@@ -466,7 +481,7 @@
     margin-bottom: 2px;
   }
 
-  .teacher-table td:nth-child(2) .teacher-meta-sub {
+  .teacher-table td:nth-child(3) .teacher-meta-sub {
     font-size: 0.75rem !important;
     color: var(--color-primary) !important;
     font-weight: 600;
@@ -770,6 +785,45 @@
     padding: var(--space-md) 0;
   }
 
+  .footer-monument-stack {
+    gap: 2px;
+    padding: 6px 0;
+  }
+
+  .footer-monument-line {
+    font-size: clamp(1.2rem, 5.5vw, 1.65rem);
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .footer-monument-cross {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.25);
+    margin: 1px 0;
+  }
+
+  .footer-monument-stack {
+    gap: 2px;
+    padding: 6px 0;
+  }
+
+  .footer-monument-line {
+    font-size: clamp(1.05rem, 5vw, 1.35rem);
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .footer-monument-cross {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.25);
+    margin: 1px 0;
+  }
+
   .footer-monument-typo {
     font-size: clamp(1.15rem, 5vw, 1.55rem);
     color: rgba(255, 255, 255, 0.45);
@@ -838,11 +892,6 @@
 
   .watch-player-frame {
     border-radius: var(--radius-md);
-  }
-
-  .watch-player-box iframe {
-    top: -46px;
-    height: calc(100% + 46px);
   }
 
   .watch-video-title {
@@ -1263,6 +1312,26 @@
   .footer-partnership {
     font-size: 0.6875rem;
     line-height: 1.4;
+  }
+
+  .footer-monument-stack {
+    gap: 2px;
+    padding: 6px 0;
+  }
+
+  .footer-monument-line {
+    font-size: clamp(1.05rem, 5vw, 1.35rem);
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .footer-monument-cross {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.25);
+    margin: 1px 0;
   }
 
   .footer-monument-typo {
