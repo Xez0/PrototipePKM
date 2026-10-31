@@ -347,11 +347,11 @@
 
           <form id="teacherLoginForm" class="login-form" onsubmit="event.preventDefault(); App.handleLoginSubmit();">
             <div class="form-group">
-              <label for="loginNip">Akun atau Email Guru</label>
+              <label for="loginNip">Nomor NIP, Nama Akun, atau Email Guru</label>
               <input 
                 type="text" 
                 id="loginNip" 
-                placeholder="Masukkan nama pengguna atau email guru..."
+                placeholder="Masukkan NIP (18 digit), nama akun, atau email guru..."
                 autocomplete="username"
                 required
               >
@@ -376,7 +376,7 @@
           <div class="login-demo-box">
             <div class="login-demo-title">Kemudahan Uji Coba Prototipe PkM</div>
             <p class="login-demo-text">
-              Bapak/Ibu dewan guru atau penguji dapat langsung mencoba portal tanpa perlu mengetik kata sandi:
+              Bapak/Ibu guru atau peninjau dapat login menggunakan <strong>NIP: 19850314 201101 1 008</strong>, nama akun <strong>hadi</strong>, atau akses instan:
             </p>
             <button type="button" class="btn btn-secondary btn-sm" id="btnFastDemoLogin" onclick="App.handleFastLogin()" style="width: 100%; justify-content: center;">
               Masuk Langsung (Akun Demo: Hadi)
@@ -403,7 +403,7 @@
             <div class="teacher-profile-avatar" id="teacherAvatarText">HD</div>
             <div>
               <div class="teacher-profile-name" id="teacherDisplayGreeting">Hadi</div>
-              <div class="teacher-profile-nip" id="teacherDisplayNip">Dewan Guru SMPN 7 Tangsel</div>
+              <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19850314 201101 1 008 • Dewan Guru SMPN 7 Tangsel</div>
             </div>
           </div>
 

@@ -114,10 +114,20 @@ const AuthManager = {
   // Akun Demo untuk Peninjau & Dewan Guru SMPN 7 Tangsel
   defaultTeacher: {
     name: "Hadi",
-    nip: "",
+    nip: "19850314 201101 1 008",
     email: "hadi@smpn7tangsel.sch.id",
     subject: "Informatika",
     role: "Dewan Guru SMPN 7 Tangsel"
+  },
+
+  // Helper Format NIP Standar Indonesia (18 Digit: YYYYMMDD YYYYMM X XXX)
+  formatNip: function (input) {
+    if (!input) return "";
+    const clean = input.replace(/\D/g, "");
+    if (clean.length === 18) {
+      return `${clean.slice(0, 8)} ${clean.slice(8, 14)} ${clean.slice(14, 15)} ${clean.slice(15)}`;
+    }
+    return input.trim();
   },
 
   isLoggedIn: function () {
@@ -137,23 +147,40 @@ const AuthManager = {
 
   login: function (identifier, password) {
     // Validasi ramah untuk keperluan prototipe sekolah:
-    // Boleh menggunakan nama akun 'hadi', email guru, atau password apa saja
-    const id = (identifier || "").trim().toLowerCase();
+    // Mendukung login via Nomor NIP, nama akun ('hadi'), atau email guru
+    const rawId = (identifier || "").trim();
+    const id = rawId.toLowerCase();
+    const cleanDigits = rawId.replace(/\D/g, "");
     const pass = (password || "").trim();
 
     if (!id) {
-      return { success: false, message: "Nama Akun atau Email Guru harus diisi." };
+      return { success: false, message: "Nomor NIP, Nama Akun, atau Email Guru harus diisi." };
     }
 
     let teacherData = { ...this.defaultTeacher };
-    if (id === "hadi" || id.includes("hadi")) {
+
+    // 1. Cek Login via Nomor NIP (angka >= 8 digit atau 18 digit standar)
+    if (cleanDigits.length >= 8) {
       teacherData.name = "Hadi";
+      teacherData.nip = this.formatNip(cleanDigits.length === 18 ? cleanDigits : "198503142011011008");
       teacherData.email = "hadi@smpn7tangsel.sch.id";
-    } else if (id.includes("@")) {
+    }
+    // 2. Cek Login via Nama Akun 'Hadi'
+    else if (id === "hadi" || id.includes("hadi")) {
+      teacherData.name = "Hadi";
+      teacherData.nip = "19850314 201101 1 008";
+      teacherData.email = "hadi@smpn7tangsel.sch.id";
+    }
+    // 3. Cek Login via Alamat Email
+    else if (id.includes("@")) {
       teacherData.email = id;
       teacherData.name = id.split("@")[0].charAt(0).toUpperCase() + id.split("@")[0].slice(1);
-    } else {
-      teacherData.name = identifier;
+      teacherData.nip = "19850314 201101 1 008";
+    }
+    // 4. Input Nama Pengguna Lain
+    else {
+      teacherData.name = rawId;
+      teacherData.nip = "19850314 201101 1 008";
     }
 
     sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));

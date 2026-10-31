@@ -423,7 +423,7 @@ const App = {
     }
   },
 
-  // Render Profil Guru di Ruang Guru
+  // Render Profil Guru di Ruang Guru (Portal Guru)
   renderTeacherProfile: function () {
     const teacher = AuthManager.getTeacher() || AuthManager.defaultTeacher;
     const greetingElem = document.getElementById("teacherDisplayGreeting");
@@ -431,7 +431,10 @@ const App = {
     const avatarElem = document.getElementById("teacherAvatarText");
 
     if (greetingElem) greetingElem.textContent = teacher.name;
-    if (nipElem) nipElem.textContent = "Dewan Guru SMPN 7 Kota Tangerang Selatan";
+    if (nipElem) {
+      const nipText = teacher.nip ? `NIP. ${teacher.nip} • ` : "";
+      nipElem.textContent = `${nipText}Dewan Guru SMPN 7 Tangsel`;
+    }
     if (avatarElem) {
       const initials = (teacher.name || "Hadi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "HD";
       avatarElem.textContent = initials;
