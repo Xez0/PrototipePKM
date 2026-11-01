@@ -164,7 +164,11 @@ const VideoPlayer = {
     const descElem = document.getElementById("watchDescriptionText");
 
     if (publishDateElem) {
-      publishDateElem.textContent = `Ditayangkan: ${RepoStorage.formatDate(video.publishedAt)}`;
+      let publishText = `Ditayangkan: ${RepoStorage.formatDate(video.publishedAt)}`;
+      if (video.updatedAt) {
+        publishText += ` • Diedit: ${RepoStorage.formatDate(video.updatedAt)}`;
+      }
+      publishDateElem.textContent = publishText;
     }
     if (durationElem) {
       durationElem.textContent = `Durasi: ${video.duration || '15:00'}`;

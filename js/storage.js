@@ -474,6 +474,18 @@ const RepoStorage = {
     return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   },
 
+  // Format Tanggal, Hari, dan Jam Lengkap (Contoh: Rabu, 21 Okt 2026 14:30 WIB)
+  formatDateTime: function (dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()} ${hours}:${minutes} WIB`;
+  },
+
   // Sanitasi Objek agar Sesuai Skema Tabel 'videos' Supabase (Cegah error PGRST204)
   cleanPayloadForSupabase: function (videoObj) {
     const allowed = [

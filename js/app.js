@@ -698,6 +698,14 @@ const App = {
     if (previewImg && this.selectedThumbnailUrl) {
       previewImg.src = this.selectedThumbnailUrl;
     }
+    const identityPreview = document.getElementById("identityThumbPreviewImg");
+    const identityTag = document.getElementById("identityThumbTag");
+    if (identityPreview && this.selectedThumbnailUrl) {
+      identityPreview.src = this.selectedThumbnailUrl;
+    }
+    if (identityTag) {
+      identityTag.textContent = "Frame Video";
+    }
   },
 
   // Upload Thumbnail Kustom Sendiri (Canva/Gambar Laptop)
@@ -779,8 +787,6 @@ const App = {
     const durInfo = await this.extractVideoDuration(file);
     this.pendingVideoDuration = durInfo.formatted;
     if (durElem) durElem.textContent = "Durasi Asli: " + durInfo.formatted;
-    const durInput = document.getElementById("simpleVideoDuration");
-    if (durInput) durInput.value = durInfo.formatted;
 
     // 2. Ekstrak 3 frame video snapshot (Thumbnail YouTube Style)
     const customizerBlock = document.getElementById("thumbnailCustomizerBlock");
@@ -952,6 +958,10 @@ const App = {
     const mainDesc = document.getElementById("teacherFormMainDesc");
     const submitBtnText = document.getElementById("btnSubmitText");
 
+    const stepCard1 = document.getElementById("formStepCard1");
+    const stepCard2Title = document.getElementById("stepCard2Title");
+    const stepCard3Title = document.getElementById("stepCard3Title");
+
     const titleInput = document.getElementById("simpleVideoTitle");
     const gradeInput = document.getElementById("simpleVideoGrade");
     const subjectInput = document.getElementById("simpleVideoSubject");
@@ -960,6 +970,8 @@ const App = {
     const quizUrlInput = document.getElementById("simpleVideoQuizUrl");
     const chaptersInput = document.getElementById("simpleVideoChapters");
     const ytInput = document.getElementById("inputTeacherYoutubeUrl");
+    const identityThumbImg = document.getElementById("identityThumbPreviewImg");
+    const identityThumbTag = document.getElementById("identityThumbTag");
 
     if (!formSection || !tableSection) return;
 
@@ -970,6 +982,11 @@ const App = {
       if (mainDesc) mainDesc.textContent = "Isi sumber video dan identitas kelas di bawah ini. Materi yang disimpan akan langsung tayang di katalog siswa.";
       if (submitBtnText) submitBtnText.textContent = "Simpan & Tayangkan Materi ke Siswa";
 
+      // Tampilkan Card 1 (Sumber Video) di mode Create
+      if (stepCard1) stepCard1.style.display = "block";
+      if (stepCard2Title) stepCard2Title.innerHTML = "2. Identitas Kelas &amp; Mata Pelajaran";
+      if (stepCard3Title) stepCard3Title.innerHTML = "3. Bahan Pendamping Belajar";
+
       // Reset Formulir
       if (titleInput) titleInput.value = "";
       if (outcomeInput) outcomeInput.value = "";
@@ -978,10 +995,12 @@ const App = {
       if (chaptersInput) chaptersInput.value = "";
       if (ytInput) ytInput.value = "";
       if (subjectInput) subjectInput.value = "Matematika";
-      const durInput = document.getElementById("simpleVideoDuration");
-      if (durInput) durInput.value = "10:00";
+
       this.pendingVideoDuration = "10:00";
       this.selectedThumbnailUrl = null;
+      if (identityThumbImg) identityThumbImg.src = this.getCoverBySubject("Matematika");
+      if (identityThumbTag) identityThumbTag.textContent = "Cover Mapel";
+
       this.selectGradeBtn("7");
       this.switchUploadSource("youtube");
       this.handleYoutubeUrlInput("");
@@ -998,8 +1017,13 @@ const App = {
       if (modeInput) modeInput.value = "edit";
       if (editIdInput) editIdInput.value = v.id;
       if (mainTitle) mainTitle.textContent = "Edit Materi Video Pembelajaran";
-      if (mainDesc) mainDesc.textContent = "Perbarui detail materi ajar di bawah ini. Perubahan akan langsung disinkronkan ke katalog siswa.";
+      if (mainDesc) mainDesc.textContent = "Perbarui detail identitas materi dan bahan ajar di bawah ini. Sumber video tidak dapat diubah.";
       if (submitBtnText) submitBtnText.textContent = "Simpan Perubahan Materi";
+
+      // Sembunyikan Card 1 (Sumber Video) di mode Edit sesuai instruksi!
+      if (stepCard1) stepCard1.style.display = "none";
+      if (stepCard2Title) stepCard2Title.innerHTML = "1. Identitas Kelas &amp; Mata Pelajaran";
+      if (stepCard3Title) stepCard3Title.innerHTML = "2. Bahan Pendamping Belajar";
 
       if (titleInput) titleInput.value = v.title || "";
       if (subjectInput) subjectInput.value = v.subject || "Matematika";
@@ -1011,19 +1035,15 @@ const App = {
       const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
       if (chaptersInput) chaptersInput.value = chapText;
 
-      const durInput = document.getElementById("simpleVideoDuration");
-      if (durInput) durInput.value = v.duration || "10:00";
+      // Durasi otomatis tetap memakai durasi materi yang sudah ada
       this.pendingVideoDuration = v.duration || "10:00";
-      this.selectedThumbnailUrl = null;
 
-      if (v.sourceType === "local") {
-        this.switchUploadSource("file");
-      } else {
-        this.switchUploadSource("youtube");
-        const ytId = RepoStorage.extractYouTubeId(v.embedUrl);
-        const friendlyUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : (v.embedUrl || "");
-        if (ytInput) ytInput.value = friendlyUrl;
-        this.handleYoutubeUrlInput(friendlyUrl);
+      // Muat Thumbnail Saat Ini ke Form Identitas
+      const currentThumb = v.thumbnail || this.getCoverBySubject(v.subject);
+      this.selectedThumbnailUrl = currentThumb;
+      if (identityThumbImg) identityThumbImg.src = currentThumb;
+      if (identityThumbTag) {
+        identityThumbTag.textContent = v.thumbnail ? "Thumbnail Aktif" : "Cover Mapel";
       }
     }
 
@@ -1042,6 +1062,53 @@ const App = {
     window.scrollTo({ top: 120, behavior: "smooth" });
   },
 
+  // Ganti Thumbnail dari Form Identitas
+  handleIdentityThumbnailSelected: function (input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith("image/")) {
+        this.showToast("Silakan pilih berkas gambar yang valid (JPG, PNG, atau WebP).", "danger");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        this.selectedThumbnailUrl = dataUrl;
+        const preview = document.getElementById("identityThumbPreviewImg");
+        const tag = document.getElementById("identityThumbTag");
+        if (preview) preview.src = dataUrl;
+        if (tag) tag.textContent = "Kustom (" + file.name + ")";
+        this.showToast("Thumbnail materi berhasil diubah!", "success");
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+
+  // Kembalikan Thumbnail ke Cover Standar Mata Pelajaran
+  resetThumbnailToSubjectCover: function () {
+    const subjSelect = document.getElementById("simpleVideoSubject");
+    const subj = subjSelect ? subjSelect.value : "Matematika";
+    const cover = this.getCoverBySubject(subj);
+    this.selectedThumbnailUrl = cover;
+    const preview = document.getElementById("identityThumbPreviewImg");
+    const tag = document.getElementById("identityThumbTag");
+    if (preview) preview.src = cover;
+    if (tag) tag.textContent = "Cover Mapel";
+    this.showToast("Sampul thumbnail dikembalikan ke cover mata pelajaran.", "info");
+  },
+
+  // Respon saat Mata Pelajaran Berubah
+  handleSubjectChange: function (subject) {
+    if (!this.selectedThumbnailUrl || this.selectedThumbnailUrl.startsWith("assets/cover-")) {
+      const cover = this.getCoverBySubject(subject);
+      this.selectedThumbnailUrl = cover;
+      const preview = document.getElementById("identityThumbPreviewImg");
+      const tag = document.getElementById("identityThumbTag");
+      if (preview) preview.src = cover;
+      if (tag) tag.textContent = "Cover Mapel";
+    }
+  },
+
   // Pratinjau YouTube Real-Time (Live Auto-Preview Card)
   handleYoutubeUrlInput: function (url) {
     const previewCard = document.getElementById("youtubeLivePreviewCard");
@@ -1057,8 +1124,17 @@ const App = {
 
     if (ytId) {
       previewCard.style.display = "flex";
-      if (thumbImg) thumbImg.src = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+      const ytThumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`;
+      if (thumbImg) thumbImg.src = ytThumb;
       if (durationElem) durationElem.textContent = "14:20";
+      this.pendingVideoDuration = "14:20";
+      if (!this.selectedThumbnailUrl || this.selectedThumbnailUrl.startsWith("assets/cover-")) {
+        this.selectedThumbnailUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+        const identityPreview = document.getElementById("identityThumbPreviewImg");
+        const identityTag = document.getElementById("identityThumbTag");
+        if (identityPreview) identityPreview.src = this.selectedThumbnailUrl;
+        if (identityTag) identityTag.textContent = "Thumbnail YouTube";
+      }
       if (titleElem) titleElem.textContent = "Video YouTube Terverifikasi (ID: " + ytId + ")";
       if (metaElem) metaElem.textContent = "Kanal Edukasi • Kualitas HD 1080p";
 
@@ -1151,8 +1227,7 @@ const App = {
 
     try {
       if (mode === "create") {
-        const durInput = document.getElementById("simpleVideoDuration");
-        const chosenDuration = (durInput && durInput.value.trim()) ? durInput.value.trim() : (this.pendingVideoDuration || "10:00");
+        const chosenDuration = this.pendingVideoDuration || "10:00";
         const chosenThumbnail = this.selectedThumbnailUrl || defaultCover;
 
         let videoPayload = {
@@ -1275,15 +1350,15 @@ const App = {
         }
       } else {
         // Mode Ubah / Edit
-        const durInput = document.getElementById("simpleVideoDuration");
-        const chosenDuration = (durInput && durInput.value.trim()) ? durInput.value.trim() : (this.pendingVideoDuration || "10:00");
+        const videos = RepoStorage.getVideos();
+        const existingVideo = videos.find(item => item.id === editId) || {};
 
         let updatedData = {
           title,
           grade,
           subject,
           category: this.mapCategoryBySubject(subject),
-          duration: chosenDuration,
+          duration: existingVideo.duration || this.pendingVideoDuration || "10:00",
           learningOutcome: outcome,
           pdfContent: notes,
           quizUrl: quizUrl,
@@ -1291,24 +1366,12 @@ const App = {
           chapters: this.parseChaptersInput(chaptersRaw)
         };
 
-        if (this.currentUploadSource === "youtube") {
-          const ytInput = document.getElementById("inputTeacherYoutubeUrl");
-          const ytUrl = ytInput ? ytInput.value.trim() : "";
-          if (ytUrl) {
-            const ytId = RepoStorage.extractYouTubeId(ytUrl);
-            if (!ytId) {
-              this.showToast("Tautan video YouTube tidak valid. Mohon periksa kembali.", "danger");
-              if (submitBtn) submitBtn.disabled = false;
-              return;
-            }
-            updatedData.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
-            updatedData.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || this.getCoverBySubject(subject);
-            updatedData.sourceType = "youtube";
-          }
-        }
-
         if (this.selectedThumbnailUrl) {
           updatedData.thumbnail = this.selectedThumbnailUrl;
+        } else if (existingVideo.thumbnail) {
+          updatedData.thumbnail = existingVideo.thumbnail;
+        } else {
+          updatedData.thumbnail = this.getCoverBySubject(subject);
         }
 
         await RepoStorage.updateVideo(editId, updatedData);
@@ -1409,6 +1472,10 @@ const App = {
       const cleanId = sanitizeId(v.id);
       const jsSubject = escapeJsString(v.subject);
       const safeCover = escapeHtml(cover);
+      const hasEdited = !!v.updatedAt;
+      const formattedEditedDate = hasEdited ? RepoStorage.formatDateTime(v.updatedAt) : '';
+      const relativeEditedTime = hasEdited ? this.formatRelativeTime(v.updatedAt) : '';
+
       return `
         <tr>
           <td class="teacher-td-no">
@@ -1424,11 +1491,29 @@ const App = {
             <div class="teacher-title-text" onclick="App.openVideoById('${cleanId}', 'teacher')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
             <div class="teacher-meta-sub">
               ${safeSubject} • Kelas ${safeGrade}
+              ${hasEdited ? `
+                <span class="badge-edited" title="Terakhir diperbarui: ${escapeHtml(formattedEditedDate)}">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right: 2px;">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  Diedit
+                </span>
+              ` : ''}
             </div>
           </td>
           <td class="teacher-td-date">
             <div class="teacher-date-relative">${relativeTime}</div>
             <div class="teacher-date-full">${formattedDate}</div>
+            ${hasEdited ? `
+              <div class="teacher-date-edited" title="Terakhir diperbarui: ${escapeHtml(formattedEditedDate)}">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: -1px; margin-right: 3px; flex-shrink: 0;">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>Diedit ${relativeEditedTime}</span>
+              </div>
+            ` : ''}
           </td>
           <td class="teacher-td-actions" style="text-align: right; white-space: nowrap;">
             <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${cleanId}', 'teacher')" title="Uji putar materi">
@@ -1901,6 +1986,11 @@ const App = {
             <div class="card-meta-row">
               <span class="card-meta-subject">${safeSubject}</span>
               <span class="card-meta-date">${formattedDate}</span>
+              ${v.updatedAt ? `
+                <span class="card-badge-edited" title="Materi diperbarui guru: ${escapeHtml(RepoStorage.formatDate(v.updatedAt))}">
+                  Diedit
+                </span>
+              ` : ''}
               ${isDone ? `
                 <span class="status-completed-badge" title="Telah kamu pelajari">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>

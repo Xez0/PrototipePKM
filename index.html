@@ -501,8 +501,8 @@
             <!-- ========================================== -->
             <!-- CARD 1: SUMBER VIDEO PEMBELAJARAN          -->
             <!-- ========================================== -->
-            <div class="form-step-card" data-step="1">
-              <h2 class="step-card-title">1. Sumber Video Pembelajaran</h2>
+            <div class="form-step-card" id="formStepCard1" data-step="1">
+              <h2 class="step-card-title" id="stepCard1Title">1. Sumber Video Pembelajaran</h2>
 
               <!-- Tab Pilihan Sumber Video -->
               <div class="source-picker-tabs">
@@ -737,8 +737,8 @@
             <!-- ========================================== -->
             <!-- CARD 2: IDENTITAS KELAS & MATA PELAJARAN   -->
             <!-- ========================================== -->
-            <div class="form-step-card" data-step="2">
-              <h2 class="step-card-title">2. Identitas Kelas &amp; Mata Pelajaran</h2>
+            <div class="form-step-card" id="formStepCard2" data-step="2">
+              <h2 class="step-card-title" id="stepCard2Title">2. Identitas Kelas &amp; Mata Pelajaran</h2>
 
               <div class="form-group">
                 <label for="simpleVideoTitle" class="form-label-req">
@@ -770,7 +770,7 @@
                   <label for="simpleVideoSubject" class="form-label-req">
                     Mata Pelajaran <span class="text-req">*</span>
                   </label>
-                  <select id="simpleVideoSubject" class="form-select" required>
+                  <select id="simpleVideoSubject" class="form-select" required onchange="App.handleSubjectChange(this.value)">
                     <option value="Matematika" selected>Matematika</option>
                     <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
                     <option value="Bahasa Indonesia">Bahasa Indonesia</option>
@@ -784,27 +784,53 @@
                 </div>
               </div>
 
+              <!-- KUSTOMISASI THUMBNAIL DI IDENTITAS -->
               <div class="form-group" style="margin-top: var(--space-md);">
-                <label for="simpleVideoDuration">
-                  Perkiraan Durasi Video (Menit:Detik)
+                <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-weight: 600; color: var(--color-ink);">Gambar Sampul / Thumbnail Video</span>
+                  <span class="badge-optional" id="identityThumbHint">Dapat diganti kapan saja</span>
                 </label>
-                <input 
-                  type="text" 
-                  id="simpleVideoDuration" 
-                  class="form-input-text"
-                  placeholder="Contoh: 14:20" 
-                  value="10:00"
-                >
-                <span class="form-hint">Format MM:SS. Durasi terisi otomatis saat mengunggah video atau dapat disesuaikan secara manual.</span>
+                
+                <div class="identity-thumb-card">
+                  <div class="identity-thumb-media">
+                    <img id="identityThumbPreviewImg" src="assets/cover-matematika.svg" alt="Pratinjau Thumbnail Video" class="identity-thumb-img">
+                    <span class="identity-thumb-tag" id="identityThumbTag">Cover Mapel</span>
+                  </div>
+                  
+                  <div class="identity-thumb-info">
+                    <div class="identity-thumb-desc" id="identityThumbDesc">
+                      Thumbnail tampil di katalog siswa dan pemutar video. Anda dapat mengunggah file gambar kustom (Canva, JPG, PNG, WebP) atau menggunakan sampul standar mata pelajaran.
+                    </div>
+                    
+                    <div class="identity-thumb-actions">
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('inputIdentityThumbnailFile').click()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Unggah Gambar Thumbnail</span>
+                      </button>
+                      <button type="button" class="btn btn-outline btn-sm" id="btnResetToSubjectCover" onclick="App.resetThumbnailToSubjectCover()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="1 4 1 10 7 10"></polyline>
+                          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        <span>Gunakan Cover Mapel</span>
+                      </button>
+                      <input type="file" id="inputIdentityThumbnailFile" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="App.handleIdentityThumbnailSelected(this)">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- ========================================== -->
             <!-- CARD 3: BAHAN PENDAMPING BELAJAR           -->
             <!-- ========================================== -->
-            <div class="form-step-card" data-step="3">
+            <div class="form-step-card" id="formStepCard3" data-step="3">
               <div class="step-card-header-flex">
-                <h2 class="step-card-title">3. Bahan Pendamping Belajar</h2>
+                <h2 class="step-card-title" id="stepCard3Title">3. Bahan Pendamping Belajar</h2>
                 <span class="badge-optional">Opsional — Boleh Dikosongkan</span>
               </div>
               <p class="step-card-sub">
@@ -1045,10 +1071,9 @@
       </p>
 
       <div class="delete-modal-warning-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
         </svg>
         <span>Dapat diurungkan selama notifikasi masih tampil</span>
       </div>
