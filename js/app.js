@@ -22,7 +22,7 @@ window.escapeHtml = escapeHtml;
 // ==========================================================================
 const YouTubeUploader = {
   CLIENT_ID: "609447982110-6bv5uh18pordb7sh3u1q7l3jvo5ehhpb.apps.googleusercontent.com",
-  SCOPES: "https://www.googleapis.com/auth/youtube.upload",
+  SCOPES: "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl",
   tokenClient: null,
   accessToken: null,
   tokenExpiresAt: 0,

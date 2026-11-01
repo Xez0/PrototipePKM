@@ -282,10 +282,11 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Endpoint Redirect ke Google OAuth Consent Screen
+  // Endpoint Redirect ke Google OAuth Consent Screen (Izin Upload & Hapus Permanen)
   if (pathname === "/api/youtube-auth") {
     const googleCfg = getGoogleOAuthConfig();
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(googleCfg.clientId)}&redirect_uri=${encodeURIComponent(googleCfg.redirectUri)}&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload&access_type=offline&prompt=consent&login_hint=${encodeURIComponent(googleCfg.channelEmail)}`;
+    const scopes = encodeURIComponent("https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl");
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(googleCfg.clientId)}&redirect_uri=${encodeURIComponent(googleCfg.redirectUri)}&response_type=code&scope=${scopes}&access_type=offline&prompt=consent&login_hint=${encodeURIComponent(googleCfg.channelEmail)}`;
     res.writeHead(302, { "Location": authUrl });
     return res.end();
   }
@@ -378,6 +379,94 @@ const server = http.createServer(async (req, res) => {
       }
 
       return sendJson(res, 200, { success: true, uploadUrl });
+    } catch (err) {
+      return sendJson(res, 500, { success: false, error: err.message });
+    }
+  }
+
+  // Endpoint untuk Menghapus Video dari Channel YouTube Resmi Sekolah
+  if (pathname === "/api/youtube-delete" && (method === "POST" || method === "DELETE")) {
+    try {
+      const payload = await parseJsonBody(req);
+      const youtubeVideoId = (payload.youtubeVideoId || payload.videoId || "").trim();
+      if (!youtubeVideoId) {
+        return sendJson(res, 400, { success: false, error: "ID video YouTube wajib disertakan" });
+      }
+
+      const googleCfg = getGoogleOAuthConfig();
+      const tokenPath = path.join(DATA_DIR, "youtube-token.json");
+      const apiTokenPath = path.join(ROOT_DIR, "api", "youtube-token.json");
+      let refreshToken = process.env.YOUTUBE_REFRESH_TOKEN;
+
+      if (!refreshToken) {
+        if (fs.existsSync(tokenPath)) {
+          try {
+            refreshToken = JSON.parse(fs.readFileSync(tokenPath, "utf8")).refresh_token;
+          } catch (e) {}
+        } else if (fs.existsSync(apiTokenPath)) {
+          try {
+            refreshToken = JSON.parse(fs.readFileSync(apiTokenPath, "utf8")).refresh_token;
+          } catch (e) {}
+        }
+      }
+
+      if (!refreshToken) {
+        return sendJson(res, 400, {
+          success: false,
+          error: "Channel YouTube belum diotorisasi di server."
+        });
+      }
+
+      const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: googleCfg.clientId,
+          client_secret: googleCfg.clientSecret,
+          refresh_token: refreshToken,
+          grant_type: "refresh_token"
+        }).toString()
+      });
+
+      const tokenJson = await tokenRes.json();
+      if (!tokenJson.access_token) {
+        return sendJson(res, 500, {
+          success: false,
+          error: "Gagal me-refresh token akses: " + (tokenJson.error_description || tokenJson.error)
+        });
+      }
+
+      // Hapus video via Google YouTube Data API v3
+      const ytDeleteRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${encodeURIComponent(youtubeVideoId)}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${tokenJson.access_token}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (ytDeleteRes.status === 204) {
+        console.log(`[YOUTUBE DELETE SUKSES] Video ${youtubeVideoId} berhasil dihapus permanen dari channel YouTube.`);
+        return sendJson(res, 200, {
+          success: true,
+          message: `Video ${youtubeVideoId} berhasil dihapus permanen dari channel YouTube.`
+        });
+      }
+
+      if (ytDeleteRes.status === 404) {
+        return sendJson(res, 200, {
+          success: true,
+          message: "Video tidak ditemukan di channel YouTube atau milik kanal pihak ketiga."
+        });
+      }
+
+      const errText = await ytDeleteRes.text();
+      console.warn(`[YOUTUBE DELETE WARNING] Status ${ytDeleteRes.status}:`, errText);
+      return sendJson(res, ytDeleteRes.status, {
+        success: false,
+        status: ytDeleteRes.status,
+        error: "Respon YouTube API: " + errText
+      });
     } catch (err) {
       return sendJson(res, 500, { success: false, error: err.message });
     }

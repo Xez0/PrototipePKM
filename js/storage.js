@@ -577,12 +577,32 @@ const RepoStorage = {
     return true;
   },
 
-  // Hapus Video (Hapus dari Supabase, Backend, LocalStorage, dan IndexedDB)
+  // Hapus Video (Hapus dari Supabase, YouTube Channel, Backend, LocalStorage, dan IndexedDB)
   deleteVideo: async function (id) {
     let videos = this.getVideos();
     const target = videos.find(v => v.id === id);
     if (target && target.sourceType === "local") {
       await VideoDB.deleteVideoFile(id);
+    }
+
+    // Jika video memiliki ID YouTube, kirim instruksi penghapusan ke YouTube API
+    if (target && target.embedUrl) {
+      const ytId = this.extractYouTubeId(target.embedUrl);
+      if (ytId) {
+        try {
+          fetch("/api/youtube-delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ youtubeVideoId: ytId })
+          }).then(res => res.json()).then(resData => {
+            if (resData && resData.success) {
+              console.log("[YOUTUBE API] Video berhasil dihapus dari channel YouTube:", ytId);
+            }
+          }).catch(ytErr => {
+            console.warn("[YOUTUBE API] Hapus video YouTube dilewati:", ytErr);
+          });
+        } catch (e) {}
+      }
     }
 
     // Pastikan Supabase client siap
