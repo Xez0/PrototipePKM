@@ -169,6 +169,7 @@ const VideoPlayer = {
         publishText += ` • Diedit: ${RepoStorage.formatDate(video.updatedAt)}`;
       }
       publishDateElem.textContent = publishText;
+      publishDateElem.title = `Waktu Unggah: ${RepoStorage.formatDateTime(video.publishedAt)}${video.updatedAt ? ' | Terakhir Diedit: ' + RepoStorage.formatDateTime(video.updatedAt) : ''}`;
     }
     if (durationElem) {
       durationElem.textContent = `Durasi: ${video.duration || '15:00'}`;

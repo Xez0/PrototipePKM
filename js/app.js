@@ -1473,6 +1473,7 @@ const App = {
       const jsSubject = escapeJsString(v.subject);
       const safeCover = escapeHtml(cover);
       const hasEdited = !!v.updatedAt;
+      const formattedUploadDateTime = RepoStorage.formatDateTime(v.publishedAt);
       const formattedEditedDate = hasEdited ? RepoStorage.formatDateTime(v.updatedAt) : '';
       const relativeEditedTime = hasEdited ? this.formatRelativeTime(v.updatedAt) : '';
 
@@ -1502,7 +1503,7 @@ const App = {
               ` : ''}
             </div>
           </td>
-          <td class="teacher-td-date">
+          <td class="teacher-td-date" title="Diunggah pada: ${escapeHtml(formattedUploadDateTime)}">
             <div class="teacher-date-relative">${relativeTime}</div>
             <div class="teacher-date-full">${formattedDate}</div>
             ${hasEdited ? `
@@ -1985,9 +1986,9 @@ const App = {
           <div class="card-body">
             <div class="card-meta-row">
               <span class="card-meta-subject">${safeSubject}</span>
-              <span class="card-meta-date">${formattedDate}</span>
+              <span class="card-meta-date" title="Diunggah pada: ${escapeHtml(RepoStorage.formatDateTime(v.publishedAt))}">${formattedDate}</span>
               ${v.updatedAt ? `
-                <span class="card-badge-edited" title="Materi diperbarui guru: ${escapeHtml(RepoStorage.formatDate(v.updatedAt))}">
+                <span class="card-badge-edited" title="Materi diperbarui guru: ${escapeHtml(RepoStorage.formatDateTime(v.updatedAt))}">
                   Diedit
                 </span>
               ` : ''}
