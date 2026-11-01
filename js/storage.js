@@ -265,10 +265,18 @@ const RepoStorage = {
 
       if (!error && Array.isArray(data)) {
         if (data.length > 0) {
+          const enrichedData = data.map(v => {
+            const isSchool = (v.sourceType === "youtube_upload" || v.sourceType === "local" || v.uploadedBySchool === true);
+            return {
+              ...v,
+              uploadedBySchool: isSchool,
+              uploadMethod: isSchool ? "file_upload" : "url_embed"
+            };
+          });
           this.isServerOnline = true;
-          this.saveVideos(data);
+          this.saveVideos(enrichedData);
           this.updateSyncUI("online");
-          return data;
+          return enrichedData;
         } else if (window.INITIAL_VIDEO_DATA && window.INITIAL_VIDEO_DATA.length > 0) {
           // Hanya jika tabel cloud kosong pertama kali (0 baris), inisialisasi materi kurikulum awal
           console.log("[SUPABASE SEED] Tabel cloud kosong, melakukan inisialisasi materi otomatis...");
@@ -431,8 +439,10 @@ const RepoStorage = {
     };
 
     // Jika sumber bukan youtube dan file lokal disertakan
-    if (newVideo.sourceType !== "youtube" && videoFile && videoFile instanceof Blob) {
+    if (newVideo.sourceType !== "youtube" && newVideo.sourceType !== "youtube_upload" && videoFile && videoFile instanceof Blob) {
       videoWithId.sourceType = "local";
+      videoWithId.uploadedBySchool = true;
+      videoWithId.uploadMethod = "file_upload";
       videoWithId.fileName = videoFile.name || "video-materi.mp4";
       videoWithId.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
       
@@ -458,8 +468,14 @@ const RepoStorage = {
           console.warn("[SYNC] Gagal upload berkas ke server, fallback ke IndexedDB:", err);
         }
       }
+    } else if (newVideo.sourceType === "youtube_upload") {
+      videoWithId.sourceType = "youtube_upload";
+      videoWithId.uploadedBySchool = true;
+      videoWithId.uploadMethod = "file_upload";
     } else {
       videoWithId.sourceType = "youtube";
+      videoWithId.uploadedBySchool = false;
+      videoWithId.uploadMethod = "url_embed";
     }
 
     // Pastikan Supabase client siap sebelum simpan
@@ -577,18 +593,26 @@ const RepoStorage = {
     return true;
   },
 
-  // Hapus Video (Hapus dari Supabase, YouTube Channel, Backend, LocalStorage, dan IndexedDB)
-  deleteVideo: async function (id) {
+  // Hapus Video (Hapus dari Supabase, YouTube Channel jika milik sekolah, Backend, LocalStorage, dan IndexedDB)
+  deleteVideo: async function (id, options = {}) {
     let videos = this.getVideos();
     const target = videos.find(v => v.id === id);
     if (target && target.sourceType === "local") {
       await VideoDB.deleteVideoFile(id);
     }
 
-    // Jika video memiliki ID YouTube, kirim instruksi penghapusan ke YouTube API
-    if (target && target.embedUrl) {
+    // Periksa apakah video ini diunggah ke channel YouTube resmi sekolah kita
+    // Video dari URL eksternal (bukan channel sekolah) TIDAK BOLEH dikirim ke API YouTube
+    const isSchoolUpload = target && (
+      target.sourceType === "youtube_upload" ||
+      target.uploadedBySchool === true ||
+      target.uploadMethod === "file_upload"
+    );
+
+    if (isSchoolUpload && target.embedUrl && !options.skipYouTube) {
       const ytId = this.extractYouTubeId(target.embedUrl);
       if (ytId) {
+        console.log("[DELETE] Menghapus video dari channel YouTube resmi sekolah:", ytId);
         try {
           fetch("/api/youtube-delete", {
             method: "POST",
@@ -596,13 +620,15 @@ const RepoStorage = {
             body: JSON.stringify({ youtubeVideoId: ytId })
           }).then(res => res.json()).then(resData => {
             if (resData && resData.success) {
-              console.log("[YOUTUBE API] Video berhasil dihapus dari channel YouTube:", ytId);
+              console.log("[YOUTUBE API] Video berhasil dihapus dari channel YouTube sekolah:", ytId);
             }
           }).catch(ytErr => {
             console.warn("[YOUTUBE API] Hapus video YouTube dilewati:", ytErr);
           });
         } catch (e) {}
       }
+    } else {
+      console.log("[DELETE] Materi bersumber dari tautan/URL eksternal, hanya dihapus dari database sekolah (tidak menyentuh YouTube).");
     }
 
     // Pastikan Supabase client siap

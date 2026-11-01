@@ -456,7 +456,16 @@ const server = http.createServer(async (req, res) => {
       if (ytDeleteRes.status === 404) {
         return sendJson(res, 200, {
           success: true,
-          message: "Video tidak ditemukan di channel YouTube atau milik kanal pihak ketiga."
+          message: "Video tidak ditemukan di channel YouTube atau sudah dihapus sebelumnya."
+        });
+      }
+
+      if (ytDeleteRes.status === 403) {
+        console.log(`[YOUTUBE DELETE INFO] Video ${youtubeVideoId} bukan milik channel resmi sekolah (video pihak ketiga). Penghapusan YouTube dilewati.`);
+        return sendJson(res, 200, {
+          success: true,
+          skipped: true,
+          message: "Video merupakan milik pihak ketiga (URL eksternal). Penghapusan YouTube fisik dilewati dengan aman."
         });
       }
 

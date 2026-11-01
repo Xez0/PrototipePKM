@@ -1166,7 +1166,9 @@ const App = {
               "Video Terunggah! Menyimpan ke Database Sekolah...",
               "Menyinkronkan data materi ke katalog siswa dan server cloud..."
             );
-            videoPayload.sourceType = "youtube";
+            videoPayload.sourceType = "youtube_upload";
+            videoPayload.uploadedBySchool = true;
+            videoPayload.uploadMethod = "file_upload";
             videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl("https://youtu.be/" + ytVideoId);
             videoPayload.thumbnail = chosenThumbnail || `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
 
@@ -1191,6 +1193,8 @@ const App = {
               "Mengalihkan berkas video ke server repositori internal..."
             );
             videoPayload.sourceType = "local";
+            videoPayload.uploadedBySchool = true;
+            videoPayload.uploadMethod = "file_upload";
             await RepoStorage.addVideo(videoPayload, this.pendingVideoFile);
             this.setUploadProgress(100, "100% Selesai! Materi Berhasil Diterbitkan", "Video tersimpan di repositori server internal sekolah.");
             await new Promise(r => setTimeout(r, 600));
@@ -1213,6 +1217,8 @@ const App = {
             return;
           }
           videoPayload.sourceType = "youtube";
+          videoPayload.uploadedBySchool = false;
+          videoPayload.uploadMethod = "url_embed";
           videoPayload.embedUrl = RepoStorage.formatVideoEmbedUrl(ytUrl);
           videoPayload.thumbnail = RepoStorage.getThumbnailUrl(ytUrl) || defaultCover;
 
@@ -1418,24 +1424,33 @@ const App = {
     // Simpan data video yang dihapus untuk dukungan Urungkan (Undo)
     this.lastDeletedVideo = { ...videoToDelete };
 
-    await RepoStorage.deleteVideo(id);
+    // Hapus dari UI dan Supabase terlebih dahulu dengan flag skipYouTube: true agar bisa di-undo
+    await RepoStorage.deleteVideo(id, { skipYouTube: true });
     this.renderStats();
     this.renderVideoGrid();
     this.renderTeacherTable();
     this.initFeaturedRotation();
 
+    const isSchoolUpload = (
+      videoToDelete.sourceType === "youtube_upload" ||
+      videoToDelete.uploadedBySchool === true ||
+      videoToDelete.uploadMethod === "file_upload"
+    );
+
     this.showToast({
       type: "danger",
       title: "Materi Dihapus",
-      desc: `Materi "${videoToDelete.title}" telah dihapus. Klik 'Urungkan' sebelum notifikasi hilang jika ingin membatalkan.`,
+      desc: isSchoolUpload
+        ? `Materi "${videoToDelete.title}" telah dihapus. Klik 'Urungkan' sebelum notifikasi hilang jika ingin membatalkan.`
+        : `Materi "${videoToDelete.title}" telah dihapus dari katalog. Klik 'Urungkan' sebelum notifikasi hilang jika ingin membatalkan.`,
       duration: 6000,
       actionText: "Urungkan",
       actionIcon: this.toastIcons.undo,
       onAction: async () => {
         if (this.lastDeletedVideo) {
-          await RepoStorage.restoreVideo(this.lastDeletedVideo);
-          const restoredTitle = this.lastDeletedVideo.title;
+          const videoToRestore = { ...this.lastDeletedVideo };
           this.lastDeletedVideo = null;
+          await RepoStorage.restoreVideo(videoToRestore);
           this.renderStats();
           this.renderVideoGrid();
           this.renderTeacherTable();
@@ -1443,13 +1458,42 @@ const App = {
           this.showToast({
             type: "success",
             title: "Penghapusan Dibatalkan",
-            desc: `Materi "${restoredTitle}" berhasil dipulihkan kembali.`,
+            desc: `Materi "${videoToRestore.title}" berhasil dipulihkan kembali.`,
             duration: 3500
           });
         }
       },
       onDismiss: () => {
-        this.lastDeletedVideo = null;
+        // Jika tidak diurungkan selama masa notifikasi aktif:
+        // Hapus fisik dari YouTube HANYA jika materi diunggah ke channel YouTube sekolah kita
+        if (this.lastDeletedVideo) {
+          const pendingTarget = this.lastDeletedVideo;
+          this.lastDeletedVideo = null;
+          const shouldDeleteFromYT = (
+            pendingTarget.sourceType === "youtube_upload" ||
+            pendingTarget.uploadedBySchool === true ||
+            pendingTarget.uploadMethod === "file_upload"
+          );
+          if (shouldDeleteFromYT && pendingTarget.embedUrl) {
+            const ytId = RepoStorage.extractYouTubeId(pendingTarget.embedUrl);
+            if (ytId) {
+              console.log("[PERMANENT DELETE] Menghapus video dari channel YouTube resmi sekolah:", ytId);
+              fetch("/api/youtube-delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ youtubeVideoId: ytId })
+              }).then(res => res.json()).then(resData => {
+                if (resData && resData.success) {
+                  console.log("[YOUTUBE API] Video berhasil dihapus permanen dari channel YouTube:", ytId);
+                }
+              }).catch(err => {
+                console.warn("[YOUTUBE API] Gagal memproses hapus YouTube:", err);
+              });
+            }
+          } else {
+            console.log("[PERMANENT DELETE] Materi berasal dari URL YouTube eksternal (bukan milik channel sekolah), penghapusan YouTube fisik dilewati.");
+          }
+        }
       }
     });
   },

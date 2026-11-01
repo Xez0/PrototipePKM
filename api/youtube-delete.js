@@ -101,10 +101,20 @@ module.exports = async (req, res) => {
     }
 
     if (deleteRes.status === 404) {
-      // 404 berarti video sudah tidak ada di YouTube atau milik pihak ketiga
+      // 404 berarti video sudah tidak ada di YouTube atau sudah pernah dihapus
       return res.status(200).json({
         success: true,
-        message: "Video tidak ditemukan di channel YouTube atau bukan milik channel sekolah."
+        message: "Video tidak ditemukan di channel YouTube atau sudah dihapus sebelumnya."
+      });
+    }
+
+    if (deleteRes.status === 403) {
+      // 403 berarti video pihak ketiga / bukan milik channel sekolah kita
+      console.log(`[YOUTUBE DELETE INFO] Video ${youtubeVideoId} bukan milik channel resmi sekolah (video pihak ketiga). Penghapusan YouTube dilewati.`);
+      return res.status(200).json({
+        success: true,
+        skipped: true,
+        message: "Video merupakan milik pihak ketiga (URL eksternal). Penghapusan YouTube fisik dilewati dengan aman."
       });
     }
 
@@ -119,3 +129,4 @@ module.exports = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+
