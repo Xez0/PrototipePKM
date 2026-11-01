@@ -27,6 +27,18 @@ module.exports = (req, res) => {
   }
 
   if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE") {
+    // Verifikasi Otorisasi Dewan Guru
+    const TEACHER_AUTH_TOKEN = process.env.TEACHER_AUTH_TOKEN || "smpn7-guru-auth-token-2026";
+    const authHeader = req.headers["authorization"] || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : authHeader.trim();
+
+    if (token !== TEACHER_AUTH_TOKEN) {
+      return res.status(401).json({
+        success: false,
+        error: "Akses ditolak: Operasi ini memerlukan otorisasi resmi Dewan Guru SMPN 7."
+      });
+    }
+
     // Di Vercel Serverless environment, local filesystem bersifat ephemeral / read-only.
     // Client akan menyimpan di Supabase Cloud serta IndexedDB & LocalStorage secara otomatis.
     return res.status(200).json({

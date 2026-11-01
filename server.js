@@ -73,9 +73,26 @@ function sendJson(res, statusCode, data) {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Cache-Control": "no-store, no-cache, must-revalidate"
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
   });
   res.end(JSON.stringify(data));
+}
+
+// Otorisasi Dewan Guru: Token Sesi Keamanan Guru SMPN 7
+const TEACHER_AUTH_TOKEN = process.env.TEACHER_AUTH_TOKEN || "smpn7-guru-auth-token-2026";
+
+function isAuthorizedTeacher(req) {
+  const authHeader = req.headers["authorization"] || "";
+  let token = "";
+  if (authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7).trim();
+  } else {
+    token = authHeader.trim();
+  }
+  return token === TEACHER_AUTH_TOKEN;
 }
 
 // Helper: Parse Body JSON
@@ -102,7 +119,17 @@ function parseJsonBody(req) {
 
 // Helper: Handle Upload File Video (Multipart / Binary Stream)
 function handleFileUpload(req, res) {
+  // Verifikasi Otorisasi Dewan Guru sebelum memproses berkas
+  if (!isAuthorizedTeacher(req)) {
+    return sendJson(res, 401, {
+      success: false,
+      error: "Akses ditolak: Operasi unggah berkas memerlukan otorisasi resmi Dewan Guru."
+    });
+  }
+
   const contentType = req.headers["content-type"] || "";
+  const MAX_UPLOAD_SIZE = 500 * 1024 * 1024; // Batas maksimal 500MB (Mencegah DoS / Memory Exhaustion)
+  const ALLOWED_EXTS = [".mp4", ".webm", ".mkv"];
   
   if (contentType.includes("multipart/form-data")) {
     const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
@@ -111,9 +138,19 @@ function handleFileUpload(req, res) {
     }
     const boundary = boundaryMatch[1] || boundaryMatch[2];
     const chunks = [];
+    let totalBytes = 0;
     
-    req.on("data", chunk => chunks.push(chunk));
+    req.on("data", chunk => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_UPLOAD_SIZE) {
+        req.destroy();
+        return sendJson(res, 413, { success: false, error: "Ukuran berkas melebihi batas maksimal (500 MB)" });
+      }
+      chunks.push(chunk);
+    });
+
     req.on("end", () => {
+      if (totalBytes > MAX_UPLOAD_SIZE) return;
       const buffer = Buffer.concat(chunks);
       const boundaryBuf = Buffer.from(`--${boundary}`);
       
@@ -134,6 +171,10 @@ function handleFileUpload(req, res) {
       const filenameMatch = headerStr.match(/filename="([^"]+)"/i);
       const originalName = filenameMatch ? filenameMatch[1] : "video-materi.mp4";
       
+      // Whitelist ekstensi (Mencegah Stored XSS via .html/.svg)
+      const rawExt = path.extname(originalName).toLowerCase();
+      const ext = ALLOWED_EXTS.includes(rawExt) ? rawExt : ".mp4";
+
       const fileDataStart = headerEnd + 4;
       const nextBoundary = buffer.indexOf(Buffer.from(`\r\n--${boundary}`), fileDataStart);
       const fileDataEnd = nextBoundary !== -1 ? nextBoundary : buffer.length - 4;
@@ -141,7 +182,6 @@ function handleFileUpload(req, res) {
       const fileContent = buffer.slice(fileDataStart, fileDataEnd);
       
       // Buat nama file unik dan aman di server
-      const ext = path.extname(originalName) || ".mp4";
       const safeName = `video-${Date.now()}-${crypto.randomBytes(4).toString("hex")}${ext}`;
       const savePath = path.join(UPLOADS_DIR, safeName);
       
@@ -168,10 +208,17 @@ function handleFileUpload(req, res) {
     let totalBytes = 0;
     req.on("data", chunk => {
       totalBytes += chunk.length;
+      if (totalBytes > MAX_UPLOAD_SIZE) {
+        req.destroy();
+        writeStream.end();
+        if (fs.existsSync(savePath)) try { fs.unlinkSync(savePath); } catch (e) {}
+        return sendJson(res, 413, { success: false, error: "Ukuran berkas melebihi batas maksimal (500 MB)" });
+      }
       writeStream.write(chunk);
     });
     
     req.on("end", () => {
+      if (totalBytes > MAX_UPLOAD_SIZE) return;
       writeStream.end();
       const sizeMB = (totalBytes / (1024 * 1024)).toFixed(1) + " MB";
       console.log(`[UPLOAD RAW SUKSES] ${safeName} (${sizeMB})`);
@@ -293,6 +340,9 @@ const server = http.createServer(async (req, res) => {
 
   // Endpoint untuk membuat Pre-Authorized Resumable Upload URL di YouTube
   if (pathname === "/api/youtube-init" && method === "POST") {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     try {
       const payload = await parseJsonBody(req);
       const googleCfg = getGoogleOAuthConfig();
@@ -386,6 +436,9 @@ const server = http.createServer(async (req, res) => {
 
   // Endpoint untuk Menghapus Video dari Channel YouTube Resmi Sekolah
   if (pathname === "/api/youtube-delete" && (method === "POST" || method === "DELETE")) {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     try {
       const payload = await parseJsonBody(req);
       const youtubeVideoId = (payload.youtubeVideoId || payload.videoId || "").trim();
@@ -492,6 +545,7 @@ const server = http.createServer(async (req, res) => {
       success: true,
       server: "Backend Repositori Video SMPN 7 Tangerang Selatan",
       status: "online",
+      canUploadFiles: true,
       version: "2.0.0",
       totalVideos: videos.length,
       storageMode: "server-filesystem-storage",
@@ -511,6 +565,9 @@ const server = http.createServer(async (req, res) => {
 
   // 3. POST Tambah Video Baru (/api/videos)
   if (pathname === "/api/videos" && method === "POST") {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     try {
       const payload = await parseJsonBody(req);
       if (!payload.title) {
@@ -540,6 +597,9 @@ const server = http.createServer(async (req, res) => {
 
   // 4. PUT Update Video (/api/videos/:id)
   if (pathname.startsWith("/api/videos/") && method === "PUT") {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     const id = pathname.replace("/api/videos/", "").trim();
     try {
       const payload = await parseJsonBody(req);
@@ -567,6 +627,9 @@ const server = http.createServer(async (req, res) => {
 
   // 5. DELETE Hapus Video (/api/videos/:id)
   if (pathname.startsWith("/api/videos/") && method === "DELETE") {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     const id = pathname.replace("/api/videos/", "").trim();
     const videos = readVideos();
     const idx = videos.findIndex(v => v.id === id);
@@ -598,32 +661,81 @@ const server = http.createServer(async (req, res) => {
     return handleFileUpload(req, res);
   }
 
-  // 7. POST Reset ke Data Default Resmi (/api/reset)
+  // 7. POST Reset ke Data Default Resmi (/api/reset) - Aman Tanpa eval()
   if (pathname === "/api/reset" && method === "POST") {
+    if (!isAuthorizedTeacher(req)) {
+      return sendJson(res, 401, { success: false, error: "Akses ditolak: Memerlukan otorisasi resmi Dewan Guru." });
+    }
     try {
-      const dataJs = fs.readFileSync(path.join(ROOT_DIR, "js", "data.js"), "utf8");
-      const match = dataJs.match(/const INITIAL_VIDEO_DATA = (\[[\s\S]*?\]);\s*window/);
-      if (match) {
-        const defaultData = eval(match[1]);
-        writeVideos(defaultData);
-        console.log(`[API RESET] Repositori dikembalikan ke ${defaultData.length} materi resmi.`);
-        return sendJson(res, 200, { success: true, count: defaultData.length, data: defaultData });
+      const initialFile = path.join(DATA_DIR, "initial-videos.json");
+      let defaultData;
+      if (fs.existsSync(initialFile)) {
+        defaultData = JSON.parse(fs.readFileSync(initialFile, "utf8"));
+      } else {
+        defaultData = readVideos();
       }
+      writeVideos(defaultData);
+      console.log(`[API RESET] Repositori dikembalikan ke ${defaultData.length} materi resmi.`);
+      return sendJson(res, 200, { success: true, count: defaultData.length, data: defaultData });
     } catch (e) {
       return sendJson(res, 500, { success: false, error: "Gagal reset: " + e.message });
     }
   }
 
   // ==========================================================================
-  // STATIC FILE SERVING (index.html, css, js, assets, uploads)
+  // STATIC FILE SERVING BERSIFAT AMAN (SECURE STATIC SERVING)
+  // Mencegah kebocoran file konfigurasi, database, token, kode server, dan traversal
   // ==========================================================================
   let filePath = path.join(ROOT_DIR, pathname === "/" ? "index.html" : pathname);
 
   // Mencegah directory traversal
   const normalizedPath = path.normalize(filePath);
   if (!normalizedPath.startsWith(ROOT_DIR)) {
-    res.writeHead(403, { "Content-Type": "text/plain" });
-    return res.end("Forbidden");
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    return res.end("Forbidden: Directory traversal terdeteksi");
+  }
+
+  // 1. Blokir semua berkas/direktori tersembunyi (.git, .env, .taste-skill, dsb.)
+  const pathParts = pathname.split("/");
+  if (pathParts.some(p => p.startsWith("."))) {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    return res.end("Forbidden: Akses ke berkas tersembunyi dilarang.");
+  }
+
+  // 2. Blokir folder sistem internal
+  const lowerPath = pathname.toLowerCase();
+  if (
+    lowerPath.startsWith("/data/") ||
+    lowerPath.startsWith("/api/") ||
+    lowerPath.startsWith("/node_modules/") ||
+    lowerPath.startsWith("/.taste-skill/")
+  ) {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    return res.end("Forbidden: Akses ke direktori internal dilarang.");
+  }
+
+  // 3. Blokir ekstensi berkas sensitif & kode backend
+  const ext = path.extname(normalizedPath).toLowerCase();
+  const BLOCKED_EXTENSIONS = [".json", ".md", ".env", ".yml", ".yaml", ".sql", ".sh", ".bat", ".ps1", ".lock"];
+  if (BLOCKED_EXTENSIONS.includes(ext) || lowerPath === "/server.js" || lowerPath === "/package.json" || lowerPath === "/vercel.json" || lowerPath.includes("token")) {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    return res.end("Forbidden: Akses ke berkas konfigurasi/sistem dilarang.");
+  }
+
+  // 4. Whitelist jalur publik yang diizinkan
+  const isAllowedPublic = 
+    pathname === "/" ||
+    pathname === "/index.html" ||
+    pathname === "/portal-guru-form.html" ||
+    pathname === "/favicon.ico" ||
+    (lowerPath.startsWith("/css/") && ext === ".css") ||
+    (lowerPath.startsWith("/js/") && ext === ".js") ||
+    (lowerPath.startsWith("/assets/") && [".svg", ".png", ".jpg", ".jpeg", ".webp", ".mp4", ".webm", ".ico"].includes(ext)) ||
+    (lowerPath.startsWith("/uploads/") && [".mp4", ".webm", ".mkv", ".jpg", ".jpeg", ".png", ".webp"].includes(ext));
+
+  if (!isAllowedPublic) {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    return res.end("Forbidden: Jalur berkas publik tidak dikenali.");
   }
 
   fs.stat(normalizedPath, (err, stats) => {
@@ -643,8 +755,14 @@ const server = http.createServer(async (req, res) => {
       `);
     }
 
-    const ext = path.extname(normalizedPath).toLowerCase();
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
+
+    // Set Security Headers
+    const securityHeaders = {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "SAMEORIGIN",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    };
 
     // Dukungan HTTP 206 Partial Content (Streaming Range Video)
     const range = req.headers.range;
@@ -656,6 +774,7 @@ const server = http.createServer(async (req, res) => {
       
       const fileStream = fs.createReadStream(normalizedPath, { start, end });
       res.writeHead(206, {
+        ...securityHeaders,
         "Content-Range": `bytes ${start}-${end}/${stats.size}`,
         "Accept-Ranges": "bytes",
         "Content-Length": chunksize,
@@ -666,6 +785,7 @@ const server = http.createServer(async (req, res) => {
 
     // Response Normal File Statis
     res.writeHead(200, {
+      ...securityHeaders,
       "Content-Length": stats.size,
       "Content-Type": contentType,
       "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600"

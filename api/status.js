@@ -10,6 +10,7 @@ module.exports = (req, res) => {
   return res.status(200).json({
     status: "online",
     platform: "Vercel Serverless",
+    canUploadFiles: false,
     school: "UPTD SMP Negeri 7 Kota Tangerang Selatan",
     academicYear: "2026/2027",
     timestamp: new Date().toISOString()

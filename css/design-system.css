@@ -58,6 +58,13 @@
   --font-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
+  /* Skala Tipografi Modular Baku (5 Tingkat Terukur - Anti-Slop) */
+  --text-display: clamp(2rem, 3.2vw, 2.25rem); /* 32-36px - Judul Display / Hero */
+  --text-h1:      1.5rem;                       /* 24px - Judul Seksi Utama / Modal */
+  --text-h2:      1.125rem;                     /* 18px - Judul Kartu / Sub-seksi */
+  --text-body:    1rem;                         /* 16px - Teks Bodi Konten */
+  --text-caption: 0.8125rem;                    /* 13px - Label, Metadata, Caption */
+
   /* Skala Spasi */
   --space-2xs: 4px;
   --space-xs: 8px;
@@ -167,26 +174,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-size: var(--text-display);
   letter-spacing: -0.025em;
 }
 
 h2 {
-  font-size: 1.75rem;
+  font-size: var(--text-h1);
   letter-spacing: -0.02em;
 }
 
 h3 {
-  font-size: 1.25rem;
+  font-size: var(--text-h2);
   letter-spacing: -0.015em;
 }
 
 h4 {
-  font-size: 1rem;
+  font-size: var(--text-body);
 }
 
 p {
-  font-size: 1rem;
+  font-size: var(--text-body);
   line-height: 1.6;
   color: var(--color-ink-muted);
 }

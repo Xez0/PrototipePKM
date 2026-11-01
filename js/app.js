@@ -5,16 +5,41 @@
    Drag & Drop Video Komputer, Filter Jenjang, & Navigasi Terpadu
    ========================================================================== */
 
-function escapeHtml(str) {
-  if (str === null || str === undefined) return "";
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+if (typeof window.escapeHtml !== "function") {
+  window.escapeHtml = function (str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
 }
-window.escapeHtml = escapeHtml;
+var escapeHtml = window.escapeHtml;
+
+if (typeof window.escapeJsString !== "function") {
+  window.escapeJsString = function (str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/</g, "\\x3c")
+      .replace(/>/g, "\\x3e");
+  };
+}
+var escapeJsString = window.escapeJsString;
+
+if (typeof window.sanitizeId !== "function") {
+  window.sanitizeId = function (id) {
+    if (id === null || id === undefined) return "";
+    return String(id).replace(/[^a-zA-Z0-9_-]/g, "");
+  };
+}
+var sanitizeId = window.sanitizeId;
 
 // ==========================================================================
 // PENGUNGGAH RESMI GOOGLE YOUTUBE DATA API V3 (DIRECT UPLOAD UNTUK GURU)
@@ -86,9 +111,14 @@ const YouTubeUploader = {
 
     // Prioritas 1: Minta URL Unggah Pra-Otorisasi dari Backend (Zero-Popup untuk Guru)
     try {
+      const initHeaders = { "Content-Type": "application/json" };
+      if (typeof AuthManager !== "undefined" && typeof AuthManager.getAuthToken === "function") {
+        const token = AuthManager.getAuthToken();
+        if (token) initHeaders["Authorization"] = "Bearer " + token;
+      }
       const initRes = await fetch("/api/youtube-init", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: initHeaders,
         body: JSON.stringify({
           title: metadata.title || "Materi SMPN 7 Tangsel",
           description: metadata.description || "Video materi pembelajaran resmi SMPN 7 Tangsel.",
@@ -480,12 +510,18 @@ const App = {
     const tabYt = document.getElementById("tabSourceYoutube");
     const blockFile = document.getElementById("sourceFileBlock");
     const blockYt = document.getElementById("sourceYoutubeBlock");
+    const offlineNotice = document.getElementById("offlineUploadNotice");
 
     if (sourceType === "file") {
       if (tabFile) tabFile.classList.add("active");
       if (tabYt) tabYt.classList.remove("active");
       if (blockFile) blockFile.style.display = "block";
       if (blockYt) blockYt.style.display = "none";
+
+      // Tampilkan notifikasi peringatan jika server repositori sedang offline
+      if (offlineNotice) {
+        offlineNotice.style.display = RepoStorage.isServerOnline ? "none" : "block";
+      }
     } else {
       if (tabFile) tabFile.classList.remove("active");
       if (tabYt) tabYt.classList.add("active");
@@ -692,6 +728,15 @@ const App = {
   handleFileSelectedFile: async function (file) {
     if (!file) return;
     this.pendingVideoFile = file;
+
+    if (!RepoStorage.isServerOnline) {
+      this.showToast({
+        type: "warning",
+        title: "Server Offline",
+        desc: "Server offline: Berkas video hanya bisa diunggah saat server aktif. Gunakan Tautan YouTube.",
+        duration: 5000
+      });
+    }
 
     const dropzone = document.getElementById("videoFileDropzone");
     const previewCard = document.getElementById("fileSelectedDisplay");
@@ -1187,6 +1232,9 @@ const App = {
             this.showToast("Materi pembelajaran berhasil diunggah ke YouTube & langsung tayang di katalog siswa!", "success");
           } catch (uploadErr) {
             console.warn("[UPLOAD FALLBACK] Upload YouTube dialihkan ke repositori internal:", uploadErr);
+            if (!RepoStorage.isServerOnline) {
+              throw new Error("Server offline: Berkas video hanya bisa diunggah saat server aktif. Gunakan Tautan YouTube.");
+            }
             this.setUploadProgress(
               92,
               "Menyimpan ke Repositori Server Sekolah...",
@@ -1274,7 +1322,14 @@ const App = {
       this.initFeaturedRotation();
     } catch (err) {
       console.error("Gagal memproses materi:", err);
-      this.showToast("Terjadi kendala saat menyimpan video. Silakan coba kembali.", "danger");
+      this.showToast({
+        type: "danger",
+        title: "Gagal Menyimpan Materi",
+        desc: err.message || "Terjadi kendala saat menyimpan video. Silakan coba kembali.",
+        duration: 7000
+      });
+      if (submitBtn) submitBtn.disabled = false;
+      return;
     } finally {
       this.resetUploadProgress();
     }
@@ -1351,19 +1406,22 @@ const App = {
       const safeSubject = escapeHtml(v.subject);
       const safeGrade = escapeHtml(v.grade);
       const safeDur = escapeHtml(v.duration || '15:00');
+      const cleanId = sanitizeId(v.id);
+      const jsSubject = escapeJsString(v.subject);
+      const safeCover = escapeHtml(cover);
       return `
         <tr>
           <td class="teacher-td-no">
             <span class="teacher-num-badge">#${idx + 1}</span>
           </td>
           <td class="teacher-td-thumb">
-            <div class="teacher-thumb-wrap" onclick="App.openVideoById('${v.id}', 'teacher')" title="Klik untuk memutar materi" role="button" tabindex="0">
-              <img src="${cover}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');">
+            <div class="teacher-thumb-wrap" onclick="App.openVideoById('${cleanId}', 'teacher')" title="Klik untuk memutar materi" role="button" tabindex="0">
+              <img src="${safeCover}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null; this.src=App.getCoverBySubject('${jsSubject}');">
               <span class="teacher-thumb-duration">${safeDur}</span>
             </div>
           </td>
           <td>
-            <div class="teacher-title-text" onclick="App.openVideoById('${v.id}', 'teacher')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
+            <div class="teacher-title-text" onclick="App.openVideoById('${cleanId}', 'teacher')" role="button" tabindex="0" title="Klik untuk memutar materi">${safeTitle}</div>
             <div class="teacher-meta-sub">
               ${safeSubject} • Kelas ${safeGrade}
             </div>
@@ -1373,13 +1431,13 @@ const App = {
             <div class="teacher-date-full">${formattedDate}</div>
           </td>
           <td class="teacher-td-actions" style="text-align: right; white-space: nowrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${v.id}', 'teacher')" title="Uji putar materi">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openVideoById('${cleanId}', 'teacher')" title="Uji putar materi">
               Tonton
             </button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openEditModal('${v.id}')" title="Edit materi" style="margin-left: 4px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.openEditModal('${cleanId}')" title="Edit materi" style="margin-left: 4px;">
               Edit
             </button>
-            <button type="button" class="btn btn-outline btn-sm btn-delete-teacher" onclick="App.deleteVideoItem('${v.id}')" title="Hapus materi" style="margin-left: 4px;">
+            <button type="button" class="btn btn-outline btn-sm btn-delete-teacher" onclick="App.deleteVideoItem('${cleanId}')" title="Hapus materi" style="margin-left: 4px;">
               Hapus
             </button>
           </td>
@@ -1478,9 +1536,14 @@ const App = {
             const ytId = RepoStorage.extractYouTubeId(pendingTarget.embedUrl);
             if (ytId) {
               console.log("[PERMANENT DELETE] Menghapus video dari channel YouTube resmi sekolah:", ytId);
+              const ytDelHeaders = { "Content-Type": "application/json" };
+              if (typeof AuthManager !== "undefined" && typeof AuthManager.getAuthToken === "function") {
+                const token = AuthManager.getAuthToken();
+                if (token) ytDelHeaders["Authorization"] = "Bearer " + token;
+              }
               fetch("/api/youtube-delete", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: ytDelHeaders,
                 body: JSON.stringify({ youtubeVideoId: ytId })
               }).then(res => res.json()).then(resData => {
                 if (resData && resData.success) {
@@ -1681,11 +1744,11 @@ const App = {
     toast.innerHTML = `
       <div class="toast-icon">${iconMarkup}</div>
       <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        <div class="toast-desc">${desc}</div>
+        <div class="toast-title">${escapeHtml(title)}</div>
+        ${desc ? `<div class="toast-desc">${escapeHtml(desc)}</div>` : ""}
       </div>
       <div class="toast-actions">
-        ${actionText ? `<button type="button" class="toast-btn-action">${actionIcon || ""}${actionText}</button>` : ""}
+        ${actionText ? `<button type="button" class="toast-btn-action">${actionIcon || ""}${escapeHtml(actionText)}</button>` : ""}
         <button type="button" class="toast-close-btn" aria-label="Tutup">${this.toastIcons.close}</button>
       </div>
       <div class="toast-fuse" style="animation-duration: ${duration}ms;"></div>
@@ -1800,23 +1863,26 @@ const App = {
       const safeSubject = escapeHtml(v.subject);
       const safeTeacher = escapeHtml(v.teacher);
       const safeGrade = escapeHtml(v.grade);
+      const cleanId = sanitizeId(v.id);
+      const jsSubject = escapeJsString(v.subject);
+      const safeCover = escapeHtml(coverSrc);
 
       return `
         <article 
           class="video-card ${isDone ? 'video-card-completed' : ''}" 
-          id="card-${v.id}"
-          onclick="App.openVideoById('${v.id}')"
-          onkeydown="App.handleCardKeydown(event, '${v.id}')"
+          id="card-${cleanId}"
+          onclick="App.openVideoById('${cleanId}')"
+          onkeydown="App.handleCardKeydown(event, '${cleanId}')"
           tabindex="0"
           role="button"
           aria-label="Pelajari materi ${safeTitle} untuk ${safeSubject} Kelas ${safeGrade}"
         >
           <div class="card-thumbnail-wrap">
             <img 
-              src="${coverSrc}" 
+              src="${safeCover}" 
               alt="${safeTitle}" 
               loading="lazy"
-              onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');"
+              onerror="this.onerror=null; this.src=App.getCoverBySubject('${jsSubject}');"
             >
             <span class="card-badge-grade" data-grade="${safeGrade}">Kelas ${safeGrade}</span>
             <span class="card-badge-source ${isLocal ? 'badge-local' : 'badge-yt'}">
@@ -1855,7 +1921,7 @@ const App = {
               <button 
                 type="button" 
                 class="btn btn-primary btn-sm btn-card-watch" 
-                onclick="event.stopPropagation(); App.openVideoById('${v.id}')"
+                onclick="event.stopPropagation(); App.openVideoById('${cleanId}')"
                 title="Buka dan tonton video materi sekarang"
                 style="width: 100%; justify-content: center;"
               >

@@ -111,23 +111,32 @@ window.VideoDB = VideoDB;
 // 2. AUTHENTICATION MANAGER (KHUSUS DEWAN GURU SMPN 7)
 // ==========================================================================
 const AuthManager = {
-  // Akun Guru Terdaftar & Demo Prototipe PkM
-  defaultTeacher: {
-    name: "Budi Santoso, S.Kom.",
-    nip: "19840915 200902 1 003",
-    email: "budi.santoso@smpn7tangsel.sch.id",
-    subject: "Informatika",
-    role: "Dewan Guru SMPN 7 Tangsel"
-  },
+  TEACHER_SECRET_TOKEN: "smpn7-guru-auth-token-2026",
 
-  // Akun Khusus Demo Peninjau PkM
-  demoHadi: {
-    name: "Hadi",
-    nip: "19850612 201001 1 008",
-    email: "hadi@smpn7tangsel.sch.id",
-    subject: "Informatika",
-    role: "Dewan Guru SMPN 7 Tangsel"
-  },
+  // Akun Resmi Terdaftar Dewan Guru
+  teachers: [
+    {
+      id: "budi",
+      name: "Budi Santoso, S.Kom.",
+      nip: "19840915 200902 1 003",
+      email: "budi.santoso@smpn7tangsel.sch.id",
+      subject: "Informatika",
+      role: "Dewan Guru SMPN 7 Tangsel",
+      validPasswords: ["guru7smpn", "budi123", "smpn7tangsel"]
+    },
+    {
+      id: "hadi",
+      name: "Hadi",
+      nip: "19850612 201001 1 008",
+      email: "hadi@smpn7tangsel.sch.id",
+      subject: "Informatika",
+      role: "Dewan Guru SMPN 7 Tangsel",
+      validPasswords: ["guru7smpn", "hadi123", "smpn7tangsel"]
+    }
+  ],
+
+  // Fallback master password untuk seluruh dewan guru sekolah jika login via NIP terdaftar
+  masterPasswords: ["guru7smpn", "smpn7tangsel", "unpam2026"],
 
   // Helper Format NIP Standar Indonesia (18 Digit: YYYYMMDD YYYYMM X XXX)
   formatNip: function (input) {
@@ -141,7 +150,13 @@ const AuthManager = {
 
   isLoggedIn: function () {
     const raw = sessionStorage.getItem(STORAGE_KEYS.TEACHER_SESSION);
-    return !!raw;
+    if (!raw) return false;
+    try {
+      const data = JSON.parse(raw);
+      return !!(data && data.token === this.TEACHER_SECRET_TOKEN);
+    } catch (e) {
+      return false;
+    }
   },
 
   getTeacher: function () {
@@ -154,54 +169,91 @@ const AuthManager = {
     }
   },
 
+  getAuthToken: function () {
+    const teacher = this.getTeacher();
+    return (teacher && teacher.token) ? teacher.token : this.TEACHER_SECRET_TOKEN;
+  },
+
   login: function (identifier, password) {
-    // Validasi ramah untuk keperluan prototipe sekolah:
-    // Mendukung login via Nomor NIP, nama akun ('hadi' atau 'budi'), atau email guru
     const rawId = (identifier || "").trim();
     const id = rawId.toLowerCase();
     const cleanDigits = rawId.replace(/\D/g, "");
     const pass = (password || "").trim();
 
-    if (!id) {
-      return { success: false, message: "Nomor NIP, Nama Akun, atau Email Guru harus diisi." };
+    if (!rawId) {
+      return { success: false, message: "Nomor NIP, Nama Akun, atau Email Guru wajib diisi." };
+    }
+    if (!pass) {
+      return { success: false, message: "Kata sandi atau PIN guru wajib diisi." };
     }
 
-    let teacherData;
+    // Cari akun guru yang cocok
+    let matchedTeacher = this.teachers.find(t => 
+      t.id === id || 
+      t.nip.replace(/\D/g, "") === cleanDigits || 
+      t.email.toLowerCase() === id ||
+      t.name.toLowerCase() === id
+    );
 
-    // 1. Cek Login Akun Demo 'Hadi'
-    if (id === "hadi" || id.includes("hadi") || cleanDigits === "198506122010011008" || id.startsWith("hadi@")) {
-      teacherData = { ...this.demoHadi };
-    }
-    // 2. Cek Login Akun Guru 'Budi Santoso, S.Kom.'
-    else if (id === "budi" || id.includes("budi") || cleanDigits === "198409152009021003" || id.startsWith("budi@")) {
-      teacherData = { ...this.defaultTeacher };
-    }
-    // 3. Cek Login via NIP (angka >= 8 digit atau 18 digit standar)
-    else if (cleanDigits.length >= 8) {
-      teacherData = { ...this.defaultTeacher };
-      teacherData.nip = this.formatNip(cleanDigits.length === 18 ? cleanDigits : "198409152009021003");
-    }
-    // 4. Cek Login via Alamat Email
-    else if (id.includes("@")) {
-      teacherData = { ...this.defaultTeacher };
-      teacherData.email = id;
-      teacherData.name = id.split("@")[0].charAt(0).toUpperCase() + id.split("@")[0].slice(1);
-    }
-    // 5. Input Nama Pengguna Lain
-    else {
-      teacherData = { ...this.defaultTeacher };
-      teacherData.name = rawId;
+    // Jika tidak ditemukan di akun spesifik, periksa apakah NIP valid 18 digit
+    if (!matchedTeacher && cleanDigits.length === 18) {
+      matchedTeacher = {
+        name: "Dewan Guru SMPN 7",
+        nip: this.formatNip(cleanDigits),
+        email: `guru.${cleanDigits.slice(0, 8)}@smpn7tangsel.sch.id`,
+        subject: "Mata Pelajaran",
+        role: "Dewan Guru SMPN 7 Tangsel",
+        validPasswords: this.masterPasswords
+      };
     }
 
-    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));
-    return { success: true, teacher: teacherData };
+    if (!matchedTeacher) {
+      return { 
+        success: false, 
+        message: "Akun guru tidak terdaftar. Masukkan NIP terdaftar (19840915 200902 1 003) atau akun demo 'hadi'." 
+      };
+    }
+
+    // Verifikasi kata sandi / PIN
+    const isValidPass = (matchedTeacher.validPasswords && matchedTeacher.validPasswords.includes(pass)) ||
+                        this.masterPasswords.includes(pass);
+
+    if (!isValidPass) {
+      return { 
+        success: false, 
+        message: "Kata sandi atau PIN salah. Silakan coba kembali (Sandi resmi: guru7smpn)." 
+      };
+    }
+
+    const sessionData = {
+      name: matchedTeacher.name,
+      nip: matchedTeacher.nip,
+      email: matchedTeacher.email,
+      subject: matchedTeacher.subject,
+      role: matchedTeacher.role,
+      token: this.TEACHER_SECRET_TOKEN,
+      loginTime: new Date().toISOString()
+    };
+
+    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(sessionData));
+    return { success: true, teacher: sessionData };
   },
 
   // Masuk Instan (Khusus Akun Demo Guru: Hadi)
   loginFastDemo: function () {
-    const teacherData = { ...this.demoHadi };
-    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));
-    return { success: true, teacher: teacherData };
+    const hadi = this.teachers.find(t => t.id === "hadi") || this.teachers[0];
+    const sessionData = {
+      name: hadi.name,
+      nip: hadi.nip,
+      email: hadi.email,
+      subject: hadi.subject,
+      role: hadi.role,
+      token: this.TEACHER_SECRET_TOKEN,
+      isDemo: true,
+      loginTime: new Date().toISOString()
+    };
+    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(sessionData));
+    return { success: true, teacher: sessionData };
   },
 
   logout: function () {
@@ -322,27 +374,42 @@ const RepoStorage = {
 
   // Cek Status & Sinkronisasi Data Otomatis dari Backend Server / Supabase
   syncWithBackend: async function () {
-    // 1. Coba sinkronkan dengan Supabase Cloud (Prioritas Utama)
-    const supabaseData = await this.initSupabase();
-    if (supabaseData) return supabaseData;
-
-    // 2. Fallback jika ada server internal Node.js
+    // Cek status ketersediaan server backend Node.js (untuk unggah berkas fisik)
     try {
-      const res = await fetch("/api/videos", { method: "GET", cache: "no-store" });
-      if (res.ok) {
-        const json = await res.json();
-        if ((json.success || json.status === "ok") && Array.isArray(json.data) && json.data.length > 0) {
-          this.isServerOnline = true;
-          this.saveVideos(json.data);
-          this.updateSyncUI("online");
-          return json.data;
-        }
+      const statusRes = await fetch("/api/status", { method: "GET", cache: "no-store" });
+      if (statusRes.ok) {
+        const statusJson = await statusRes.json().catch(() => ({}));
+        this.isServerOnline = (statusJson.status === "online" && statusJson.canUploadFiles !== false);
+      } else {
+        this.isServerOnline = false;
       }
     } catch (e) {
-      // Backend offline atau dibuka via file://
       this.isServerOnline = false;
-      this.updateSyncUI("offline");
     }
+
+    // 1. Coba sinkronkan dengan Supabase Cloud (Prioritas Utama untuk multi-device realtime)
+    const supabaseData = await this.initSupabase();
+    if (supabaseData) {
+      this.updateSyncUI(this.isServerOnline ? "online" : "offline");
+      return supabaseData;
+    }
+
+    // 2. Fallback jika ada server internal Node.js
+    if (this.isServerOnline) {
+      try {
+        const res = await fetch("/api/videos", { method: "GET", cache: "no-store" });
+        if (res.ok) {
+          const json = await res.json();
+          if ((json.success || json.status === "ok") && Array.isArray(json.data) && json.data.length > 0) {
+            this.saveVideos(json.data);
+            this.updateSyncUI("online");
+            return json.data;
+          }
+        }
+      } catch (e) {}
+    }
+
+    this.updateSyncUI("offline");
     return this.getVideos();
   },
 
@@ -446,27 +513,47 @@ const RepoStorage = {
       videoWithId.fileName = videoFile.name || "video-materi.mp4";
       videoWithId.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
       
-      // 1. Simpan di IndexedDB browser lokal untuk pemutaran offline seketika
-      await VideoDB.saveVideoFile(videoId, videoFile);
+      // Validasi: Berkas video komputer WAJIB berhasil diunggah ke server repositori backend
+      // agar berkas fisiknya dapat diakses oleh siswa di perangkat lain (HP / Laptop)
+      let uploadSuccess = false;
+      const formData = new FormData();
+      formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
 
-      // 2. Jika server backend online, unggah ke server /api/upload
-      if (this.isServerOnline) {
-        try {
-          const formData = new FormData();
-          formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
-          const uploadRes = await fetch("/api/upload", {
-            method: "POST",
-            body: formData
-          });
-          if (uploadRes.ok) {
-            const uploadJson = await uploadRes.json();
-            if (uploadJson.success && uploadJson.url) {
-              videoWithId.embedUrl = uploadJson.url;
-            }
+      try {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          },
+          body: formData
+        });
+
+        if (uploadRes.ok) {
+          const uploadJson = await uploadRes.json();
+          if (uploadJson.success && uploadJson.url) {
+            videoWithId.embedUrl = uploadJson.url;
+            uploadSuccess = true;
+          } else {
+            throw new Error(uploadJson.error || "Gagal memperoleh tautan berkas dari server.");
           }
-        } catch (err) {
-          console.warn("[SYNC] Gagal upload berkas ke server, fallback ke IndexedDB:", err);
+        } else {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || `Server repositori menolak unggahan (HTTP ${uploadRes.status}).`);
         }
+      } catch (err) {
+        console.error("[UPLOAD DITOLAK]:", err.message || err);
+        throw new Error(err.message || "Server offline: Berkas video hanya bisa diunggah saat server aktif. Gunakan Tautan YouTube.");
+      }
+
+      if (!uploadSuccess || !videoWithId.embedUrl) {
+        throw new Error("Gagal mengunggah berkas video ke server repositori sekolah. Pastikan server backend SMPN 7 aktif.");
+      }
+
+      // Berhasil diunggah ke server: simpan salinan di IndexedDB untuk cache lokal perangkat guru
+      try {
+        await VideoDB.saveVideoFile(videoId, videoFile);
+      } catch (e) {
+        console.warn("[INDEXEDDB] Gagal simpan cache lokal guru:", e);
       }
     } else if (newVideo.sourceType === "youtube_upload") {
       videoWithId.sourceType = "youtube_upload";
@@ -503,7 +590,10 @@ const RepoStorage = {
       try {
         await fetch("/api/videos", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          },
           body: JSON.stringify(videoWithId)
         });
       } catch (err) {
@@ -529,22 +619,45 @@ const RepoStorage = {
       mergedData.sourceType = "local";
       mergedData.fileName = videoFile.name || "video-materi.mp4";
       mergedData.fileSize = (videoFile.size / (1024 * 1024)).toFixed(1) + " MB";
-      await VideoDB.saveVideoFile(id, videoFile);
 
-      if (this.isServerOnline) {
-        try {
-          const formData = new FormData();
-          formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
-          const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-          if (uploadRes.ok) {
-            const uploadJson = await uploadRes.json();
-            if (uploadJson.success && uploadJson.url) {
-              mergedData.embedUrl = uploadJson.url;
-            }
+      let uploadSuccess = false;
+      const formData = new FormData();
+      formData.append("file", videoFile, videoFile.name || "video-materi.mp4");
+
+      try {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          },
+          body: formData
+        });
+
+        if (uploadRes.ok) {
+          const uploadJson = await uploadRes.json();
+          if (uploadJson.success && uploadJson.url) {
+            mergedData.embedUrl = uploadJson.url;
+            uploadSuccess = true;
+          } else {
+            throw new Error(uploadJson.error || "Gagal memperoleh tautan berkas dari server.");
           }
-        } catch (err) {
-          console.warn("[SYNC] Upload edit file gagal:", err);
+        } else {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || `Server menolak unggahan berkas (HTTP ${uploadRes.status}).`);
         }
+      } catch (err) {
+        console.error("[UPDATE FILE REJECTED]:", err.message || err);
+        throw new Error(err.message || "Server repositori sekolah sedang offline. Berkas video tidak dapat diperbarui saat offline.");
+      }
+
+      if (!uploadSuccess || !mergedData.embedUrl) {
+        throw new Error("Gagal mengunggah pembaruan berkas video ke server repositori sekolah.");
+      }
+
+      try {
+        await VideoDB.saveVideoFile(id, videoFile);
+      } catch (e) {
+        console.warn("[INDEXEDDB] Gagal simpan cache lokal guru:", e);
       }
     }
 
@@ -580,7 +693,10 @@ const RepoStorage = {
       try {
         await fetch(`/api/videos/${encodeURIComponent(id)}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          },
           body: JSON.stringify(finalVideo)
         });
       } catch (err) {
@@ -616,7 +732,10 @@ const RepoStorage = {
         try {
           fetch("/api/youtube-delete", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + AuthManager.getAuthToken()
+            },
             body: JSON.stringify({ youtubeVideoId: ytId })
           }).then(res => res.json()).then(resData => {
             if (resData && resData.success) {
@@ -648,7 +767,12 @@ const RepoStorage = {
 
     if (this.isServerOnline) {
       try {
-        await fetch(`/api/videos/${encodeURIComponent(id)}`, { method: "DELETE" });
+        await fetch(`/api/videos/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          }
+        });
       } catch (err) {
         console.warn("[SYNC] Gagal DELETE /api/videos:", err);
       }
@@ -677,7 +801,10 @@ const RepoStorage = {
         try {
           await fetch("/api/videos", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + AuthManager.getAuthToken()
+            },
             body: JSON.stringify(video)
           });
         } catch (e) {}
@@ -698,7 +825,12 @@ const RepoStorage = {
     }
     if (this.isServerOnline) {
       try {
-        await fetch("/api/reset", { method: "POST" });
+        await fetch("/api/reset", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + AuthManager.getAuthToken()
+          }
+        });
       } catch (e) {}
     }
     localStorage.setItem(STORAGE_KEYS.VIDEOS, JSON.stringify(INITIAL_VIDEO_DATA));

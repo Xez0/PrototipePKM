@@ -266,49 +266,28 @@
     min-height: 36px;
   }
 
-  /* FAQ & Educational Bands - Refined Mobile Proportion */
-  .faq-section {
-    padding: 32px 0;
+  /* Panduan Belajar Mandiri Siswa (Mobile Responsive) */
+  .guide-section {
+    padding: var(--space-xl) 0;
   }
 
-  .faq-hero-band {
-    padding-bottom: 16px;
-  }
-
-  .faq-hero-title {
-    font-size: 1.35rem;
+  .guide-title {
+    font-size: var(--text-h1);
     line-height: 1.25;
   }
 
-  .faq-hero-lead {
-    font-size: 0.875rem;
+  .guide-lead {
+    font-size: var(--text-caption);
     line-height: 1.5;
   }
 
-  .faq-band-row {
-    padding: 20px 0 !important;
-  }
-
-  .faq-band-grid {
+  .guide-steps-grid {
     grid-template-columns: 1fr;
-    gap: 8px;
-    width: 100%;
+    gap: var(--space-md);
   }
 
-  .faq-band-tag {
-    font-size: 0.75rem;
-    margin-bottom: 4px;
-  }
-
-  .faq-band-question {
-    font-size: 1.0625rem;
-    line-height: 1.35;
-    margin-bottom: 6px;
-  }
-
-  .faq-band-answer-col p {
-    font-size: 0.875rem;
-    line-height: 1.6;
+  .guide-step-card {
+    padding: var(--space-md);
   }
 
   /* Teacher Studio Section - Proportional Touch Layout */
@@ -1269,30 +1248,21 @@
     padding: 2px 5px;
   }
 
-  /* Educational FAQ Band */
-  .faq-section {
-    padding: 24px 0;
+  /* Panduan Belajar Mandiri */
+  .guide-section {
+    padding: 20px 0;
   }
 
-  .faq-hero-title {
-    font-size: 1.1875rem;
+  .guide-title {
+    font-size: var(--text-h2);
   }
 
-  .faq-hero-lead {
+  .guide-lead {
     font-size: 0.78125rem;
   }
 
-  .faq-band-row {
-    padding: 14px 0 !important;
-  }
-
-  .faq-band-question {
-    font-size: 0.9375rem;
-  }
-
-  .faq-band-answer-col p {
-    font-size: 0.78125rem;
-    line-height: 1.5;
+  .guide-step-card {
+    padding: 12px;
   }
 
   /* Footer */

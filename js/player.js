@@ -6,6 +6,42 @@
    & Rekomendasi Materi Terkait (Sidebar)
    ========================================================================== */
 
+if (typeof window.escapeHtml !== "function") {
+  window.escapeHtml = function (str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
+}
+var escapeHtml = window.escapeHtml;
+
+if (typeof window.escapeJsString !== "function") {
+  window.escapeJsString = function (str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/</g, "\\x3c")
+      .replace(/>/g, "\\x3e");
+  };
+}
+var escapeJsString = window.escapeJsString;
+
+if (typeof window.sanitizeId !== "function") {
+  window.sanitizeId = function (id) {
+    if (id === null || id === undefined) return "";
+    return String(id).replace(/[^a-zA-Z0-9_-]/g, "");
+  };
+}
+var sanitizeId = window.sanitizeId;
+
 const VideoPlayer = {
   currentVideo: null,
   currentMode: "youtube", // 'youtube' atau 'html5'
@@ -223,9 +259,37 @@ const VideoPlayer = {
         }
       }
 
-      if (!videoSrc) {
-        videoSrc = v.fallbackVideoUrl || "assets/join-nasa-s-mission-to-mars-student.mp4";
+      // Jika tidak ditemukan di IndexedDB lokal, periksa apakah file tersimpan di server backend (/uploads/...)
+      if (!videoSrc && v.embedUrl && !RepoStorage.extractYouTubeId(v.embedUrl)) {
+        videoSrc = v.embedUrl;
       }
+
+      // Jika berkas fisik tidak ada di peramban ini dan belum terunggah ke server
+      if (!videoSrc) {
+        playerContainer.innerHTML = `
+          <div class="watch-video-unavailable" style="width: 100%; height: 100%; min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #f8fafc; padding: 32px 24px; text-align: center; border-radius: 8px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #ef4444;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 600; margin: 0 0 8px; color: #f1f5f9;">Berkas Video Belum Tersedia di Server</h3>
+            <p style="font-size: 0.875rem; color: #94a3b8; max-width: 440px; margin: 0 0 20px; line-height: 1.5;">
+              Berkas video materi "${escapeHtml(v.title)}" belum diunggah ke server repositori sekolah atau tidak ditemukan di penyimpanan server.
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="VideoPlayer.backToCatalog()" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; cursor: pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              <span>Kembali ke Katalog Materi</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const safePoster = escapeHtml(v.thumbnail || (typeof App !== "undefined" && App.getCoverBySubject ? App.getCoverBySubject(v.subject) : "assets/default-cover.jpg"));
+      const safeVideoSrc = encodeURI(videoSrc);
 
       playerContainer.innerHTML = `
         <video 
@@ -234,8 +298,10 @@ const VideoPlayer = {
           autoplay 
           playsinline
           style="width: 100%; height: 100%; background: #000;"
-          poster="${v.thumbnail || App.getCoverBySubject(v.subject)}">
-          <source src="${videoSrc}">
+          poster="${safePoster}"
+          onerror="VideoPlayer.showVideoLoadError(this)"
+        >
+          <source src="${safeVideoSrc}" onerror="VideoPlayer.showVideoLoadError(this)">
           Browser Anda tidak mendukung pemutar video HTML5.
         </video>
       `;
@@ -243,17 +309,27 @@ const VideoPlayer = {
       const ytId = RepoStorage.extractYouTubeId(v.embedUrl);
       let embedSrc = "";
       if (ytId) {
-        embedSrc = `https://www.youtube.com/embed/${ytId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(window.location.origin)}`;
+        embedSrc = `https://www.youtube.com/embed/${encodeURIComponent(ytId)}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(window.location.origin)}`;
       } else {
-        embedSrc = v.embedUrl.replace("youtube-nocookie.com", "youtube.com");
-        const sep = embedSrc.includes("?") ? "&" : "?";
-        embedSrc = `${embedSrc}${sep}playsinline=1`;
+        try {
+          const parsed = new URL(v.embedUrl);
+          if (parsed.protocol === "https:" && (parsed.hostname.endsWith("youtube.com") || parsed.hostname.endsWith("youtube-nocookie.com") || parsed.hostname === "youtu.be")) {
+            embedSrc = v.embedUrl.replace("youtube-nocookie.com", "youtube.com");
+            const sep = embedSrc.includes("?") ? "&" : "?";
+            embedSrc = `${embedSrc}${sep}playsinline=1`;
+          } else {
+            console.warn("[SECURITY] Blocked non-YouTube embed URL:", v.embedUrl);
+            embedSrc = "about:blank";
+          }
+        } catch (e) {
+          embedSrc = "about:blank";
+        }
       }
 
       playerContainer.innerHTML = `
         <iframe 
           id="activeVideoIframe"
-          src="${embedSrc}" 
+          src="${escapeHtml(embedSrc)}" 
           title="${escapeHtml(v.title)}" 
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -262,6 +338,32 @@ const VideoPlayer = {
         </iframe>
       `;
     }
+  },
+
+  // Tangani kegagalan pemuatan file video di browser
+  showVideoLoadError: function (elem) {
+    const playerContainer = document.getElementById("watchPlayerContainer");
+    if (!playerContainer) return;
+    const v = this.currentVideo || {};
+    playerContainer.innerHTML = `
+      <div class="watch-video-unavailable" style="width: 100%; height: 100%; min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #f8fafc; padding: 32px 24px; text-align: center; border-radius: 8px;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: #ef4444;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 600; margin: 0 0 8px; color: #f1f5f9;">Gagal Memuat Berkas Video</h3>
+        <p style="font-size: 0.875rem; color: #94a3b8; max-width: 440px; margin: 0 0 20px; line-height: 1.5;">
+          Berkas fisik materi "${escapeHtml(v.title || 'Video')}" tidak dapat diakses atau server repositori sekolah sedang offline.
+        </p>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="VideoPlayer.backToCatalog()" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; cursor: pointer;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Kembali ke Katalog Materi</span>
+        </button>
+      </div>
+    `;
   },
 
   // Mulai Pemutaran Video Langsung (1-Tap di Mobile / Touch)
@@ -324,7 +426,9 @@ const VideoPlayer = {
     }
 
     listElem.innerHTML = related.map(v => {
-      const cover = v.thumbnail || App.getCoverBySubject(v.subject);
+      const cleanId = sanitizeId(v.id);
+      const cover = escapeHtml(v.thumbnail || (typeof App !== "undefined" && App.getCoverBySubject ? App.getCoverBySubject(v.subject) : "assets/default-cover.jpg"));
+      const jsSubject = escapeJsString(v.subject);
       const safeTitle = escapeHtml(v.title);
       const safeTeacher = escapeHtml(v.teacher);
       const safeSubject = escapeHtml(v.subject);
@@ -334,7 +438,7 @@ const VideoPlayer = {
       return `
         <div 
           class="watch-related-card" 
-          onclick="VideoPlayer.openPlayer('${v.id}', true)"
+          onclick="VideoPlayer.openPlayer('${cleanId}', true)"
           role="button"
           tabindex="0"
           title="Tonton materi: ${safeTitle}"
@@ -344,7 +448,7 @@ const VideoPlayer = {
               src="${cover}" 
               alt="${safeTitle}" 
               loading="lazy"
-              onerror="this.onerror=null; this.src=App.getCoverBySubject('${v.subject}');"
+              onerror="this.onerror=null; this.src=(typeof App !== 'undefined' && App.getCoverBySubject ? App.getCoverBySubject('${jsSubject}') : '');"
             >
             <span class="watch-related-duration">${safeDur}</span>
           </div>
@@ -363,18 +467,23 @@ const VideoPlayer = {
     const listElem = document.getElementById("watchChaptersList");
     if (!listElem) return;
 
-    listElem.innerHTML = chapters.map((ch, idx) => `
-      <div 
-        class="watch-chapter-row ${idx === this.activeChapterIndex ? 'active' : ''}" 
-        onclick="VideoPlayer.jumpToChapter(${ch.seconds}, ${idx})"
-        title="Ulangi penjelasan dari menit ${ch.time}">
-        <span class="watch-chapter-title">
-          <span class="watch-chapter-badge-num">#${idx + 1}</span>
-          ${escapeHtml(ch.title)}
-        </span>
-        <span class="watch-chapter-time">${escapeHtml(ch.time)}</span>
-      </div>
-    `).join("");
+    listElem.innerHTML = chapters.map((ch, idx) => {
+      const safeSeconds = parseInt(ch.seconds, 10) || 0;
+      const safeTime = escapeHtml(ch.time || "00:00");
+      const safeTitle = escapeHtml(ch.title || "");
+      return `
+        <div 
+          class="watch-chapter-row ${idx === this.activeChapterIndex ? 'active' : ''}" 
+          onclick="VideoPlayer.jumpToChapter(${safeSeconds}, ${idx})"
+          title="Ulangi penjelasan dari menit ${safeTime}">
+          <span class="watch-chapter-title">
+            <span class="watch-chapter-badge-num">#${idx + 1}</span>
+            ${safeTitle}
+          </span>
+          <span class="watch-chapter-time">${safeTime}</span>
+        </div>
+      `;
+    }).join("");
   },
 
   // Lompat ke Bab / Menit Video

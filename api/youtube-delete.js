@@ -20,10 +20,22 @@ function getGoogleOAuthConfig() {
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
+  }
+
+  // Verifikasi Otorisasi Dewan Guru sebelum mengizinkan penghapusan video YouTube
+  const TEACHER_AUTH_TOKEN = process.env.TEACHER_AUTH_TOKEN || "smpn7-guru-auth-token-2026";
+  const authHeader = req.headers["authorization"] || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : authHeader.trim();
+
+  if (token !== TEACHER_AUTH_TOKEN) {
+    return res.status(401).json({
+      success: false,
+      error: "Akses ditolak: Operasi hapus YouTube memerlukan otorisasi resmi Dewan Guru SMPN 7."
+    });
   }
 
   if (req.method !== "POST" && req.method !== "DELETE") {
