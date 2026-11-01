@@ -113,9 +113,9 @@ window.VideoDB = VideoDB;
 const AuthManager = {
   // Akun Demo untuk Peninjau & Dewan Guru SMPN 7 Tangsel
   defaultTeacher: {
-    name: "Budi Santoso, S.Kom.",
+    name: "Hadi",
     nip: "19840915 200902 1 003",
-    email: "budi.santoso@smpn7tangsel.sch.id",
+    email: "hadi@smpn7tangsel.sch.id",
     subject: "Informatika",
     role: "Dewan Guru SMPN 7 Tangsel"
   },
@@ -147,7 +147,7 @@ const AuthManager = {
 
   login: function (identifier, password) {
     // Validasi ramah untuk keperluan prototipe sekolah:
-    // Mendukung login via Nomor NIP, nama akun ('budi'), atau email guru
+    // Mendukung login via Nomor NIP, nama akun ('hadi'), atau email guru
     const rawId = (identifier || "").trim();
     const id = rawId.toLowerCase();
     const cleanDigits = rawId.replace(/\D/g, "");
@@ -161,15 +161,15 @@ const AuthManager = {
 
     // 1. Cek Login via Nomor NIP (angka >= 8 digit atau 18 digit standar)
     if (cleanDigits.length >= 8) {
-      teacherData.name = "Budi Santoso, S.Kom.";
+      teacherData.name = "Hadi";
       teacherData.nip = this.formatNip(cleanDigits.length === 18 ? cleanDigits : "198409152009021003");
-      teacherData.email = "budi.santoso@smpn7tangsel.sch.id";
+      teacherData.email = "hadi@smpn7tangsel.sch.id";
     }
-    // 2. Cek Login via Nama Akun 'Budi' / 'Hadi'
-    else if (id === "budi" || id.includes("budi") || id === "hadi" || id.includes("hadi")) {
-      teacherData.name = "Budi Santoso, S.Kom.";
+    // 2. Cek Login via Nama Akun 'hadi' / 'budi'
+    else if (id === "hadi" || id.includes("hadi") || id === "budi" || id.includes("budi")) {
+      teacherData.name = "Hadi";
       teacherData.nip = "19840915 200902 1 003";
-      teacherData.email = "budi.santoso@smpn7tangsel.sch.id";
+      teacherData.email = "hadi@smpn7tangsel.sch.id";
     }
     // 3. Cek Login via Alamat Email
     else if (id.includes("@")) {

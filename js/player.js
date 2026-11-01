@@ -14,7 +14,22 @@ const VideoPlayer = {
   activeBlobUrl: null,
 
   init: function () {
-    // Siap digunakan
+    const onFsChange = () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      this.updateFullscreenButtonText(isFull);
+      const frame = document.querySelector(".watch-player-frame");
+      if (frame) {
+        if (isFull) {
+          frame.classList.add("is-fullscreen-mode");
+        } else {
+          frame.classList.remove("is-fullscreen-mode");
+        }
+      }
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+    document.addEventListener("mozfullscreenchange", onFsChange);
+    document.addEventListener("MSFullscreenChange", onFsChange);
   },
 
   // Buka Halaman Tonton Video (YouTube-Style Watch View)
@@ -458,6 +473,87 @@ const VideoPlayer = {
     const playerContainer = document.getElementById("watchPlayerContainer");
     if (playerContainer) playerContainer.innerHTML = "";
     this.currentVideo = null;
+
+    if (document.body) {
+      document.body.classList.remove("watch-view-active");
+    }
+
+    // Keluar dari fullscreen jika sedang aktif saat navigasi keluar
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      try {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } catch (e) {}
+    }
+  },
+
+  // Putar Layar Penuh Horisontal (YouTube Mobile Fullscreen Style)
+  toggleFullscreenLandscape: async function () {
+    const frame = document.querySelector(".watch-player-frame");
+    if (!frame) return;
+
+    const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+
+    if (!isFull) {
+      try {
+        if (frame.requestFullscreen) {
+          await frame.requestFullscreen();
+        } else if (frame.webkitRequestFullscreen) {
+          await frame.webkitRequestFullscreen();
+        } else if (frame.mozRequestFullScreen) {
+          await frame.mozRequestFullScreen();
+        } else if (frame.msRequestFullscreen) {
+          await frame.msRequestFullscreen();
+        }
+      } catch (err) {
+        // Fullscreen API may be blocked or restricted
+      }
+
+      // Kunci orientasi ke landscape di perangkat mobile (misal Android Chrome)
+      if (window.screen && screen.orientation && typeof screen.orientation.lock === "function") {
+        try {
+          await screen.orientation.lock("landscape");
+        } catch (e) {}
+      }
+      this.updateFullscreenButtonText(true);
+    } else {
+      try {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+      } catch (err) {}
+
+      if (window.screen && screen.orientation && typeof screen.orientation.unlock === "function") {
+        try {
+          screen.orientation.unlock();
+        } catch (e) {}
+      }
+      this.updateFullscreenButtonText(false);
+    }
+  },
+
+  // Update Teks Tombol Layar Penuh
+  updateFullscreenButtonText: function (isFull) {
+    const txt = document.getElementById("txtWatchFullscreen");
+    if (txt) {
+      txt.textContent = isFull ? "Keluar Layar Penuh" : "Layar Penuh";
+    }
+  },
+
+  // Navigasi Kembali saat dalam tampilan landscape mobile atau fullscreen
+  exitLandscapeOrBack: function () {
+    const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    if (isFull) {
+      this.toggleFullscreenLandscape();
+    } else {
+      this.backToCatalog();
+    }
   },
 
   // Kembali ke Halaman Sebelumnya (Katalog Siswa atau Portal Guru)

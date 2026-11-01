@@ -376,10 +376,10 @@
           <div class="login-demo-box">
             <div class="login-demo-title">Kemudahan Uji Coba Prototipe PkM</div>
             <p class="login-demo-text">
-              Bapak/Ibu guru atau peninjau dapat login menggunakan <strong>NIP: 19840915 200902 1 003</strong>, nama akun <strong>budi</strong>, atau akses instan:
+              Bapak/Ibu guru atau peninjau dapat login menggunakan <strong>NIP: 19840915 200902 1 003</strong>, nama akun <strong>hadi</strong>, atau akses instan:
             </p>
             <button type="button" class="btn btn-secondary btn-sm" id="btnFastDemoLogin" onclick="App.handleFastLogin()" style="width: 100%; justify-content: center;">
-              Masuk Langsung (Akun Guru: Budi Santoso, S.Kom.)
+              Masuk Langsung (Akun Demo Guru: Hadi)
             </button>
           </div>
 
@@ -400,9 +400,9 @@
         <!-- TOP BANNER RUANG GURU -->
         <div class="teacher-top-banner">
           <div class="teacher-profile-badge">
-            <div class="teacher-profile-avatar" id="teacherAvatarText">BU</div>
+            <div class="teacher-profile-avatar" id="teacherAvatarText">HA</div>
             <div>
-              <div class="teacher-profile-name" id="teacherDisplayGreeting">Budi Santoso, S.Kom.</div>
+              <div class="teacher-profile-name" id="teacherDisplayGreeting">Hadi</div>
               <div class="teacher-profile-nip" id="teacherDisplayNip">NIP. 19840915 200902 1 003 • Dewan Guru SMPN 7</div>
             </div>
           </div>
@@ -912,6 +912,12 @@
         <div class="watch-main-col">
           <!-- 16:9 VIDEO PLAYER CONTAINER -->
           <div class="watch-player-frame">
+            <button type="button" class="watch-landscape-back-btn" id="btnLandscapeBack" onclick="VideoPlayer.exitLandscapeOrBack()" aria-label="Keluar Layar Penuh" title="Keluar Layar Penuh">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </button>
             <div class="watch-player-box" id="watchPlayerContainer">
               <!-- Video iframe / HTML5 player disuntikkan secara dinamis -->
             </div>
@@ -937,6 +943,12 @@
             </div>
 
             <div class="watch-actions-group">
+              <button type="button" class="btn btn-outline btn-watch-action" id="btnWatchFullscreen" onclick="VideoPlayer.toggleFullscreenLandscape()" aria-label="Putar Layar Penuh Horisontal">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+                <span id="txtWatchFullscreen">Layar Penuh</span>
+              </button>
               <button type="button" class="btn btn-outline btn-watch-action" id="btnWatchComplete" onclick="VideoPlayer.toggleCompletion()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
                 <span id="txtWatchComplete">Tandai Selesai</span>

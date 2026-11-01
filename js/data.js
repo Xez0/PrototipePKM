@@ -175,7 +175,7 @@ const INITIAL_VIDEO_DATA = [
     grade: "7",
     subject: "Informatika / TIK",
     category: "Informatika",
-    teacher: "Budi Santoso, S.Kom.",
+    teacher: "Hadi",
     teacherNip: "",
     duration: "08:45",
     embedUrl: "https://www.youtube-nocookie.com/embed/P91EUTrTPx0?enablejsapi=1&rel=0&modestbranding=1",

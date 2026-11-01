@@ -340,6 +340,7 @@ const App = {
     if (viewName === "watch") {
       if (viewWatch) viewWatch.classList.remove("hidden");
       this.currentView = "watch";
+      document.body.classList.add("watch-view-active");
       if (updateHash && targetSectionId) {
         const nextHash = `#tonton?v=${targetSectionId}`;
         if (window.location.hash !== nextHash) {
@@ -436,7 +437,7 @@ const App = {
       nipElem.textContent = `${nipText}Dewan Guru SMPN 7`;
     }
     if (avatarElem) {
-      const initials = (teacher.name || "Budi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "BU";
+      const initials = (teacher.name || "Hadi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "HA";
       avatarElem.textContent = initials;
     }
   },
