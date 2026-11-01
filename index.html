@@ -434,7 +434,7 @@
 
               <div class="teacher-table-actions">
                 <!-- Tombol Utama Tambah Materi -->
-                <button type="button" class="btn btn-primary" onclick="App.openTeacherForm('create')">
+                <button type="button" id="btnOpenTeacherForm" class="btn btn-primary" onclick="App.openTeacherForm('create')">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -785,6 +785,20 @@
                   </select>
                 </div>
               </div>
+
+              <div class="form-group" style="margin-top: var(--space-md);">
+                <label for="simpleVideoDuration">
+                  Perkiraan Durasi Video (Menit:Detik)
+                </label>
+                <input 
+                  type="text" 
+                  id="simpleVideoDuration" 
+                  class="form-input-text"
+                  placeholder="Contoh: 14:20" 
+                  value="10:00"
+                >
+                <span class="form-hint">Format MM:SS. Durasi terisi otomatis saat mengunggah video atau dapat disesuaikan secara manual.</span>
+              </div>
             </div>
 
             <!-- ========================================== -->
@@ -1013,85 +1027,6 @@
     </div>
   </div>
 </main>
-
-  <!-- ==================== MODAL EDIT MATERI PEMBELAJARAN (GURU) ==================== -->
-  <div class="modal-backdrop" id="editVideoModalBackdrop" data-ui="dialog" onclick="if (event.target === this) App.closeEditModal()">
-    <div class="edit-modal-card" id="editVideoModal" data-ui="dialog" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
-      <div class="edit-modal-header">
-        <h3 id="editModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--color-ink);">
-          Edit Materi Pembelajaran
-        </h3>
-        <button type="button" class="btn-close-modal" onclick="App.closeEditModal()" aria-label="Tutup form edit">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      <form id="editTeacherVideoForm" onsubmit="event.preventDefault(); App.handleEditFormSubmit();" style="display: flex; flex-direction: column; gap: var(--space-md); margin-top: var(--space-md);">
-        <input type="hidden" id="editVideoId">
-
-        <div class="form-group">
-          <label for="editVideoTitle">Judul Materi Pembelajaran *</label>
-          <input type="text" id="editVideoTitle" required>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="editVideoGrade">Jenjang Kelas *</label>
-            <select id="editVideoGrade" required>
-              <option value="7">Kelas 7</option>
-              <option value="8">Kelas 8</option>
-              <option value="9">Kelas 9</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="editVideoSubject">Mata Pelajaran *</label>
-            <select id="editVideoSubject" required>
-              <option value="Matematika">Matematika</option>
-              <option value="Ilmu Pengetahuan Alam (IPA)">Ilmu Pengetahuan Alam (IPA)</option>
-              <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-              <option value="Bahasa Inggris">Bahasa Inggris</option>
-              <option value="Informatika">Informatika</option>
-              <option value="Ilmu Pengetahuan Sosial (IPS)">Ilmu Pengetahuan Sosial (IPS)</option>
-              <option value="Pendidikan Pancasila (PPKn)">Pendidikan Pancasila (PPKn)</option>
-              <option value="Seni Budaya">Seni Budaya</option>
-              <option value="Pendidikan Jasmani (PJOK)">Pendidikan Jasmani (PJOK)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group" id="editYoutubeGroup">
-          <label for="editVideoEmbedUrl">Tautan Video YouTube</label>
-          <input type="url" id="editVideoEmbedUrl" placeholder="https://www.youtube.com/watch?v=...">
-          <span class="form-hint">Kosongkan jika materi menggunakan file video lokal komputer.</span>
-        </div>
-
-        <div class="form-group">
-          <label for="editVideoOutcome">Capaian Pembelajaran (CP) / Target Kompetensi (Opsional)</label>
-          <input type="text" id="editVideoOutcome" placeholder="Contoh: Peserta didik dapat menguasai...">
-        </div>
-
-        <div class="form-group">
-          <label for="editVideoNotes">Rangkuman / Catatan Pokok Guru (Opsional)</label>
-          <textarea id="editVideoNotes" style="height: 75px;" placeholder="Tuliskan poin penting materi pembelajaran..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="editVideoChapters">Daftar Bab / Menit Repetisi (Manual, Opsional)</label>
-          <textarea id="editVideoChapters" style="height: 75px; font-size: 0.8125rem;" placeholder="Contoh format satu bab per baris:&#10;00:00 Pengantar&#10;02:30 Rumus Pokok"></textarea>
-          <span class="form-hint">Tuliskan format menit:detik diikuti judul bab. Kosongkan jika materi tidak memiliki pembagian bab.</span>
-        </div>
-
-        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: var(--space-sm);">
-          <button type="button" class="btn btn-secondary" onclick="App.closeEditModal()">Batal</button>
-          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- ==================== MODAL KONFIRMASI HAPUS MATERI (CUSTOM DIALOG) ==================== -->
   <div class="modal-backdrop delete-modal-backdrop" id="deleteConfirmModalBackdrop" onclick="if (event.target === this) App.closeDeleteModal()">

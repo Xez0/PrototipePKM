@@ -730,10 +730,12 @@ const App = {
     }
 
     // 1. Ekstrak durasi asli video
-    if (durElem) durElem.textContent = "⏱ Mendeteksi durasi...";
+    if (durElem) durElem.textContent = "Mendeteksi durasi...";
     const durInfo = await this.extractVideoDuration(file);
     this.pendingVideoDuration = durInfo.formatted;
-    if (durElem) durElem.textContent = "⏱ Durasi Asli: " + durInfo.formatted;
+    if (durElem) durElem.textContent = "Durasi Asli: " + durInfo.formatted;
+    const durInput = document.getElementById("simpleVideoDuration");
+    if (durInput) durInput.value = durInfo.formatted;
 
     // 2. Ekstrak 3 frame video snapshot (Thumbnail YouTube Style)
     const customizerBlock = document.getElementById("thumbnailCustomizerBlock");
@@ -931,6 +933,10 @@ const App = {
       if (chaptersInput) chaptersInput.value = "";
       if (ytInput) ytInput.value = "";
       if (subjectInput) subjectInput.value = "Matematika";
+      const durInput = document.getElementById("simpleVideoDuration");
+      if (durInput) durInput.value = "10:00";
+      this.pendingVideoDuration = "10:00";
+      this.selectedThumbnailUrl = null;
       this.selectGradeBtn("7");
       this.switchUploadSource("youtube");
       this.handleYoutubeUrlInput("");
@@ -960,15 +966,19 @@ const App = {
       const chapText = (v.chapters || []).map(ch => `${ch.time} ${ch.title}`).join("\n");
       if (chaptersInput) chaptersInput.value = chapText;
 
-      this.selectedThumbnailUrl = v.thumbnail || null;
+      const durInput = document.getElementById("simpleVideoDuration");
+      if (durInput) durInput.value = v.duration || "10:00";
       this.pendingVideoDuration = v.duration || "10:00";
+      this.selectedThumbnailUrl = null;
 
       if (v.sourceType === "local") {
         this.switchUploadSource("file");
       } else {
         this.switchUploadSource("youtube");
-        if (ytInput) ytInput.value = v.embedUrl || "";
-        this.handleYoutubeUrlInput(v.embedUrl || "");
+        const ytId = RepoStorage.extractYouTubeId(v.embedUrl);
+        const friendlyUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : (v.embedUrl || "");
+        if (ytInput) ytInput.value = friendlyUrl;
+        this.handleYoutubeUrlInput(friendlyUrl);
       }
     }
 
@@ -1096,7 +1106,8 @@ const App = {
 
     try {
       if (mode === "create") {
-        const chosenDuration = this.pendingVideoDuration || "10:00";
+        const durInput = document.getElementById("simpleVideoDuration");
+        const chosenDuration = (durInput && durInput.value.trim()) ? durInput.value.trim() : (this.pendingVideoDuration || "10:00");
         const chosenThumbnail = this.selectedThumbnailUrl || defaultCover;
 
         let videoPayload = {
@@ -1173,11 +1184,17 @@ const App = {
 
             this.showToast("Materi pembelajaran berhasil diunggah ke YouTube & langsung tayang di katalog siswa!", "success");
           } catch (uploadErr) {
-            console.error("[UPLOAD ERROR]:", uploadErr);
-            this.showToast("Gagal mengunggah ke YouTube: " + (uploadErr.message || "Periksa koneksi internet."), "danger");
-            this.resetUploadProgress();
-            if (submitBtn) submitBtn.disabled = false;
-            return;
+            console.warn("[UPLOAD FALLBACK] Upload YouTube dialihkan ke repositori internal:", uploadErr);
+            this.setUploadProgress(
+              92,
+              "Menyimpan ke Repositori Server Sekolah...",
+              "Mengalihkan berkas video ke server repositori internal..."
+            );
+            videoPayload.sourceType = "local";
+            await RepoStorage.addVideo(videoPayload, this.pendingVideoFile);
+            this.setUploadProgress(100, "100% Selesai! Materi Berhasil Diterbitkan", "Video tersimpan di repositori server internal sekolah.");
+            await new Promise(r => setTimeout(r, 600));
+            this.showToast("Materi pembelajaran tersimpan di repositori server internal sekolah.", "info");
           }
         } else {
           const ytInput = document.getElementById("inputTeacherYoutubeUrl");
@@ -1204,11 +1221,15 @@ const App = {
         }
       } else {
         // Mode Ubah / Edit
+        const durInput = document.getElementById("simpleVideoDuration");
+        const chosenDuration = (durInput && durInput.value.trim()) ? durInput.value.trim() : (this.pendingVideoDuration || "10:00");
+
         let updatedData = {
           title,
           grade,
           subject,
           category: this.mapCategoryBySubject(subject),
+          duration: chosenDuration,
           learningOutcome: outcome,
           pdfContent: notes,
           quizUrl: quizUrl,
@@ -1234,9 +1255,6 @@ const App = {
 
         if (this.selectedThumbnailUrl) {
           updatedData.thumbnail = this.selectedThumbnailUrl;
-        }
-        if (this.pendingVideoDuration) {
-          updatedData.duration = this.pendingVideoDuration;
         }
 
         await RepoStorage.updateVideo(editId, updatedData);
@@ -1298,11 +1316,13 @@ const App = {
     // Urutkan list materi yang terbaru selalu di atas
     videos.sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
 
-    if (query) {
+    const q = String(query || "").trim().toLowerCase();
+    if (q) {
       videos = videos.filter(v =>
-        v.title.toLowerCase().includes(query) ||
-        v.subject.toLowerCase().includes(query) ||
-        v.teacher.toLowerCase().includes(query)
+        (v.title && v.title.toLowerCase().includes(q)) ||
+        (v.subject && v.subject.toLowerCase().includes(q)) ||
+        (v.teacher && v.teacher.toLowerCase().includes(q)) ||
+        (v.grade && String(v.grade).toLowerCase().includes(q))
       );
     }
 

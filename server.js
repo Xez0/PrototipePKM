@@ -249,11 +249,10 @@ const server = http.createServer(async (req, res) => {
           <head><title>Otorisasi YouTube Sukses</title><meta charset="utf-8"></head>
           <body style="font-family: system-ui, sans-serif; text-align: center; padding: 60px; line-height: 1.6; background: #f8fafc; color: #1e293b;">
             <div style="max-width: 540px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-              <div style="font-size: 54px; margin-bottom: 16px;">🎉</div>
               <h1 style="color: #059669; margin-bottom: 8px;">Channel YouTube Berhasil Terhubung!</h1>
               <p style="color: #64748b; margin-bottom: 24px;">Kunci akses permanen (Refresh Token) akun <strong>${googleCfg.channelEmail}</strong> telah berhasil disimpan di server.</p>
               <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: left; font-size: 14px; margin-bottom: 24px;">
-                ✅ <strong>Otomatisasi Penuh Aktif:</strong><br>
+                <strong>Otomatisasi Penuh Aktif:</strong><br>
                 Mulai saat ini, seluruh guru yang mengunggah video dari perangkat mana pun <strong>sama sekali tidak perlu login Google</strong>. Video akan otomatis masuk ke channel YouTube Anda.
               </div>
               <a href="/" style="display: inline-block; background: #004d40; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold;">
@@ -270,7 +269,7 @@ const server = http.createServer(async (req, res) => {
           <html>
           <head><title>Pemberitahuan Otorisasi</title><meta charset="utf-8"></head>
           <body style="font-family: system-ui, sans-serif; text-align: center; padding: 60px;">
-            <h2>⚠️ Izin Sudah Terdaftar Sebelumnya</h2>
+            <h2>Izin Sudah Terdaftar Sebelumnya</h2>
             <p>Google mengonfirmasi akun Anda sudah pernah diizinkan. Refresh token yang sudah ada tetap aktif.</p>
             <a href="/">Kembali ke Beranda</a>
           </body>

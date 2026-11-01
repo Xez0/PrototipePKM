@@ -561,7 +561,8 @@ const RepoStorage = {
     if (this.supabaseClient) {
       try {
         const cleanPayload = this.cleanPayloadForSupabase(finalVideo);
-        const { error } = await this.supabaseClient.from("videos").update(cleanPayload).eq("id", id);
+        const { id: _ignoredId, ...updatePayload } = cleanPayload;
+        const { error } = await this.supabaseClient.from("videos").update(updatePayload).eq("id", id);
         if (error) {
           console.error("[SUPABASE] Gagal perbarui video di cloud:", error.message || error);
         } else {

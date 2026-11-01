@@ -3,8 +3,8 @@ const path = require("path");
 
 module.exports = (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -26,13 +26,13 @@ module.exports = (req, res) => {
     }
   }
 
-  if (req.method === "POST") {
+  if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE") {
     // Di Vercel Serverless environment, local filesystem bersifat ephemeral / read-only.
-    // Client akan menyimpan di IndexedDB & LocalStorage secara otomatis sebagai offline-first fallback.
+    // Client akan menyimpan di Supabase Cloud serta IndexedDB & LocalStorage secara otomatis.
     return res.status(200).json({
+      success: true,
       status: "ok",
-      message: "Materi berhasil disinkronkan ke sesi aktif.",
-      note: "Untuk persistensi multi-user cloud permanen, dapat diintegrasikan dengan Supabase."
+      message: "Operasi materi berhasil disinkronkan."
     });
   }
 

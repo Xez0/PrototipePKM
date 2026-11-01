@@ -12,7 +12,7 @@ function getGoogleOAuthConfig() {
   return {
     clientId: process.env.GOOGLE_CLIENT_ID || cfg.client_id || "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || cfg.client_secret || "",
-    redirectUri: process.env.GOOGLE_REDIRECT_URI || cfg.redirect_uri || "http://localhost:8877",
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || cfg.redirect_uri || "https://pkm-five.vercel.app",
     channelEmail: process.env.GOOGLE_CHANNEL_EMAIL || cfg.channel_email || "xezman88@gmail.com"
   };
 }
