@@ -1427,8 +1427,8 @@ const App = {
     this.showToast({
       type: "danger",
       title: "Materi Dihapus",
-      desc: `Materi "${videoToDelete.title}" telah dihapus dari repositori.`,
-      duration: 5500,
+      desc: `Materi "${videoToDelete.title}" telah dihapus. Klik 'Urungkan' sebelum notifikasi hilang jika ingin membatalkan.`,
+      duration: 6000,
       actionText: "Urungkan",
       actionIcon: this.toastIcons.undo,
       onAction: async () => {
@@ -1447,6 +1447,9 @@ const App = {
             duration: 3500
           });
         }
+      },
+      onDismiss: () => {
+        this.lastDeletedVideo = null;
       }
     });
   },
@@ -1619,6 +1622,7 @@ const App = {
       actionText = null,
       actionIcon = null,
       onAction = null,
+      onDismiss = null,
       customIcon = null
     } = opts;
 
@@ -1651,6 +1655,9 @@ const App = {
     const dismiss = () => {
       clearTimeout(timerId);
       toast.classList.add("dismissing");
+      if (typeof onDismiss === "function") {
+        try { onDismiss(); } catch (e) {}
+      }
       setTimeout(() => {
         if (container.contains(toast)) container.removeChild(toast);
       }, 250);

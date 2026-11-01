@@ -265,25 +265,12 @@ const RepoStorage = {
 
       if (!error && Array.isArray(data)) {
         if (data.length > 0) {
-          // Pastikan materi bawaan kurikulum tidak ada yang hilang dari cloud
-          const existingIds = new Set(data.map(v => v.id));
-          const missingDefaults = (window.INITIAL_VIDEO_DATA || []).filter(v => !existingIds.has(v.id));
-          if (missingDefaults.length > 0) {
-            console.log("[SUPABASE SYNC] Menambahkan materi kurikulum yang belum terdaftar di cloud:", missingDefaults.length);
-            try {
-              const cleanMissing = missingDefaults.map(v => this.cleanPayloadForSupabase(v));
-              await this.supabaseClient.from("videos").insert(cleanMissing);
-              data.push(...missingDefaults);
-            } catch (seedErr) {
-              console.warn("[SUPABASE] Gagal auto-seed materi tambahan:", seedErr);
-            }
-          }
           this.isServerOnline = true;
           this.saveVideos(data);
           this.updateSyncUI("online");
           return data;
         } else if (window.INITIAL_VIDEO_DATA && window.INITIAL_VIDEO_DATA.length > 0) {
-          // Jika Supabase kosong (0 baris), inisialisasi semua materi kurikulum
+          // Hanya jika tabel cloud kosong pertama kali (0 baris), inisialisasi materi kurikulum awal
           console.log("[SUPABASE SEED] Tabel cloud kosong, melakukan inisialisasi materi otomatis...");
           try {
             const cleanAll = window.INITIAL_VIDEO_DATA.map(v => this.cleanPayloadForSupabase(v));
