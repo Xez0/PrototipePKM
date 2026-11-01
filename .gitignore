@@ -2,6 +2,7 @@
 node_modules/
 uploads/*
 !uploads/.gitkeep
+!uploads/video-1793389591118-fd12c43b.mp4
 .DS_Store
 Thumbs.db
 .env*

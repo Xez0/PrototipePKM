@@ -17,9 +17,9 @@ module.exports = (req, res) => {
       if (fs.existsSync(dataPath)) {
         const fileContent = fs.readFileSync(dataPath, "utf-8");
         const videos = JSON.parse(fileContent);
-        return res.status(200).json({ status: "ok", data: videos });
+        return res.status(200).json({ success: true, status: "ok", data: videos });
       }
-      return res.status(200).json({ status: "ok", data: [] });
+      return res.status(200).json({ success: true, status: "ok", data: [] });
     } catch (e) {
       console.error("Error reading videos:", e);
       return res.status(500).json({ error: "Gagal membaca database materi video" });

@@ -6,6 +6,25 @@
 
 const INITIAL_VIDEO_DATA = [
   {
+    id: "smpn7-mvvduwgb",
+    title: "test",
+    grade: "7",
+    subject: "Matematika",
+    category: "MIPA",
+    teacher: "Tri Elmania, S.Pd.",
+    teacherNip: "",
+    duration: "15:00",
+    embedUrl: "/uploads/video-1793389591118-fd12c43b.mp4",
+    thumbnail: "assets/cover-test.jpg",
+    sourceType: "local",
+    publishedAt: "2026-10-30T19:46:20.440Z",
+    description: "Materi pembelajaran mandiri mata pelajaran Matematika Kelas 7. Silakan dipelajari siswa secara berulang.",
+    learningOutcome: "",
+    pdfContent: "",
+    quizUrl: "",
+    chapters: []
+  },
+  {
     id: "smpn7-mat-07-01",
     title: "Konsep Dasar Aljabar: Variabel, Koefisien, & Suku Sejenis",
     grade: "7",
