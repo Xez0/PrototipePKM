@@ -175,7 +175,7 @@ const INITIAL_VIDEO_DATA = [
     grade: "7",
     subject: "Informatika / TIK",
     category: "Informatika",
-    teacher: "Hadi",
+    teacher: "Budi Santoso, S.Kom.",
     teacherNip: "",
     duration: "08:45",
     embedUrl: "https://www.youtube-nocookie.com/embed/P91EUTrTPx0?enablejsapi=1&rel=0&modestbranding=1",
@@ -186,6 +186,40 @@ const INITIAL_VIDEO_DATA = [
     learningOutcome: "",
     pdfContent: "",
     chapters: []
+  },
+  {
+    id: "smpn7-inf-07-03",
+    title: "Literasi Digital & Etika Berkomunikasi di Media Sosial",
+    grade: "7",
+    subject: "Informatika / TIK",
+    category: "Informatika",
+    teacher: "Hadi",
+    teacherNip: "19850612 201001 1 008",
+    duration: "10:30",
+    embedUrl: "https://www.youtube-nocookie.com/embed/P91EUTrTPx0?enablejsapi=1&rel=0&modestbranding=1",
+    thumbnail: "assets/cover-informatika.svg",
+    sourceType: "youtube",
+    publishedAt: "2026-10-30T09:00:00.000Z",
+    description: "Panduan literasi digital mandiri mengenai etika berselancar di internet dan perlindungan data pribadi bagi siswa SMP Negeri 7 Tangerang Selatan.",
+    learningOutcome: "Peserta didik memahami prinsip etika digital dan mampu menerapkan keamanan akun mandiri.",
+    pdfContent: "Literasi Digital & Etika Internet SMPN 7:\n1. Menjaga kerahasiaan kata sandi akun sekolah.\n2. Berkomunikasi santun di grup belajar daring.\n3. Menyaring informasi sebelum membagikan (anti-hoaks).",
+    chapters: [
+      {
+        time: "00:00",
+        title: "Pengantar Literasi Digital",
+        seconds: 0
+      },
+      {
+        time: "03:15",
+        title: "Etika Berkomunikasi di Dunia Maya",
+        seconds: 195
+      },
+      {
+        time: "07:00",
+        title: "Keamanan Data Pribadi Siswa",
+        seconds: 420
+      }
+    ]
   }
 ];
 

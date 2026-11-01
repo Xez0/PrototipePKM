@@ -111,10 +111,19 @@ window.VideoDB = VideoDB;
 // 2. AUTHENTICATION MANAGER (KHUSUS DEWAN GURU SMPN 7)
 // ==========================================================================
 const AuthManager = {
-  // Akun Demo untuk Peninjau & Dewan Guru SMPN 7 Tangsel
+  // Akun Guru Terdaftar & Demo Prototipe PkM
   defaultTeacher: {
-    name: "Hadi",
+    name: "Budi Santoso, S.Kom.",
     nip: "19840915 200902 1 003",
+    email: "budi.santoso@smpn7tangsel.sch.id",
+    subject: "Informatika",
+    role: "Dewan Guru SMPN 7 Tangsel"
+  },
+
+  // Akun Khusus Demo Peninjau PkM
+  demoHadi: {
+    name: "Hadi",
+    nip: "19850612 201001 1 008",
     email: "hadi@smpn7tangsel.sch.id",
     subject: "Informatika",
     role: "Dewan Guru SMPN 7 Tangsel"
@@ -147,7 +156,7 @@ const AuthManager = {
 
   login: function (identifier, password) {
     // Validasi ramah untuk keperluan prototipe sekolah:
-    // Mendukung login via Nomor NIP, nama akun ('hadi'), atau email guru
+    // Mendukung login via Nomor NIP, nama akun ('hadi' atau 'budi'), atau email guru
     const rawId = (identifier || "").trim();
     const id = rawId.toLowerCase();
     const cleanDigits = rawId.replace(/\D/g, "");
@@ -157,39 +166,42 @@ const AuthManager = {
       return { success: false, message: "Nomor NIP, Nama Akun, atau Email Guru harus diisi." };
     }
 
-    let teacherData = { ...this.defaultTeacher };
+    let teacherData;
 
-    // 1. Cek Login via Nomor NIP (angka >= 8 digit atau 18 digit standar)
-    if (cleanDigits.length >= 8) {
-      teacherData.name = "Hadi";
+    // 1. Cek Login Akun Demo 'Hadi'
+    if (id === "hadi" || id.includes("hadi") || cleanDigits === "198506122010011008" || id.startsWith("hadi@")) {
+      teacherData = { ...this.demoHadi };
+    }
+    // 2. Cek Login Akun Guru 'Budi Santoso, S.Kom.'
+    else if (id === "budi" || id.includes("budi") || cleanDigits === "198409152009021003" || id.startsWith("budi@")) {
+      teacherData = { ...this.defaultTeacher };
+    }
+    // 3. Cek Login via NIP (angka >= 8 digit atau 18 digit standar)
+    else if (cleanDigits.length >= 8) {
+      teacherData = { ...this.defaultTeacher };
       teacherData.nip = this.formatNip(cleanDigits.length === 18 ? cleanDigits : "198409152009021003");
-      teacherData.email = "hadi@smpn7tangsel.sch.id";
     }
-    // 2. Cek Login via Nama Akun 'hadi' / 'budi'
-    else if (id === "hadi" || id.includes("hadi") || id === "budi" || id.includes("budi")) {
-      teacherData.name = "Hadi";
-      teacherData.nip = "19840915 200902 1 003";
-      teacherData.email = "hadi@smpn7tangsel.sch.id";
-    }
-    // 3. Cek Login via Alamat Email
+    // 4. Cek Login via Alamat Email
     else if (id.includes("@")) {
+      teacherData = { ...this.defaultTeacher };
       teacherData.email = id;
       teacherData.name = id.split("@")[0].charAt(0).toUpperCase() + id.split("@")[0].slice(1);
-      teacherData.nip = "19840915 200902 1 003";
     }
-    // 4. Input Nama Pengguna Lain
+    // 5. Input Nama Pengguna Lain
     else {
+      teacherData = { ...this.defaultTeacher };
       teacherData.name = rawId;
-      teacherData.nip = "19840915 200902 1 003";
     }
 
     sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));
     return { success: true, teacher: teacherData };
   },
 
+  // Masuk Instan (Khusus Akun Demo Guru: Hadi)
   loginFastDemo: function () {
-    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(this.defaultTeacher));
-    return { success: true, teacher: this.defaultTeacher };
+    const teacherData = { ...this.demoHadi };
+    sessionStorage.setItem(STORAGE_KEYS.TEACHER_SESSION, JSON.stringify(teacherData));
+    return { success: true, teacher: teacherData };
   },
 
   logout: function () {

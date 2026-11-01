@@ -437,7 +437,7 @@ const App = {
       nipElem.textContent = `${nipText}Dewan Guru SMPN 7`;
     }
     if (avatarElem) {
-      const initials = (teacher.name || "Hadi").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "HA";
+      const initials = (teacher.name || "Guru").replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || "GU";
       avatarElem.textContent = initials;
     }
   },
